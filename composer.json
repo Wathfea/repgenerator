@@ -1,0 +1,49 @@
+{
+    "name": "pentacom/repgenerator",
+    "description": "A Laravel repository pattern generator",
+    "keywords": [
+        "pentacom",
+        "repgenerator"
+    ],
+    "homepage": "https://github.com/pentacom/repgenerator",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Perlusz Dávid",
+            "email": "perlusz.david@pentacom.hu",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.1"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^4.0",
+        "phpunit/phpunit": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Pentacom\\Repgenerator\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Pentacom\\Repgenerator\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Pentacom\\Repgenerator\\RepgeneratorServiceProvider"
+            ]
+        }
+    }
+}

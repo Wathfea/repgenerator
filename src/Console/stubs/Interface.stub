@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Domain\{{modelName}}\Repositories\Interfaces;
+
+use App\Models\{{modelName}};
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
+
+/**
+ * Interface {{modelName}}RepositoryInterface.
+ */
+interface {{modelName}}RepositoryInterface
+{
+    /**
+     * Get al ${{modelNamePluralLowerCase}} from database.
+     *
+     * @return Collection
+     */
+    public function getAll(): Collection;
+
+    /**
+     * @param Request $request
+     *
+     * @return {{modelName}}
+     */
+    public function createNew(Request $request): {{modelName}};
+
+    /**
+     * @param int ${{modelNameSingularLowerCase}}Id
+     *
+     * @return bool
+     */
+    public function delete{{modelName}}(int ${{modelNameSingularLowerCase}}Id): bool;
+
+    /**
+     * @param  Request  $request
+     * @param  {{modelName}}  ${{modelNameSingularLowerCase}}
+     *
+     * @return {{modelName}}
+     */
+    public function update{{modelName}}(Request $request, {{modelName}} ${{modelNameSingularLowerCase}}): {{modelName}};
+
+    /**
+     * @param  int  $id
+     *
+     * @return {{modelName}}
+     */
+    public function getById(int $id): {{modelName}};
+}

@@ -1,0 +1,69 @@
+<?php
+
+namespace App\Domain\{{modelName}}\Repositories;
+
+use App\Domain\{{modelName}}\Repositories\Interfaces\{{modelName}}RepositoryInterface;
+use App\Models\{{modelName}};
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
+
+class Eloquent{{modelName}}Repository implements {{modelName}}RepositoryInterface
+{
+    /**
+     * @var {{modelName}}
+     */
+    private {{modelName}} ${{modelNameSingularLowerCase}}Model;
+
+    /**
+     * Eloquent{{modelName}}Repository constructor.
+     * @param {{modelName}} ${{modelNameSingularLowerCase}}Model
+     */
+    public function __construct({{modelName}} ${{modelNameSingularLowerCase}}Model)
+    {
+        $this->{{modelNameSingularLowerCase}}Model = ${{modelNameSingularLowerCase}}Model;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createNew(Request $request): {{modelName}}
+    {
+        ${{modelNameSingularLowerCase}} = $this->{{modelNameSingularLowerCase}}Model->newQuery()->create($request->all());
+
+        return $this->{{modelNameSingularLowerCase}}Model;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getAll(): Collection
+    {
+        return $this->{{modelNameSingularLowerCase}}Model->newQuery()->get();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function delete{{modelName}}(int ${{modelNameSingularLowerCase}}Id): bool
+    {
+        return $this->{{modelNameSingularLowerCase}}Model->newQuery()->find(${{modelNameSingularLowerCase}}Id)->delete();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function update(Request $request, {{modelName}} ${{modelNameSingularLowerCase}}): {{modelName}}
+    {
+        ${{modelNameSingularLowerCase}}->update($request->all());
+
+        return ${{modelNameSingularLowerCase}};
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getById(int $id): {{modelName}}
+    {
+        return $this->{{modelNameSingularLowerCase}}Model->newQuery()->find($id);
+    }
+}

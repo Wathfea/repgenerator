@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Domain\{{modelName}}\ViewModel;
+
+use App\Domain\ViewModelInterface;
+
+class {{modelName}} implements ViewModelInterface
+{
+    private int $id;
+
+    /**
+     * {{modelName}} constructor.
+     * @param int $id
+     */
+    public function __construct(int $id)
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->getId(),
+        ];
+    }
+
+    /**
+     * @return int
+     */
+    public function getId(): int
+    {
+        return $this->id;
+    }
+}

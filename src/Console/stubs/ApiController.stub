@@ -1,0 +1,111 @@
+<?php
+
+namespace App\Http\Controllers\Api\v1;
+
+use App\Domain\{{modelName}}\Services\{{modelName}}Service;
+use App\Http\Controllers\BaseTransactionController;
+use App\Http\Requests\{{modelName}}Request;
+use App\Http\Requests\{{modelName}}UpdateRequest;
+use App\{{modelName}};
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Response;
+
+class {{modelName}}ApiController extends BaseTransactionController
+{
+    /**
+     * @var {{modelName}}Service
+     */
+    private {{modelName}}Service ${{modelNameSingularLowerCase}}Service;
+
+    /**
+     * {{modelName}}ApiController constructor.
+     *
+     * @param {{modelName}}Service ${{modelNameSingularLowerCase}}Service
+     */
+    public function __construct({{modelName}}Service ${{modelNameSingularLowerCase}}Service)
+    {
+        $this->{{modelNameSingularLowerCase}}Service = ${{modelNameSingularLowerCase}}Service;
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param int $id
+     *
+     * @return void
+     */
+    public function destroy(int $id)
+    {
+        ${{modelNameSingularLowerCase}} = $this->{{modelNameSingularLowerCase}}Service->remove{{modelName}}($id);
+    }
+
+    /**
+     * @param {{modelName}}Request $request
+     *
+     * @return mixed
+     */
+    public function store({{modelName}}Request $request)
+    {
+        try {
+            ${{modelNameSingularLowerCase}} = $this->{{modelNameSingularLowerCase}}Service->createNew{{modelName}}($request);
+            if (${{modelNameSingularLowerCase}}) {
+                return Response::json(
+                    [
+                        'success' => true,
+                    ]
+                );
+            }
+
+            return Response::json(
+                [
+                    'success' => false,
+                ]
+            );
+        } catch (Exception $exception) {
+            Log::error('New {{modelName}} Save: '.$exception->getMessage());
+
+            return Response::json(
+                [
+                    'success' => false,
+                    'failed' => $exception->getMessage(),
+                ]
+            );
+        }
+    }
+
+    /**
+     * @param {{modelName}}UpdateRequest $request
+     * @param {{modelName}} ${{modelNameSingularLowerCase}}
+     *
+     * @return JsonResponse
+     */
+    public function update({{modelName}}UpdateRequest $request, {{modelName}} ${{modelNameSingularLowerCase}}): JsonResponse
+    {
+        try {
+            ${{modelNameSingularLowerCase}} = $this->{{modelNameSingularLowerCase}}Service->update{{modelName}}($request, ${{modelNameSingularLowerCase}});
+            if (${{modelNameSingularLowerCase}}) {
+                return Response::json(
+                    [
+                        'success' => true,
+                    ]
+                );
+            }
+
+            return Response::json(
+                [
+                    'success' => false,
+                ]
+            );
+        } catch (Exception $exception) {
+            Log::error('Update {{modelNameSingularLowerCase}}: '.$exception->getMessage());
+
+            return Response::json(
+                [
+                    'success' => false,
+                    'failed' => $exception->getMessage(),
+                ]
+            );
+        }
+    }
+}

@@ -1,0 +1,87 @@
+<?php
+
+
+namespace App\Domain\{{modelName}}\Services;
+
+
+use App\Domain\{{modelName}}\Repositories\Interfaces\{{modelName}}RepositoryInterface;
+use App\Domain\{{modelName}}\ViewModel\Transformers\{{modelName}}Transformer;
+use App\Models\{{modelName}};
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
+
+class {{modelName}}Service
+{
+    /**
+     * @var {{modelName}}RepositoryInterface
+     */
+    private {{modelName}}RepositoryInterface ${{modelNameSingularLowerCase}}Repository;
+    /**
+     * @var {{modelName}}Transformer
+     */
+    private {{modelName}}Transformer ${{modelNameSingularLowerCase}}Transformer;
+
+    /**
+     * {{modelName}}Service constructor.
+     * @param {{modelName}}RepositoryInterface ${{modelNameSingularLowerCase}}Repository
+     * @param {{modelName}}Transformer ${{modelNameSingularLowerCase}}Transformer
+     */
+    public function __construct({{modelName}}RepositoryInterface ${{modelNameSingularLowerCase}}Repository, {{modelName}}Transformer ${{modelNameSingularLowerCase}}Transformer)
+    {
+        $this->{{modelNameSingularLowerCase}}Repository = ${{modelNameSingularLowerCase}}Repository;
+        $this->{{modelNameSingularLowerCase}}Transformer = ${{modelNameSingularLowerCase}}Transformer;
+    }
+
+    /**
+     * @return array|Collection|\Illuminate\Support\Collection
+     */
+    public function getAll(): Collection
+    {
+        return $this->{{modelNameSingularLowerCase}}Repository->getAll()->map(function (${{modelNameSingularLowerCase}}) {
+            return $this->{{modelNameSingularLowerCase}}Transformer->transform(${{modelNameSingularLowerCase}});
+        });
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return {{modelName}}
+     */
+    public function createNew{{modelName}}(Request $request): {{modelName}}
+    {
+        return $this->{{modelNameSingularLowerCase}}Repository->createNew($request);
+    }
+
+    /**
+     * @param int $userId
+     *
+     * @return bool
+     */
+    public function remove{{modelName}}(int ${{modelNameSingularLowerCase}}Id): bool
+    {
+        return $this->{{modelNameSingularLowerCase}}Repository->delete{{modelName}}(${{modelNameSingularLowerCase}}Id);
+    }
+
+    /**
+     * @param  Request  $request
+     * @param {{modelName}} ${{modelNameSingularLowerCase}}
+     *
+     * @return {{modelName}}
+     */
+    public function update{{modelName}}(Request $request, {{modelName}} ${{modelNameSingularLowerCase}}): {{modelName}}
+    {
+        return $this->{{modelNameSingularLowerCase}}Repository->update($request, ${{modelNameSingularLowerCase}});
+    }
+
+    /**
+     * @param  int  $id
+     *
+     * @return {{modelName}}
+     */
+    public function get{{modelName}}ById(int $id): {{modelName}}
+    {
+        ${{modelNameSingularLowerCase}} = $this->{{modelNameSingularLowerCase}}Repository->getById($id);
+
+        return ${{modelNameSingularLowerCase}};
+    }
+}
