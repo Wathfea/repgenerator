@@ -1,8 +1,6 @@
 # Laravel Repository pattern creator
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/pentacom/repgenerator.svg?style=flat-square)](https://packagist.org/packages/pentacom/repgenerator)
-[![Build Status](https://img.shields.io/travis/pentacom/repgenerator/master.svg?style=flat-square)](https://travis-ci.org/pentacom/repgenerator)
-[![Quality Score](https://img.shields.io/scrutinizer/g/pentacom/repgenerator.svg?style=flat-square)](https://scrutinizer-ci.com/g/pentacom/repgenerator)
 [![Total Downloads](https://img.shields.io/packagist/dt/pentacom/repgenerator.svg?style=flat-square)](https://packagist.org/packages/pentacom/repgenerator)
 
 
@@ -49,11 +47,6 @@ Also 2 new routes will register in the api.php and web.php
 * base migration for resource
 * rollback command to delete all files
 * tests
-### Testing
-
-``` bash
-composer test
-```
 
 ### Changelog
 
