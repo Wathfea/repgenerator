@@ -81,7 +81,7 @@ class PatternGenerator extends Command
      */
     protected function getStub(string $name)
     {
-        return __DIR__ . "/stubs/$name.stub";
+        return file_get_contents(__DIR__ . "/stubs/$name.stub");
     }
 
     /**
