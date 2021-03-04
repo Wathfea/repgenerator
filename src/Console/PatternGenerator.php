@@ -103,7 +103,11 @@ class PatternGenerator extends Command
             $this->getStub('Controller')
         );
 
-        file_put_contents(app_path("/Http/Controllers/Web/{$name}Controller.php"), $controllerTemplate);
+        if (!file_exists($path = app_path("Http/Controllers/Web"))) {
+            mkdir($path, 0777, true);
+        }
+
+        file_put_contents(app_path("Http/Controllers/Web/{$name}Controller.php"), $controllerTemplate);
     }
 
     /**
@@ -130,7 +134,7 @@ class PatternGenerator extends Command
             mkdir($path, 0777, true);
         }
 
-        file_put_contents(app_path("/Http/Controllers/Api/{$version}/{$name}ApiController.php"), $apiControllerTemplate);
+        file_put_contents(app_path("Http/Controllers/Api/{$version}/{$name}ApiController.php"), $apiControllerTemplate);
     }
 
     /**
@@ -144,11 +148,11 @@ class PatternGenerator extends Command
             $this->getStub('Request')
         );
 
-        if (!file_exists($path = app_path('/Http/Requests'))) {
+        if (!file_exists($path = app_path('Http/Requests'))) {
             mkdir($path, 0777, true);
         }
 
-        file_put_contents(app_path("/Http/Requests/{$name}Request.php"), $requestTemplate);
+        file_put_contents(app_path("Http/Requests/{$name}Request.php"), $requestTemplate);
     }
 
     /**
@@ -162,11 +166,11 @@ class PatternGenerator extends Command
             $this->getStub('UpdateRequest')
         );
 
-        if (!file_exists($path = app_path('/Http/Requests'))) {
+        if (!file_exists($path = app_path('Http/Requests'))) {
             mkdir($path, 0777, true);
         }
 
-        file_put_contents(app_path("/Http/Requests/{$name}UpdateRequest.php"), $updateRequestTemplate);
+        file_put_contents(app_path("Http/Requests/{$name}UpdateRequest.php"), $updateRequestTemplate);
     }
 
     /**
@@ -188,7 +192,7 @@ class PatternGenerator extends Command
             $this->getStub('Eloquent')
         );
 
-        if (!file_exists($path = app_path("/Domain/{$name}/Repositories"))) {
+        if (!file_exists($path = app_path("Domain/{$name}/Repositories"))) {
             mkdir($path, 0777, true);
         }
 
@@ -214,7 +218,7 @@ class PatternGenerator extends Command
             $this->getStub('Interface')
         );
 
-        if (!file_exists($path = app_path("/Domain/{$name}/Repositories/Interfaces"))) {
+        if (!file_exists($path = app_path("Domain/{$name}/Repositories/Interfaces"))) {
             mkdir($path, 0777, true);
         }
 
@@ -240,7 +244,7 @@ class PatternGenerator extends Command
             $this->getStub('Service')
         );
 
-        if (!file_exists($path = app_path("/Domain/{$name}/Services"))) {
+        if (!file_exists($path = app_path("Domain/{$name}/Services"))) {
             mkdir($path, 0777, true);
         }
 
@@ -266,7 +270,7 @@ class PatternGenerator extends Command
             $this->getStub('ViewModel')
         );
 
-        if (!file_exists($path = app_path("/Domain/{$name}/ViewModel"))) {
+        if (!file_exists($path = app_path("Domain/{$name}/ViewModel"))) {
             mkdir($path, 0777, true);
         }
 
@@ -292,7 +296,7 @@ class PatternGenerator extends Command
             $this->getStub('Transformer')
         );
 
-        if (!file_exists($path = app_path("/Domain/{$name}/ViewModel/Transformers"))) {
+        if (!file_exists($path = app_path("Domain/{$name}/ViewModel/Transformers"))) {
             mkdir($path, 0777, true);
         }
 
@@ -322,7 +326,7 @@ class PatternGenerator extends Command
 
         $lower = strtolower(Str::plural($name));
 
-        if (!file_exists($path = resource_path("/views/{$lower}"))) {
+        if (!file_exists($path = resource_path("views/{$lower}"))) {
             mkdir($path, 0777, true);
         }
 
