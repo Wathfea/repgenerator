@@ -70,7 +70,7 @@ class {{modelName}}Service
      */
     public function update{{modelName}}(Request $request, {{modelName}} ${{modelNameSingularLowerCase}}): {{modelName}}
     {
-        return $this->{{modelNameSingularLowerCase}}Repository->update($request, ${{modelNameSingularLowerCase}});
+        return $this->{{modelNameSingularLowerCase}}Repository->update{{modelName}}($request, ${{modelNameSingularLowerCase}});
     }
 
     /**
