@@ -59,7 +59,6 @@ class {{modelName}}Controller extends BaseTransactionController
     public function edit({{modelName}} ${{modelNameSingularLowerCase}})
     {
         try {
-
             return view('{{modelNamePluralLowerCase}}.edit', [
                 '{{modelNameSingularLowerCase}}' => ${{modelNameSingularLowerCase}},
             ]);

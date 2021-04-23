@@ -37,7 +37,24 @@ class {{modelName}}ApiController extends BaseTransactionController
      */
     public function destroy(int $id)
     {
-        ${{modelNameSingularLowerCase}} = $this->{{modelNameSingularLowerCase}}Service->remove{{modelName}}($id);
+        try {
+            $this->{{modelNameSingularLowerCase}}Service->remove{{modelName}}($id);
+
+            return Response::json(
+                        [
+                            'success' => true,
+                        ]
+                    );
+        } catch (Exception $exception) {
+                    Log::error('{{modelName}} Destroy: '.$exception->getMessage());
+
+                    return Response::json(
+                        [
+                            'success' => false,
+                            'failed' => $exception->getMessage(),
+                        ]
+                    );
+        }
     }
 
     /**
@@ -48,18 +65,11 @@ class {{modelName}}ApiController extends BaseTransactionController
     public function store({{modelName}}Request $request)
     {
         try {
-            ${{modelNameSingularLowerCase}} = $this->{{modelNameSingularLowerCase}}Service->createNew{{modelName}}($request);
-            if (${{modelNameSingularLowerCase}}) {
-                return Response::json(
-                    [
-                        'success' => true,
-                    ]
-                );
-            }
+            $this->{{modelNameSingularLowerCase}}Service->createNew{{modelName}}($request);
 
             return Response::json(
                 [
-                    'success' => false,
+                    'success' => true,
                 ]
             );
         } catch (Exception $exception) {
@@ -83,18 +93,11 @@ class {{modelName}}ApiController extends BaseTransactionController
     public function update({{modelName}}UpdateRequest $request, {{modelName}} ${{modelNameSingularLowerCase}}): JsonResponse
     {
         try {
-            ${{modelNameSingularLowerCase}} = $this->{{modelNameSingularLowerCase}}Service->update{{modelName}}($request, ${{modelNameSingularLowerCase}});
-            if (${{modelNameSingularLowerCase}}) {
-                return Response::json(
-                    [
-                        'success' => true,
-                    ]
-                );
-            }
+            $this->{{modelNameSingularLowerCase}}Service->update{{modelName}}($request, ${{modelNameSingularLowerCase}});
 
             return Response::json(
                 [
-                    'success' => false,
+                    'success' => true,
                 ]
             );
         } catch (Exception $exception) {
