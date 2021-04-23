@@ -7,6 +7,7 @@ use App\Http\Controllers\BaseTransactionController;
 use App\Http\Requests\{{modelName}}Request;
 use App\Http\Requests\{{modelName}}UpdateRequest;
 use App\{{modelName}};
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
@@ -33,9 +34,9 @@ class {{modelName}}ApiController extends BaseTransactionController
      *
      * @param int $id
      *
-     * @return void
+     * @return JsonResponse
      */
-    public function destroy(int $id)
+    public function destroy(int $id): JsonResponse
     {
         try {
             $this->{{modelNameSingularLowerCase}}Service->remove{{modelName}}($id);
@@ -60,9 +61,9 @@ class {{modelName}}ApiController extends BaseTransactionController
     /**
      * @param {{modelName}}Request $request
      *
-     * @return mixed
+     * @return JsonResponse
      */
-    public function store({{modelName}}Request $request)
+    public function store({{modelName}}Request $request): JsonResponse
     {
         try {
             $this->{{modelNameSingularLowerCase}}Service->createNew{{modelName}}($request);
