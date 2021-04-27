@@ -16,7 +16,7 @@ class PatternGenerator extends Command
      *
      * @var string
      */
-    protected $signature = 'pattern:generator {name : Class (singular) for example User}';
+    protected $signature = 'pattern:generator {name : Class (singular) for example User} {--M|model=true : Whether the generator should generate a model}';
 
     /**
      * The console command description.
@@ -41,9 +41,14 @@ class PatternGenerator extends Command
     public function handle()
     {
         $name = $this->argument('name');
+        $generateModel = $this->argument('model');
 
         $this->info('Generating...');
-        $this->model($name);
+
+        if($generateModel) {
+            $this->model($name);
+        }
+
         $this->controller($name);
         $this->apiController('v1', $name);
         $this->request($name);
