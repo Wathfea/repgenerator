@@ -16,7 +16,7 @@ class PatternGenerator extends Command
      *
      * @var string
      */
-    protected $signature = 'pattern:generator {name : Class (singular) for example User} {--M|model=true : Whether the generator should generate a model}';
+    protected $signature = 'pattern:generate {name : Class (singular) for example User} {--M|model : Whether the generator should generate a model}';
 
     /**
      * The console command description.

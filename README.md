@@ -17,7 +17,7 @@ composer require pentacom/repgenerator
 
 To generate the files run 
 
-`php artisan pattern:generator {name : Class (singular) for example User}`
+`php artisan pattern:generate {name : Class (singular) for example User} {--M|model : Whether the generator should generate a model}'`
 
 New files will be:
 
