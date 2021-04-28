@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Domain\{{modelName}}\Filters\{{modelName}}Filter;
+use App\Domain\{{modelName}}\Resources\{{modelName}}Resource;
 use App\Domain\{{modelName}}\Services\{{modelName}}Service;
 use App\Http\Controllers\BaseTransactionController;
 use App\Http\Requests\{{modelName}}Request;
 use App\Http\Requests\{{modelName}}UpdateRequest;
-use App\{{modelName}};
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
+use Yajra\DataTables\Facades\DataTables;
 
+/**
+ * Class {{modelName}}ApiController.
+ */
 class {{modelName}}ApiController extends BaseTransactionController
 {
     /**
@@ -21,56 +26,82 @@ class {{modelName}}ApiController extends BaseTransactionController
 
     /**
      * {{modelName}}ApiController constructor.
-     *
-     * @param {{modelName}}Service ${{modelNameSingularLowerCase}}Service
+     * @param  {{modelName}}Service  ${{modelNameSingularLowerCase}}Service
      */
-    public function __construct({{modelName}}Service ${{modelNameSingularLowerCase}}Service)
-    {
+    public function __construct(
+        {{modelName}}Service ${{modelNameSingularLowerCase}}Service
+    ) {
         $this->{{modelNameSingularLowerCase}}Service = ${{modelNameSingularLowerCase}}Service;
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param int $id
-     *
+     * @param  {{modelName}}Filter  $filter
+     * @return JsonResponse
+     * @throws \Exception
+     */
+    public function index({{modelName}}Filter $filter): JsonResponse
+    {
+        ${{modelNamePluralLowerCase}} = {{modelName}}Resource::collection($this->{{modelNameSingularLowerCase}}Service->getAllByFilter($filter));
+
+        return DataTables::of(${{modelNamePluralLowerCase}})->toJson();
+    }
+
+    /**
+     * @param  int  $id
      * @return JsonResponse
      */
     public function destroy(int $id): JsonResponse
     {
         try {
-            $this->{{modelNameSingularLowerCase}}Service->remove{{modelName}}($id);
+            ${{modelNameSingularLowerCase}} = $this->{{modelNameSingularLowerCase}}Service->get{{modelName}}ById($id);
+            if (${{modelNameSingularLowerCase}}) {
+
+                $deleted = $this->{{modelNameSingularLowerCase}}Service->remove{{modelName}}($id);
+
+                return Response::json(
+                    [
+                        'success' => $deleted,
+                        'message' => $deleted ? trans('{{modelNameSingularLowerCase}}.deleted') : trans('{{modelNameSingularLowerCase}}.delete_failed'),
+                    ]
+                );
+            }
 
             return Response::json(
-                        [
-                            'success' => true,
-                        ]
-                    );
+                [
+                    'success' => false,
+                    'message' => trans('{{modelNameSingularLowerCase}}.not_found'),
+                ]
+            );
         } catch (Exception $exception) {
-                    Log::error('{{modelName}} Destroy: '.$exception->getMessage());
-
-                    return Response::json(
-                        [
-                            'success' => false,
-                            'failed' => $exception->getMessage(),
-                        ]
-                    );
+            return Response::json(
+                [
+                    'success' => false,
+                    'failed' => $exception->getMessage(),
+                ]
+            );
         }
     }
 
     /**
-     * @param {{modelName}}Request $request
-     *
+     * @param  {{modelName}}Request  $request
      * @return JsonResponse
      */
     public function store({{modelName}}Request $request): JsonResponse
     {
         try {
-            $this->{{modelNameSingularLowerCase}}Service->createNew{{modelName}}($request);
+            ${{modelNameSingularLowerCase}} = $this->{{modelNameSingularLowerCase}}Service->createNew{{modelName}}($request->all());
+
+            if (${{modelNameSingularLowerCase}}) {
+                return Response::json(
+                    [
+                        'success' => true,
+                    ]
+                );
+            }
 
             return Response::json(
                 [
-                    'success' => true,
+                    'success' => false,
                 ]
             );
         } catch (Exception $exception) {
@@ -86,19 +117,27 @@ class {{modelName}}ApiController extends BaseTransactionController
     }
 
     /**
-     * @param {{modelName}}UpdateRequest $request
-     * @param {{modelName}} ${{modelNameSingularLowerCase}}
+     * @param  {{modelName}}UpdateRequest  $request
+     * @param  int  ${{modelNameSingularLowerCase}}Id
      *
      * @return JsonResponse
      */
-    public function update({{modelName}}UpdateRequest $request, {{modelName}} ${{modelNameSingularLowerCase}}): JsonResponse
+    public function update({{modelName}}UpdateRequest $request, int ${{modelNameSingularLowerCase}}Id): JsonResponse
     {
         try {
-            $this->{{modelNameSingularLowerCase}}Service->update{{modelName}}($request, ${{modelNameSingularLowerCase}});
+            ${{modelNameSingularLowerCase}} = $this->{{modelNameSingularLowerCase}}Service->update{{modelName}}($request->all(), ${{modelNameSingularLowerCase}}Id);
+
+            if (${{modelNameSingularLowerCase}}) {
+                return Response::json(
+                    [
+                        'success' => true,
+                    ]
+                );
+            }
 
             return Response::json(
                 [
-                    'success' => true,
+                    'success' => false,
                 ]
             );
         } catch (Exception $exception) {

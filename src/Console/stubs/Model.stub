@@ -2,9 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Kblais\QueryFilter\FilterableTrait;
 
 class {{modelName}} extends BaseModel
 {
+    use HasFactory, FilterableTrait;
+
     /**
      * The attributes that aren't mass assignable.
      *

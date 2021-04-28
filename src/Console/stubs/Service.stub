@@ -1,14 +1,11 @@
 <?php
 
-
 namespace App\Domain\{{modelName}}\Services;
 
-
+use App\Domain\{{modelName}}\Filters\{{modelName}}Filter;
 use App\Domain\{{modelName}}\Repositories\Interfaces\{{modelName}}RepositoryInterface;
-use App\Domain\{{modelName}}\ViewModel\Transformers\{{modelName}}Transformer;
 use App\Models\{{modelName}};
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class {{modelName}}Service
 {
@@ -16,72 +13,69 @@ class {{modelName}}Service
      * @var {{modelName}}RepositoryInterface
      */
     private {{modelName}}RepositoryInterface ${{modelNameSingularLowerCase}}Repository;
-    /**
-     * @var {{modelName}}Transformer
-     */
-    private {{modelName}}Transformer ${{modelNameSingularLowerCase}}Transformer;
 
     /**
      * {{modelName}}Service constructor.
-     * @param {{modelName}}RepositoryInterface ${{modelNameSingularLowerCase}}Repository
-     * @param {{modelName}}Transformer ${{modelNameSingularLowerCase}}Transformer
+     * @param  {{modelName}}RepositoryInterface  ${{modelNameSingularLowerCase}}Repository
      */
-    public function __construct({{modelName}}RepositoryInterface ${{modelNameSingularLowerCase}}Repository, {{modelName}}Transformer ${{modelNameSingularLowerCase}}Transformer)
+    public function __construct({{modelName}}RepositoryInterface ${{modelNameSingularLowerCase}}Repository)
     {
         $this->{{modelNameSingularLowerCase}}Repository = ${{modelNameSingularLowerCase}}Repository;
-        $this->{{modelNameSingularLowerCase}}Transformer = ${{modelNameSingularLowerCase}}Transformer;
     }
 
+
     /**
-     * @return array|Collection|\Illuminate\Support\Collection
+     * @return Collection
      */
     public function getAll(): Collection
     {
-        return $this->{{modelNameSingularLowerCase}}Repository->getAll()->map(function (${{modelNameSingularLowerCase}}) {
-            return $this->{{modelNameSingularLowerCase}}Transformer->transform(${{modelNameSingularLowerCase}});
-        });
+        return $this->{{modelNameSingularLowerCase}}Repository->getAll();
     }
 
     /**
-     * @param Request $request
+     * @param  {{modelName}}Filter  $filter
+     * @return Collection
+     */
+    public function getAllByFilter({{modelName}}Filter $filter): Collection
+    {
+        return $this->{{modelNameSingularLowerCase}}Repository->getAllByFilter($filter);
+    }
+
+    /**
+     * @param  array  $data
      *
      * @return {{modelName}}
      */
-    public function createNew{{modelName}}(Request $request): {{modelName}}
+    public function createNew{{modelName}}(array $data): {{modelName}}
     {
-        return $this->{{modelNameSingularLowerCase}}Repository->createNew($request);
+        return $this->{{modelNameSingularLowerCase}}Repository->create($data);
     }
 
     /**
-     * @param int $userId
-     *
+     * @param  int  ${{modelNameSingularLowerCase}}Id
      * @return bool
      */
     public function remove{{modelName}}(int ${{modelNameSingularLowerCase}}Id): bool
     {
-        return $this->{{modelNameSingularLowerCase}}Repository->delete{{modelName}}(${{modelNameSingularLowerCase}}Id);
+        return $this->{{modelNameSingularLowerCase}}Repository->delete(${{modelNameSingularLowerCase}}Id);
     }
 
     /**
-     * @param  Request  $request
-     * @param {{modelName}} ${{modelNameSingularLowerCase}}
-     *
+     * @param  array  $data
+     * @param  int  ${{modelNameSingularLowerCase}}Id
      * @return {{modelName}}
      */
-    public function update{{modelName}}(Request $request, {{modelName}} ${{modelNameSingularLowerCase}}): {{modelName}}
+    public function update{{modelName}}(array $data, int ${{modelNameSingularLowerCase}}Id): {{modelName}}
     {
-        return $this->{{modelNameSingularLowerCase}}Repository->update{{modelName}}($request, ${{modelNameSingularLowerCase}});
+        return $this->{{modelNameSingularLowerCase}}Repository->update($data, ${{modelNameSingularLowerCase}}Id);
     }
 
     /**
      * @param  int  $id
-     *
      * @return {{modelName}}
      */
     public function get{{modelName}}ById(int $id): {{modelName}}
     {
-        ${{modelNameSingularLowerCase}} = $this->{{modelNameSingularLowerCase}}Repository->getById($id);
-
-        return ${{modelNameSingularLowerCase}};
+        return $this->{{modelNameSingularLowerCase}}Repository->getById($id);
     }
 }

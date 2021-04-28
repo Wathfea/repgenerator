@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Domain;
+
+use Illuminate\Support\Collection;
+use Kblais\QueryFilter\QueryFilter;
+
+interface RepositoryInterface
+{
+    /**
+     * @return Collection
+     */
+    public function getAll(): Collection;
+
+    /**
+     * @param  array  $data
+     * @return mixed
+     */
+    public function create(array $data);
+
+    /**
+     * @param  int  $id
+     *
+     * @return bool
+     */
+    public function delete(int $id): bool;
+
+    /**
+     * @param  array  $data
+     * @param  int  $id
+     * @return mixed
+     */
+    public function update(array $data, int $id);
+
+    /**
+     * @param  int  $id
+     */
+    public function getById(int $id);
+
+    /**
+     * @param  QueryFilter  $filter
+     * @return Collection
+     */
+    public function getAllByFilter(QueryFilter $filter): Collection;
+}

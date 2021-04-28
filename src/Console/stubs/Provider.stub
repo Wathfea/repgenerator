@@ -1,0 +1,51 @@
+<?php
+
+namespace App\Domain\{{modelName}}\Providers;
+
+use App\Domain\{{modelName}}\Repositories\Eloquent{{modelName}}Repository;
+use App\Domain\{{modelName}}\Services\{{modelName}}Service;
+use App\Http\Controllers\Api\v1\{{modelName}}ApiController;
+use App\Http\Controllers\Web\{{modelName}}Controller;
+use App\Models\{{modelName}};
+use Illuminate\Support\ServiceProvider;
+
+class {{modelName}}ServiceProvider extends ServiceProvider
+{
+    /**
+     * @return void
+     */
+    public function register()
+    {
+        $this->app->singleton(Eloquent{{modelName}}Repository::class, function () {
+            return new Eloquent{{modelName}}Repository(app({{modelName}}::class));
+        });
+
+        $this->app->singleton({{modelName}}Service::class, function () {
+            return new {{modelName}}Service(app(Eloquent{{modelName}}Repository::class));
+        });
+
+        $this->app->singleton({{modelName}}Controller::class, function () {
+            ${{modelNameSingularLowerCase}}Controller = new {{modelName}}Controller();
+            ${{modelNameSingularLowerCase}}Controller->middleware(config('role-middlewares.controllers.{{modelNameSingularLowerCase}}'));
+
+            return ${{modelNameSingularLowerCase}}Controller;
+        });
+
+        $this->app->singleton({{modelName}}ApiController::class, function () {
+            ${{modelNameSingularLowerCase}}ApiController = new {{modelName}}ApiController(app({{modelName}}Service::class));
+            ${{modelNameSingularLowerCase}}ApiController->middleware(config('role-middlewares.controllers.{{modelNameSingularLowerCase}}'));
+
+            return ${{modelNameSingularLowerCase}}ApiController;
+        });
+    }
+
+    /**
+     * Bootstrap services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        //
+    }
+}

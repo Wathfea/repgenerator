@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Domain\{{modelName}}\Filters;
+
+use App\Domain\AbstractQueryFilter;
+use Illuminate\Database\Eloquent\Builder;
+
+class {{modelName}}Filter extends AbstractQueryFilter
+{
+    /**
+     * EXAMPLE!!!!!!!
+     * @param  bool  $isActive
+     * @return Builder
+     */
+    public function status(bool $isActive): Builder
+    {
+        return $this->builder->where('status', $isActive);
+    }
+}
