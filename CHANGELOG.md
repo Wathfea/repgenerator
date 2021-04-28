@@ -2,10 +2,6 @@
 
 All notable changes to `repgenerator` will be documented in this file
 
-## 1.0.7 - 2021-04-27
-
-- Added optional model generation flag
-
 ## 1.0.6 - 2021-04-23
 
 - Fixed return types

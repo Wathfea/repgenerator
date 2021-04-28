@@ -1,0 +1,13 @@
+<?php
+
+namespace App\Domain;
+
+use Illuminate\Database\Eloquent\Builder;
+
+interface EloquentRepositoryInterface extends RepositoryInterface
+{
+    /**
+     * @return Builder
+     */
+    public function getQB(): Builder;
+}
