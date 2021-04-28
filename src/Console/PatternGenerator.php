@@ -133,6 +133,16 @@ class PatternGenerator extends Command
         }
         $this->info('Base Controller is ready!');
 
+        $baseModel = $this->getStub('BaseModel');
+        if (!file_exists($path = app_path("Models/BaseModel.php"))) {
+            file_put_contents($path, $baseModel);
+            $this->generatedFiles[] = [
+                'name' => 'BaseModel.php',
+                'location' => $path
+            ];
+        }
+        $this->info('Base Model is ready!');
+
         $abstractEloquentRepository = $this->getStub('AbstractEloquentRepository');
         if (!file_exists($path = app_path("Domain/AbstractEloquentRepository.php"))) {
             file_put_contents($path, $abstractEloquentRepository);
@@ -274,11 +284,11 @@ class PatternGenerator extends Command
             $this->getStub('Request')
         );
 
-        if (!file_exists($path = app_path('Http/Requests'))) {
+        if (!file_exists($path = app_path("Domain/{$name}/Requests"))) {
             mkdir($path, 0777, true);
         }
 
-        file_put_contents($path = app_path("Http/Requests/{$name}Request.php"), $requestTemplate);
+        file_put_contents($path = app_path("Domain/{$name}/Requests/{$name}Request.php"), $requestTemplate);
         $this->generatedFiles[] = [
             'name' => "{$name}Request.php",
             'location' => $path
@@ -296,11 +306,11 @@ class PatternGenerator extends Command
             $this->getStub('UpdateRequest')
         );
 
-        if (!file_exists($path = app_path('Http/Requests'))) {
+        if (!file_exists($path = app_path('Domain/{$name}/Requests'))) {
             mkdir($path, 0777, true);
         }
 
-        file_put_contents($path = app_path("Http/Requests/{$name}UpdateRequest.php"), $updateRequestTemplate);
+        file_put_contents($path = app_path("Domain/{$name}/Requests/{$name}UpdateRequest.php"), $updateRequestTemplate);
         $this->generatedFiles[] = [
             'name' => "{$name}UpdateRequest.php",
             'location' => $path
@@ -524,19 +534,23 @@ class PatternGenerator extends Command
     {
         File::append(base_path('routes/web.php'),
             'Route::resource(\''.Str::plural(strtolower($name))."', {$name}Controller::class)->only(['index', 'create', 'edit']);\n\r");
+
         $this->generatedFiles[] = [
             'name' => "web.php",
             'location' => base_path('routes/web.php')
         ];
 
-        File::append(base_path('routes/api.php'), 'Route::resource(\''.Str::plural(strtolower($name))."', {$name}ApiController::class, [
+        File::append(base_path('routes/api.php'), '
+        use App\Http\Controllers\Api\v1\\'.$name.'ApiController;
+        Route::resource(\''.Str::plural(strtolower($name))."', {$name}ApiController::class, [
             'names' => [
                 'index' => 'api.".Str::plural(strtolower($name)).".index',
                 'store' => 'api.".Str::plural(strtolower($name)).".store',
                 'update' => 'api.".Str::plural(strtolower($name)).".update',
                 'destroy' => 'api.".Str::plural(strtolower($name)).".destroy',
             ],
-        ])->only(['index', 'store', 'update', 'destroy']);\n\r");
+        ])->only(['index', 'store', 'update', 'destroy']);\n\r" );
+
         $this->generatedFiles[] = [
             'name' => "api.php",
             'location' => base_path('routes/api.php')
