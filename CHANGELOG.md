@@ -2,6 +2,12 @@
 
 All notable changes to `repgenerator` will be documented in this file
 
+## 1.1.0 - 2021-04-28
+
+- Added missing BaseModel
+- Fixed api route use missing
+- Removed Requests under Domain
+
 ## 1.0.9 - 2021-04-28
 
 - Refactored pattern generation
