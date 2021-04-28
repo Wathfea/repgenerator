@@ -19,30 +19,6 @@ To generate the files run
 
 `php artisan pattern:generate {name : Class (singular) for example User} {--M|model : Whether the generator should generate a model}'`
 
-New files will be:
-
-* app/Models/{$name}.php
-* app/Http/Controllers/Web/{$name}Controller.php
-* app/Http/Controllers/Api/{$version}/{$name}ApiController.php
-* app//Http/Requests/{$name}Request.php
-* app/Http/Requests/{$name}UpdateRequest.php
-* app/Domain/{$name}/Repositories/Eloquent{$name}Repository.php
-* app/Domain/{$name}/Repositories/Interfaces/{$name}RepositoryInterface.php
-* app/Domain/{$name}/Services/{$name}Service.php
-* app/Domain/{$name}/ViewModel/{$name}.php
-* app/Domain/{$name}/ViewModel/Transformers/{$name}Transformer.php
-* views/{$name}/index.blade.php
-* views/{$name}/edit.blade.php
-* views/{$name}/create.blade.php
-
-Also 2 new routes will register in the api.php and web.php
-
->Web.php:
-`Route::resource('{$name}', {$name}Controller::class)->only(['index', 'create', 'edit']);`
-
->Api.php:
-`Route::resource('{$name}', {$name}ApiController::class)->only(['store', 'update', 'destroy']);`
-
 ## TODOS
 * base migration for resource
 * rollback command to delete all files
@@ -63,6 +39,7 @@ If you discover any security related issues, please email perlusz.david@pentacom
 ## Credits
 
 - [Perlusz Dávid](https://github.com/pentacom)
+- [Simon Tamás](https://github.com/pentacom)
 - [All Contributors](../../contributors)
 
 ## License

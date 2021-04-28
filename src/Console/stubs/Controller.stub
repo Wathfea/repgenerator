@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Web;
 
-use App\Domain\{{modelName}}\Services\{{modelName}}Service;
 use App\Http\Controllers\BaseTransactionController;
-use App\{{modelName}};
+use App\Models\{{modelName}};
+use Exception;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -16,27 +16,11 @@ use Illuminate\Support\Facades\Log;
 class {{modelName}}Controller extends BaseTransactionController
 {
     /**
-     * @var {{modelName}}Service
-     */
-    private {{modelName}}Service ${{modelNameSingularLowerCase}}Service;
-
-    /**
-     * {{modelName}}Controller constructor.
-     * @param {{modelName}}Service ${{modelNameSingularLowerCase}}Service
-     */
-    public function __construct({{modelName}}Service ${{modelNameSingularLowerCase}}Service)
-    {
-        $this->{{modelNameSingularLowerCase}}Service = ${{modelNameSingularLowerCase}}Service;
-    }
-
-    /**
      * @return Application|Factory|View
      */
     public function index()
     {
-        ${{modelNamePluralLowerCase}} = $this->{{modelNameSingularLowerCase}}Service->getAll();
-
-        return view('{{modelNamePluralLowerCase}}.index', compact('{{modelNamePluralLowerCase}}'));
+        return view('{{modelNamePluralLowerCase}}.index');
     }
 
     /**
@@ -52,7 +36,7 @@ class {{modelName}}Controller extends BaseTransactionController
     }
 
     /**
-     * @param {{modelName}} ${{modelNameSingularLowerCase}}
+     * @param  {{modelName}}  ${{modelNameSingularLowerCase}}
      *
      * @return Factory|\Illuminate\View\View
      */

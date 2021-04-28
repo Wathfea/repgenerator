@@ -2,6 +2,16 @@
 
 All notable changes to `repgenerator` will be documented in this file
 
+## 1.0.9 - 2021-04-28
+
+- Refactored pattern generation
+
+## 1.0.8 - 2021-04-27
+
+- New pattern generation signature `pattern:generate
+  {name : Class (singular) for example User}
+  {--model : Whether the generator should generate a model}`
+
 ## 1.0.7 - 2021-04-27
 
 - Added optional model generation flag

@@ -1,0 +1,86 @@
+<?php
+
+namespace App\Domain;
+
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use Kblais\QueryFilter\QueryFilter;
+
+abstract class AbstractEloquentRepository implements RepositoryInterface, EloquentRepositoryInterface
+{
+    private Model $model;
+
+    /**
+     * AbstractEloquentRepository constructor.
+     * @param  Model  $model
+     */
+    public function __construct(Model $model)
+    {
+        $this->model = $model;
+    }
+
+    /**
+     * @param  array  $data
+     * @return Model
+     */
+    public function create(array $data): Model
+    {
+        return $this->getQB()->create($data);
+    }
+
+    /**
+     * @return Builder
+     */
+    public function getQB(): Builder
+    {
+        return $this->model->newQuery();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function delete(int $id): bool
+    {
+        return $this->model->newQuery()->find($id)->delete();
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getAll(): Collection
+    {
+        return $this->getQB()->get();
+    }
+
+    /**
+     * @param  QueryFilter  $filter
+     * @return Collection
+     */
+    public function getAllByFilter(QueryFilter $filter): Collection
+    {
+        return $this->getQB()->filter($filter)->get();
+    }
+
+    /**
+     * @param  int  $id
+     * @return Model
+     */
+    public function getById(int $id): Model
+    {
+        return $this->getQB()->find($id);
+    }
+
+    /**
+     * @param  array  $data
+     * @param  int  $id
+     * @return Model
+     */
+    public function update(array $data, int $id): Model
+    {
+        $model = $this->getById($id);
+        $model->update($data);
+
+        return $model;
+    }
+}

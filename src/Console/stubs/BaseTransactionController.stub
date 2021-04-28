@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Exception;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+/**
+ * Class BaseTransactionController.
+ */
+class BaseTransactionController extends Controller
+{
+    /**
+     * @param string $method
+     * @param array $parameters
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws Exception|\Throwable
+     */
+    public function callAction($method, $parameters)
+    {
+        DB::beginTransaction();
+        try {
+            $result = parent::callAction($method, $parameters);
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::error($exception->getMessage());
+            throw $exception;
+        }
+        DB::commit();
+
+        return $result;
+    }
+}
