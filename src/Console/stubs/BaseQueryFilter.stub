@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Domain;
+
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Kblais\QueryFilter\QueryFilter;
+
+/**
+ * Class BaseQueryFilter
+ * @package App\Domain
+ */
+class BaseQueryFilter extends QueryFilter
+{
+    /**
+     * BaseQueryFilter constructor.
+     * @param  \Illuminate\Http\Request  $request
+     */
+    public function __construct(Request $request)
+    {
+        parent::__construct($request);
+        //@TODO: Implement ordering and searching
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder  $builder
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
+     */
+    public function apply(Builder $builder)
+    {
+        $qb = parent::apply($builder);
+        if ($this->request->has('per_page')) {
+            return $qb->paginate($this->request->get('per_page'));
+        } else {
+            return $qb->get();
+        }
+    }
+}

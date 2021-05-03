@@ -2,10 +2,10 @@
 
 namespace App\Domain\{{modelName}}\Filters;
 
-use App\Domain\AbstractQueryFilter;
+use App\Domain\BaseQueryFilter;
 use Illuminate\Database\Eloquent\Builder;
 
-class {{modelName}}Filter extends AbstractQueryFilter
+class {{modelName}}Filter extends BaseQueryFilter
 {
     /**
      * EXAMPLE!!!!!!!

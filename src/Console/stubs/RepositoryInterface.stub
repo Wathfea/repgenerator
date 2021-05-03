@@ -2,9 +2,13 @@
 
 namespace App\Domain;
 
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
-use Kblais\QueryFilter\QueryFilter;
 
+/**
+ * Interface RepositoryInterface
+ * @package App\Domain
+ */
 interface RepositoryInterface
 {
     /**
@@ -38,8 +42,8 @@ interface RepositoryInterface
     public function getById(int $id);
 
     /**
-     * @param  QueryFilter  $filter
-     * @return Collection
+     * @param  array  $requestData
+     * @return Collection|LengthAwarePaginator
      */
-    public function getAllByFilter(QueryFilter $filter): Collection;
+    public function getByFilter(array $requestData);
 }

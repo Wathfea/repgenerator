@@ -17,7 +17,8 @@ class {{modelName}}ServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(Eloquent{{modelName}}Repository::class, function () {
-            return new Eloquent{{modelName}}Repository(app({{modelName}}::class));
+            return (new Eloquent{{modelName}}Repository(app({{modelName}}::class)))
+                ->setFilterClass({{modelName}}Filter::class);
         });
 
         $this->app->singleton({{modelName}}Service::class, function () {

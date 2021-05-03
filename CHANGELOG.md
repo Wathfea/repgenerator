@@ -2,6 +2,11 @@
 
 All notable changes to `repgenerator` will be documented in this file
 
+## 1.1.1 - 2021-05-03
+
+- Refactored filtering, for better DI separation
+- Removed DataTable depedency
+
 ## 1.1.0 - 2021-04-28
 
 - Added missing BaseModel

@@ -153,11 +153,11 @@ class PatternGenerator extends Command
         }
         $this->info('AbstractEloquentRepository is ready!');
 
-        $abstractQueryFilter = $this->getStub('AbstractQueryFilter');
+        $baseQueryFilter = $this->getStub('BaseQueryFilter');
         if (!file_exists($path = app_path("Domain/AbstractQueryFilter.php"))) {
-            file_put_contents($path, $abstractQueryFilter);
+            file_put_contents($path, $baseQueryFilter);
             $this->generatedFiles[] = [
-                'name' => 'AbstractQueryFilter.php',
+                'name' => 'BaseQueryFilter.php',
                 'location' => $path
             ];
         }

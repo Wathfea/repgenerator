@@ -5,12 +5,24 @@ namespace App\Domain;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
-use Kblais\QueryFilter\QueryFilter;
 
+/**
+ * Class AbstractEloquentRepository
+ * @package App\Domain
+ */
 abstract class AbstractEloquentRepository implements RepositoryInterface, EloquentRepositoryInterface
 {
+    /**
+     * @var \Illuminate\Database\Eloquent\Model
+     */
     private Model $model;
+    /**
+     * @var string
+     */
+    private string $filterClass;
 
     /**
      * AbstractEloquentRepository constructor.
@@ -19,6 +31,24 @@ abstract class AbstractEloquentRepository implements RepositoryInterface, Eloque
     public function __construct(Model $model)
     {
         $this->model = $model;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFilterClass(): string
+    {
+        return $this->filterClass;
+    }
+
+    /**
+     * @param  string  $filterClass
+     * @return AbstractEloquentRepository
+     */
+    public function setFilterClass(string $filterClass): AbstractEloquentRepository
+    {
+        $this->filterClass = $filterClass;
+        return $this;
     }
 
     /**
@@ -56,21 +86,21 @@ abstract class AbstractEloquentRepository implements RepositoryInterface, Eloque
     }
 
     /**
-     * @param  QueryFilter  $filter
-     * @return Collection
+     * @param  array  $requestData
+     * @return Collection|LengthAwarePaginator
      */
-    public function getAllByFilter(QueryFilter $filter): Collection
+    public function getByFilter(array $requestData)
     {
-        return $this->getQB()->filter($filter)->get();
+        $request = (new Request())->merge($requestData);
+        return $this->getQB()->filter($this->hasFilterClass() ? new $this->filterClass($request) : new BaseQueryFilter($request));
     }
 
     /**
-     * @param  int  $id
-     * @return Model
+     * @return bool
      */
-    public function getById(int $id): Model
+    public function hasFilterClass(): bool
     {
-        return $this->getQB()->find($id);
+        return !empty($this->filterClass);
     }
 
     /**
@@ -84,5 +114,14 @@ abstract class AbstractEloquentRepository implements RepositoryInterface, Eloque
         $model->update($data);
 
         return $model;
+    }
+
+    /**
+     * @param  int  $id
+     * @return Model
+     */
+    public function getById(int $id): Model
+    {
+        return $this->getQB()->find($id);
     }
 }
