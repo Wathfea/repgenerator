@@ -2,6 +2,7 @@
 
 namespace App\Domain;
 
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -39,10 +40,11 @@ abstract class AbstractEloquentRepository implements RepositoryInterface, Eloque
 
     /**
      * {@inheritdoc}
+     * @throws Exception
      */
     public function delete(int $id): bool
     {
-        return $this->model->newQuery()->find($id)->delete();
+        return $this->model::destroy($id);
     }
 
     /**
