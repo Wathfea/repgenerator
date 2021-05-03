@@ -6,6 +6,8 @@ All notable changes to `repgenerator` will be documented in this file
 
 - Refactored filtering, for better DI separation
 - Removed DataTable depedency
+- Fixed wrong namespace in requests, 
+- Fixed destroy method in abstract eloquent repository
 
 ## 1.1.0 - 2021-04-28
 
