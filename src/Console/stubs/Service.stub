@@ -33,12 +33,12 @@ class {{modelName}}Service
     }
 
     /**
-     * @param  {{modelName}}Filter  $filter
-     * @return Collection
+     * @param  array  $requestData
+     * @return Collection|LengthAwarePaginator
      */
-    public function getAllByFilter({{modelName}}Filter $filter): Collection
+    public function getByFilter(array $requestData)
     {
-        return $this->{{modelNameSingularLowerCase}}Repository->getAllByFilter($filter);
+        return $this->{{modelNameSingularLowerCase}}Repository->getByFilter($requestData);
     }
 
     /**

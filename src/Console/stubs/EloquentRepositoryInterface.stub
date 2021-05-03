@@ -4,6 +4,10 @@ namespace App\Domain;
 
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Interface EloquentRepositoryInterface
+ * @package App\Domain
+ */
 interface EloquentRepositoryInterface extends RepositoryInterface
 {
     /**

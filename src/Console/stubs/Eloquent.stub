@@ -7,6 +7,10 @@ use App\Domain\{{modelName}}\Repositories\Interfaces\{{modelName}}RepositoryInte
 use App\Domain\EloquentRepositoryInterface;
 use App\Domain\RepositoryInterface;
 
+/**
+ * Class Eloquent{{modelName}}Repository
+ * @package App\Domain\{{modelName}}\Repositories
+ */
 class Eloquent{{modelName}}Repository extends AbstractEloquentRepository implements RepositoryInterface, EloquentRepositoryInterface, {{modelName}}RepositoryInterface
 {
 

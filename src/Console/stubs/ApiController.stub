@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\Domain\{{modelName}}\Filters\{{modelName}}Filter;
 use App\Domain\{{modelName}}\Resources\{{modelName}}Resource;
 use App\Domain\{{modelName}}\Services\{{modelName}}Service;
 use App\Http\Controllers\BaseTransactionController;
@@ -12,7 +11,8 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
-use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+
 
 /**
  * Class {{modelName}}ApiController.
@@ -28,22 +28,17 @@ class {{modelName}}ApiController extends BaseTransactionController
      * {{modelName}}ApiController constructor.
      * @param  {{modelName}}Service  ${{modelNameSingularLowerCase}}Service
      */
-    public function __construct(
-        {{modelName}}Service ${{modelNameSingularLowerCase}}Service
-    ) {
+    public function __construct( {{modelName}}Service ${{modelNameSingularLowerCase}}Service ) {
         $this->{{modelNameSingularLowerCase}}Service = ${{modelNameSingularLowerCase}}Service;
     }
 
     /**
-     * @param  {{modelName}}Filter  $filter
-     * @return JsonResponse
-     * @throws \Exception
+     * @param  Request  $request
+     * @return AnonymousResourceCollection
      */
-    public function index({{modelName}}Filter $filter): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection
     {
-        ${{modelNamePluralLowerCase}} = {{modelName}}Resource::collection($this->{{modelNameSingularLowerCase}}Service->getAllByFilter($filter));
-
-        return DataTables::of(${{modelNamePluralLowerCase}})->toJson();
+        return {{modelName}}Resource::collection($this->{{modelNameSingularLowerCase}}Service->getByFilter($request->all()));
     }
 
     /**
