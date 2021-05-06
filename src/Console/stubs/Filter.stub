@@ -5,6 +5,9 @@ namespace App\Domain\{{modelName}}\Filters;
 use App\Domain\BaseQueryFilter;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Class {{modelName}}Filter
+ */
 class {{modelName}}Filter extends BaseQueryFilter
 {
     /**

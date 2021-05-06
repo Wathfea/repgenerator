@@ -2,6 +2,10 @@
 
 All notable changes to `repgenerator` will be documented in this file
 
+## 1.1.2 - 2021-05-06
+- Upgrade to PHP 8
+- Added searching options for filtering
+
 ## 1.1.1 - 2021-05-03
 
 - Refactored filtering, for better DI separation

@@ -2,25 +2,20 @@
 
 namespace App\Domain\{{modelName}}\Services;
 
-use App\Domain\{{modelName}}\Filters\{{modelName}}Filter;
 use App\Domain\{{modelName}}\Repositories\Interfaces\{{modelName}}RepositoryInterface;
 use App\Models\{{modelName}};
 use Illuminate\Support\Collection;
 
+/**
+ * Class {{modelName}}Service
+ */
 class {{modelName}}Service
 {
-    /**
-     * @var {{modelName}}RepositoryInterface
-     */
-    private {{modelName}}RepositoryInterface ${{modelNameSingularLowerCase}}Repository;
-
     /**
      * {{modelName}}Service constructor.
      * @param  {{modelName}}RepositoryInterface  ${{modelNameSingularLowerCase}}Repository
      */
-    public function __construct({{modelName}}RepositoryInterface ${{modelNameSingularLowerCase}}Repository)
-    {
-        $this->{{modelNameSingularLowerCase}}Repository = ${{modelNameSingularLowerCase}}Repository;
+    public function __construct(private {{modelName}}RepositoryInterface ${{modelNameSingularLowerCase}}Repository) {
     }
 
 
@@ -36,7 +31,7 @@ class {{modelName}}Service
      * @param  array  $requestData
      * @return Collection|LengthAwarePaginator
      */
-    public function getByFilter(array $requestData)
+    public function getByFilter(array $requestData): LengthAwarePaginator|Collection
     {
         return $this->{{modelNameSingularLowerCase}}Repository->getByFilter($requestData);
     }

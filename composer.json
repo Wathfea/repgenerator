@@ -16,7 +16,7 @@
         }
     ],
     "require": {
-        "php": "^7.3|^8.0",
+        "php": "^8.0",
         "kblais/query-filter": "^1.7",
         "spatie/laravel-permission": "^3.18"
     },

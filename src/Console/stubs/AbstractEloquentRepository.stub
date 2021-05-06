@@ -11,14 +11,9 @@ use Illuminate\Support\Collection;
 
 /**
  * Class AbstractEloquentRepository
- * @package App\Domain
  */
 abstract class AbstractEloquentRepository implements RepositoryInterface, EloquentRepositoryInterface
 {
-    /**
-     * @var \Illuminate\Database\Eloquent\Model
-     */
-    private Model $model;
     /**
      * @var string
      */
@@ -28,9 +23,8 @@ abstract class AbstractEloquentRepository implements RepositoryInterface, Eloque
      * AbstractEloquentRepository constructor.
      * @param  Model  $model
      */
-    public function __construct(Model $model)
+    public function __construct(private Model $model)
     {
-        $this->model = $model;
     }
 
     /**
@@ -89,7 +83,7 @@ abstract class AbstractEloquentRepository implements RepositoryInterface, Eloque
      * @param  array  $requestData
      * @return Collection|LengthAwarePaginator
      */
-    public function getByFilter(array $requestData)
+    public function getByFilter(array $requestData): LengthAwarePaginator|Collection
     {
         $request = (new Request())->merge($requestData);
         return $this->getQB()->filter($this->hasFilterClass() ? new $this->filterClass($request) : new BaseQueryFilter($request));

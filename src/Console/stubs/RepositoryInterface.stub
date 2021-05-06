@@ -7,7 +7,6 @@ use Illuminate\Support\Collection;
 
 /**
  * Interface RepositoryInterface
- * @package App\Domain
  */
 interface RepositoryInterface
 {
@@ -20,7 +19,7 @@ interface RepositoryInterface
      * @param  array  $data
      * @return mixed
      */
-    public function create(array $data);
+    public function create(array $data): mixed;
 
     /**
      * @param  int  $id
@@ -34,7 +33,7 @@ interface RepositoryInterface
      * @param  int  $id
      * @return mixed
      */
-    public function update(array $data, int $id);
+    public function update(array $data, int $id): mixed;
 
     /**
      * @param  int  $id
@@ -45,5 +44,5 @@ interface RepositoryInterface
      * @param  array  $requestData
      * @return Collection|LengthAwarePaginator
      */
-    public function getByFilter(array $requestData);
+    public function getByFilter(array $requestData): LengthAwarePaginator|Collection;
 }

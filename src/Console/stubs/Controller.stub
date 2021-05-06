@@ -18,7 +18,7 @@ class {{modelName}}Controller extends BaseTransactionController
     /**
      * @return Application|Factory|View
      */
-    public function index()
+    public function index(): Factory|View|Application
     {
         return view('{{modelNamePluralLowerCase}}.index');
     }
@@ -26,7 +26,7 @@ class {{modelName}}Controller extends BaseTransactionController
     /**
      * @return Factory|View|Application
      */
-    public function create()
+    public function create(): Factory|View|Application
     {
         try {
             return view('{{modelNamePluralLowerCase}}.create');
@@ -40,7 +40,7 @@ class {{modelName}}Controller extends BaseTransactionController
      *
      * @return Factory|\Illuminate\View\View
      */
-    public function edit({{modelName}} ${{modelNameSingularLowerCase}})
+    public function edit({{modelName}} ${{modelNameSingularLowerCase}}): Factory|\Illuminate\View\View
     {
         try {
             return view('{{modelNamePluralLowerCase}}.edit', [
