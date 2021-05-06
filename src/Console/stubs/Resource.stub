@@ -4,6 +4,9 @@ namespace App\Domain\{{modelName}}\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * Class {{modelName}}Resource
+ */
 class {{modelName}}Resource extends JsonResource
 {
     /**
@@ -12,7 +15,7 @@ class {{modelName}}Resource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function toArray($request)
+    public function toArray($request): array
     {
         return parent::toArray($request);
     }

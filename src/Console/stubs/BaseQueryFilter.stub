@@ -3,32 +3,57 @@
 namespace App\Domain;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
 use Kblais\QueryFilter\QueryFilter;
 
 /**
  * Class BaseQueryFilter
- * @package App\Domain
  */
 class BaseQueryFilter extends QueryFilter
 {
+    protected array $searchableColumns = [];
+
     /**
-     * BaseQueryFilter constructor.
-     * @param  \Illuminate\Http\Request  $request
+     * @return array
      */
-    public function __construct(Request $request)
+    public function getSearchableColumns(): array
     {
-        parent::__construct($request);
-        //@TODO: Implement ordering and searching
+        return $this->searchableColumns;
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Builder  $builder
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
+     * @param  array  $searchableColumns
+     * @return BaseQueryFilter
      */
+    public function setSearchableColumns(array $searchableColumns): self
+    {
+        $this->searchableColumns = $searchableColumns;
+
+        return $this;
+    }
+
     public function apply(Builder $builder)
     {
         $qb = parent::apply($builder);
+        if ($this->request->has('search')) {
+            foreach ($this->getSearchableColumns() as $searchableColumn) {
+                $qb->orWhere($searchableColumn, 'like', '%'.$this->request->get('search').'%');
+            }
+        }
+
+        if ($this->request->has('order_by')) {
+            $orderColumns = $this->request->get('order_by');
+            $orderColumns = is_array($orderColumns) ? $orderColumns : [$orderColumns];
+            $orderDirections = $this->request->get('order_dir');
+            $orderDirections = !empty($orderDirections) ? (is_array($orderDirections) ? $orderDirections : [$orderDirections]) : [];
+            foreach ($orderColumns as $index => $orderColumn) {
+                $orderDirection = 'asc';
+                if (!empty($orderDirections) && array_key_exists($index, $orderDirections)) {
+                    $orderDirection = $orderDirections[$index];
+                }
+                $qb->orderBy($orderColumn, $orderDirection);
+            }
+        }
+
         if ($this->request->has('per_page')) {
             return $qb->paginate($this->request->get('per_page'));
         } else {

@@ -20,16 +20,10 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 class {{modelName}}ApiController extends BaseTransactionController
 {
     /**
-     * @var {{modelName}}Service
-     */
-    private {{modelName}}Service ${{modelNameSingularLowerCase}}Service;
-
-    /**
      * {{modelName}}ApiController constructor.
      * @param  {{modelName}}Service  ${{modelNameSingularLowerCase}}Service
      */
-    public function __construct( {{modelName}}Service ${{modelNameSingularLowerCase}}Service ) {
-        $this->{{modelNameSingularLowerCase}}Service = ${{modelNameSingularLowerCase}}Service;
+    public function __construct(private {{modelName}}Service ${{modelNameSingularLowerCase}}Service ) {
     }
 
     /**

@@ -24,7 +24,7 @@ class BaseModel extends Model
      * @return mixed
      * @throws ReflectionException
      */
-    public function scopeWithAll($query)
+    public function scopeWithAll($query): mixed
     {
         return $query->with($this->getSupportedRelations());
     }
@@ -41,7 +41,7 @@ class BaseModel extends Model
         foreach ($reflextionClass->getMethods() as $method) {
             $doc = $method->getDocComment();
 
-            if ($doc && strpos($doc, '@Relation') !== false) {
+            if ($doc && str_contains($doc, '@Relation')) {
                 $relations[] = $method->getName();
             }
         }

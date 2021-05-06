@@ -3,32 +3,35 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class BaseTransactionController.
  */
 class BaseTransactionController extends Controller
 {
+
     /**
-     * @param string $method
-     * @param array $parameters
-     *
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws Exception|\Throwable
+     * @param  string  $method
+     * @param  array  $parameters
+     * @return \Symfony\Component\HttpFoundation\Response|\Illuminate\View\View|\Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     * @throws \Throwable
      */
-    public function callAction($method, $parameters)
+    public function callAction($method, $parameters): Response|View|AnonymousResourceCollection
     {
-        DB::beginTransaction();
         try {
+            DB::beginTransaction();
             $result = parent::callAction($method, $parameters);
+            DB::commit();
         } catch (Exception $exception) {
             DB::rollBack();
             Log::error($exception->getMessage());
             throw $exception;
         }
-        DB::commit();
 
         return $result;
     }
