@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\v1\{{modelName}}ApiController;
 use App\Http\Controllers\Web\{{modelName}}Controller;
 use App\Models\{{modelName}};
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Http\Request;
 
 /**
  * Class {{modelName}}ServiceProvider.

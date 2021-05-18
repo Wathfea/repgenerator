@@ -3,35 +3,23 @@
 namespace App\Domain;
 
 use Illuminate\Database\Eloquent\Builder;
+use JetBrains\PhpStorm\Pure;
 use Kblais\QueryFilter\QueryFilter;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
- * Class BaseQueryFilter
+ * Class BaseQueryFilter.
  */
 class BaseQueryFilter extends QueryFilter
 {
     protected array $searchableColumns = [];
 
     /**
-     * @return array
+     * @param  Builder  $builder
+     * @return LengthAwarePaginator|Builder|Builder[]|Collection
      */
-    public function getSearchableColumns(): array
-    {
-        return $this->searchableColumns;
-    }
-
-    /**
-     * @param  array  $searchableColumns
-     * @return BaseQueryFilter
-     */
-    public function setSearchableColumns(array $searchableColumns): self
-    {
-        $this->searchableColumns = $searchableColumns;
-
-        return $this;
-    }
-
-    public function apply(Builder $builder)
+    public function apply(Builder $builder): LengthAwarePaginator|Builder|Collection|array
     {
         $qb = parent::apply($builder);
         if ($this->request->has('search')) {
@@ -59,5 +47,82 @@ class BaseQueryFilter extends QueryFilter
         } else {
             return $qb->get();
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function getSearchableColumns(): array
+    {
+        return $this->searchableColumns;
+    }
+
+    /**
+     * @param  array  $searchableColumns
+     * @return BaseQueryFilter
+     */
+    public function setSearchableColumns(array $searchableColumns): self
+    {
+        $this->searchableColumns = $searchableColumns;
+
+        return $this;
+    }
+
+    /**
+     * @param  string  $table
+     * @param  string  $first
+     * @param  null  $operator
+     * @param  null  $second
+     * @return BaseQueryFilter
+     */
+    public function leftJoin(string $table, string $first, $operator = null, $second = null): self
+    {
+        if (!$this->isJoined($table)) {
+            $this->builder->leftJoin($table, $first, $operator, $second);
+        }
+
+        return $this;
+    }
+
+    #[Pure]
+    public function isJoined(
+        string $table
+    ): bool {
+        $joins = $this->builder->getQuery()->joins;
+        if ($joins == null) {
+            return false;
+        }
+        foreach ($joins as $join) {
+            if ($join->table == $table) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  string  $table
+     * @param  string  $first
+     * @param  string|null  $operator
+     * @param  string|null  $second
+     * @return BaseQueryFilter
+     */
+    public function rightJoin(string $table, string $first, string $operator = null, string $second = null)
+    {
+        if (!$this->isJoined($table)) {
+            $this->builder->rightJoin($table, $first, $operator, $second);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param  int  $id
+     * @return Builder
+     */
+    public function id(int $id): Builder
+    {
+        return $this->builder->whereId($id);
     }
 }

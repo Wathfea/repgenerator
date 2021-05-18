@@ -14,21 +14,24 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class BaseTransactionController extends Controller
 {
-
     /**
      * @param  string  $method
      * @param  array  $parameters
-     * @return \Symfony\Component\HttpFoundation\Response|\Illuminate\View\View|\Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     * @return Response|View|AnonymousResourceCollection
      * @throws \Throwable
      */
-    public function callAction($method, $parameters): Response|View|AnonymousResourceCollection
+    public function callAction($method, $parameters): Response | View | AnonymousResourceCollection
     {
         try {
             DB::beginTransaction();
             $result = parent::callAction($method, $parameters);
-            DB::commit();
+            if (DB::connection()->getPdo()->inTransaction()) {
+                DB::commit();
+            }
         } catch (Exception $exception) {
-            DB::rollBack();
+            if (DB::connection()->getPdo()->inTransaction()) {
+                DB::rollBack();
+            }
             Log::error($exception->getMessage());
             throw $exception;
         }

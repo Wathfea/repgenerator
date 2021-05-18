@@ -4,14 +4,14 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Domain\{{modelName}}\Resources\{{modelName}}Resource;
 use App\Domain\{{modelName}}\Services\{{modelName}}Service;
-use App\Http\Controllers\BaseTransactionController;
 use App\Domain\{{modelName}}\Requests\{{modelName}}Request;
 use App\Domain\{{modelName}}\Requests\{{modelName}}UpdateRequest;
 use Exception;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Http\Controllers\BaseTransactionController;
 
 
 /**
@@ -51,7 +51,7 @@ class {{modelName}}ApiController extends BaseTransactionController
                     [
                         'success' => $deleted,
                         'message' => $deleted ? trans('{{modelNameSingularLowerCase}}.deleted') : trans('{{modelNameSingularLowerCase}}.delete_failed'),
-                    ]
+                    ], $deleted ? 200 : 202
                 );
             }
 
@@ -59,14 +59,14 @@ class {{modelName}}ApiController extends BaseTransactionController
                 [
                     'success' => false,
                     'message' => trans('{{modelNameSingularLowerCase}}.not_found'),
-                ]
+                ], 202
             );
         } catch (Exception $exception) {
             return Response::json(
                 [
                     'success' => false,
                     'failed' => $exception->getMessage(),
-                ]
+                ], 202
             );
         }
     }
@@ -91,7 +91,7 @@ class {{modelName}}ApiController extends BaseTransactionController
             return Response::json(
                 [
                     'success' => false,
-                ]
+                ], 202
             );
         } catch (Exception $exception) {
             Log::error('New {{modelName}} Save: '.$exception->getMessage());
@@ -100,7 +100,7 @@ class {{modelName}}ApiController extends BaseTransactionController
                 [
                     'success' => false,
                     'failed' => $exception->getMessage(),
-                ]
+                ], 202
             );
         }
     }
@@ -127,7 +127,7 @@ class {{modelName}}ApiController extends BaseTransactionController
             return Response::json(
                 [
                     'success' => false,
-                ]
+                ], 202
             );
         } catch (Exception $exception) {
             Log::error('Update {{modelNameSingularLowerCase}}: '.$exception->getMessage());
@@ -136,7 +136,7 @@ class {{modelName}}ApiController extends BaseTransactionController
                 [
                     'success' => false,
                     'failed' => $exception->getMessage(),
-                ]
+                ], 202
             );
         }
     }

@@ -5,12 +5,14 @@ namespace App\Domain;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
- * Class AbstractEloquentRepository
+ * Class AbstractEloquentRepository.
  */
 abstract class AbstractEloquentRepository implements RepositoryInterface, EloquentRepositoryInterface
 {
@@ -39,27 +41,43 @@ abstract class AbstractEloquentRepository implements RepositoryInterface, Eloque
      * @param  string  $filterClass
      * @return AbstractEloquentRepository
      */
-    public function setFilterClass(string $filterClass): AbstractEloquentRepository
+    public function setFilterClass(string $filterClass): self
     {
         $this->filterClass = $filterClass;
+
         return $this;
     }
 
     /**
      * @param  array  $data
-     * @return Model
+     * @return int
+     * @throws \Exception
      */
-    public function create(array $data): Model
+    public function create(array $data): int
     {
-        return $this->getQB()->create($data);
+        $entity = ($this->getQB()->create($data));
+        if ($entity instanceof Pivot) {
+            return DB::getPdo()->lastInsertId();
+        }
+        if (! $entity || ! $entity->getAttribute('id')) {
+            throw new Exception('Failed to create eloquent model');
+        }
+
+        return $entity->getAttribute('id');
     }
 
     /**
+     * @param  array  $withRelationships
      * @return Builder
      */
-    public function getQB(): Builder
+    public function getQB(array $withRelationships = []): Builder
     {
-        return $this->model->newQuery();
+        $qb = $this->model->newQuery();
+        if (! empty($withRelationships)) {
+            $qb->with($withRelationships);
+        }
+
+        return $qb;
     }
 
     /**
@@ -72,21 +90,24 @@ abstract class AbstractEloquentRepository implements RepositoryInterface, Eloque
     }
 
     /**
+     * @param  array  $withRelationships
      * @return Collection
      */
-    public function getAll(): Collection
+    public function getAll(array $withRelationships = []): Collection
     {
-        return $this->getQB()->get();
+        return $this->getQB($withRelationships)->get();
     }
 
     /**
-     * @param  array  $requestData
+     * @param  array  $data
+     * @param  array  $withRelationships
      * @return Collection|LengthAwarePaginator
      */
-    public function getByFilter(array $requestData): LengthAwarePaginator|Collection
+    public function getByFilter(array $data, array $withRelationships = []): LengthAwarePaginator | Collection
     {
-        $request = (new Request())->merge($requestData);
-        return $this->getQB()->filter($this->hasFilterClass() ? new $this->filterClass($request) : new BaseQueryFilter($request));
+        $request = (new Request())->merge($data);
+
+        return $this->getQB($withRelationships)->filter($this->hasFilterClass() ? new $this->filterClass($request) : new BaseQueryFilter($request));
     }
 
     /**
@@ -94,28 +115,26 @@ abstract class AbstractEloquentRepository implements RepositoryInterface, Eloque
      */
     public function hasFilterClass(): bool
     {
-        return !empty($this->filterClass);
+        return ! empty($this->filterClass);
     }
 
     /**
      * @param  array  $data
      * @param  int  $id
-     * @return Model
+     * @return bool
      */
-    public function update(array $data, int $id): Model
+    public function update(array $data, int $id): bool
     {
-        $model = $this->getById($id);
-        $model->update($data);
-
-        return $model;
+        return $this->getById($id)->update($data);
     }
 
     /**
      * @param  int  $id
-     * @return Model
+     * @param  array  $withRelationships
+     * @return Model|null
      */
-    public function getById(int $id): Model
+    public function getById(int $id, array $withRelationships = []): mixed
     {
-        return $this->getQB()->find($id);
+        return $this->getQB($withRelationships)->find($id);
     }
 }

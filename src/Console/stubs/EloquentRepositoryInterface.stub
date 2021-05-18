@@ -5,12 +5,13 @@ namespace App\Domain;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Interface EloquentRepositoryInterface
+ * Interface EloquentRepositoryInterface.
  */
 interface EloquentRepositoryInterface extends RepositoryInterface
 {
     /**
+     * @param  array  $withRelationships
      * @return Builder
      */
-    public function getQB(): Builder;
+    public function getQB(array $withRelationships): Builder;
 }
