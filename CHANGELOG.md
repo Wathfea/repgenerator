@@ -2,6 +2,14 @@
 
 All notable changes to `repgenerator` will be documented in this file
 
+## 1.1.3 - 2021-05-18
+- Missing use from web route added
+- AbstractEloquentrepository now uses pivot and relations
+- Api controller http header status codes added
+- BaseQueryFilter refactored, added default id search for all Resource
+- BaseTransactionController updated
+- Return types changed for better separation
+
 ## 1.1.2 - 2021-05-06
 - Upgrade to PHP 8
 - Added searching options for filtering

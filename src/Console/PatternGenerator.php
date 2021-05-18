@@ -306,7 +306,7 @@ class PatternGenerator extends Command
             $this->getStub('UpdateRequest')
         );
 
-        if (!file_exists($path = app_path('Domain/{$name}/Requests'))) {
+        if (!file_exists($path = app_path("Domain/{$name}/Requests"))) {
             mkdir($path, 0777, true);
         }
 
@@ -532,8 +532,9 @@ class PatternGenerator extends Command
      */
     protected function routes(string $name)
     {
-        File::append(base_path('routes/web.php'),
-            'Route::resource(\''.Str::plural(strtolower($name))."', {$name}Controller::class)->only(['index', 'create', 'edit']);\n\r");
+        File::append(base_path('routes/web.php'), '
+        use App\Http\Controllers\Web\\'.$name.'Controller;
+        Route::resource(\''.Str::plural(strtolower($name))."', {$name}Controller::class)->only(['index', 'create', 'edit']);\n\r");
 
         $this->generatedFiles[] = [
             'name' => "web.php",

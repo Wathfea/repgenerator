@@ -4,12 +4,19 @@ namespace App\Domain\{{modelName}}\Filters;
 
 use App\Domain\BaseQueryFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
  * Class {{modelName}}Filter
  */
 class {{modelName}}Filter extends BaseQueryFilter
 {
+    public function apply(Builder $builder): LengthAwarePaginator | Builder | Collection | array
+    {
+        return parent::apply($builder);
+    }
+
     /**
      * EXAMPLE!!!!!!!
      * @param  bool  $isActive
