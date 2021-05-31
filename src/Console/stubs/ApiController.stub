@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\Domain\{{modelName}}\Resources\{{modelName}}Resource;
-use App\Domain\{{modelName}}\Services\{{modelName}}Service;
 use App\Domain\{{modelName}}\Requests\{{modelName}}Request;
 use App\Domain\{{modelName}}\Requests\{{modelName}}UpdateRequest;
+use App\Domain\{{modelName}}\Resources\{{modelName}}Resource;
+use App\Domain\{{modelName}}\Services\{{modelName}}Service;
+use App\Http\Controllers\BaseTransactionController;
 use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use App\Http\Controllers\BaseTransactionController;
 
 
 /**

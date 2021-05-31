@@ -2,15 +2,15 @@
 
 namespace App\Domain\{{modelName}}\Repositories;
 
-use App\Domain\AbstractEloquentRepository;
-use App\Domain\{{modelName}}\Repositories\Interfaces\{{modelName}}RepositoryInterface;
-use App\Domain\EloquentRepositoryInterface;
-use App\Domain\RepositoryInterface;
+use App\Domain\AbstractEloquentModelRepository;
+use App\Domain\{{modelName}}\Repositories\Interfaces\{{modelName}}ModelRepositoryInterface;
+use App\Domain\EloquentModelRepositoryInterface;
+use App\Domain\ModelRepositoryInterface;
 
 /**
- * Class Eloquent{{modelName}}Repository
+ * Class Eloquent{{modelName}}ModelRepository
  */
-class Eloquent{{modelName}}Repository extends AbstractEloquentRepository implements RepositoryInterface, EloquentRepositoryInterface, {{modelName}}RepositoryInterface
+class Eloquent{{modelName}}ModelRepository extends AbstractEloquentModelRepository implements ModelRepositoryInterface, EloquentModelRepositoryInterface, {{modelName}}ModelRepositoryInterface
 {
 
 }

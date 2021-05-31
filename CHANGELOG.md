@@ -2,6 +2,10 @@
 
 All notable changes to `repgenerator` will be documented in this file
 
+## 1.1.4 - 2020-05-31
+- Added more abstract separation
+- Fixed some small bugs
+
 ## 1.1.3 - 2021-05-18
 - Missing use from web route added
 - AbstractEloquentrepository now uses pivot and relations

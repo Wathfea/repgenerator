@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * Class AbstractEloquentRepository.
  */
-abstract class AbstractEloquentRepository implements RepositoryInterface, EloquentRepositoryInterface
+abstract class AbstractEloquentModelRepository implements ModelRepositoryInterface, EloquentModelRepositoryInterface
 {
     /**
      * @var string
@@ -39,7 +39,7 @@ abstract class AbstractEloquentRepository implements RepositoryInterface, Eloque
 
     /**
      * @param  string  $filterClass
-     * @return AbstractEloquentRepository
+     * @return AbstractEloquentModelRepository
      */
     public function setFilterClass(string $filterClass): self
     {
@@ -131,7 +131,7 @@ abstract class AbstractEloquentRepository implements RepositoryInterface, Eloque
     /**
      * @param  int  $id
      * @param  array  $withRelationships
-     * @return Model|null
+     * @return mixed
      */
     public function getById(int $id, array $withRelationships = []): mixed
     {

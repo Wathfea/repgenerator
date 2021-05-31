@@ -20,8 +20,11 @@ class BaseTransactionController extends Controller
      * @return Response|View|AnonymousResourceCollection
      * @throws \Throwable
      */
-    public function callAction($method, $parameters): Response | View | AnonymousResourceCollection
+    public function callAction($method, $parameters): Response|View|AnonymousResourceCollection
     {
+        if (config('testing.env') == 'pipeline') {
+            return parent::callAction($method, $parameters);
+        }
         try {
             DB::beginTransaction();
             $result = parent::callAction($method, $parameters);
