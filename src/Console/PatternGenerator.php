@@ -378,10 +378,10 @@ class PatternGenerator extends Command
             mkdir($path, 0777, true);
         }
 
-        file_put_contents($path = app_path("Domain/{$name}/Repositories/Eloquent{$name}Repository.php"),
+        file_put_contents($path = app_path("Domain/{$name}/Repositories/Eloquent{$name}ModelRepository.php"),
             $eloquentTemplate);
         $this->generatedFiles[] = [
-            'name' => "Eloquent{$name}Repository.php",
+            'name' => "Eloquent{$name}ModelRepository.php",
             'location' => $path
         ];
     }
@@ -409,10 +409,10 @@ class PatternGenerator extends Command
             mkdir($path, 0777, true);
         }
 
-        file_put_contents($path = app_path("Domain/{$name}/Repositories/Interfaces/{$name}RepositoryInterface.php"),
+        file_put_contents($path = app_path("Domain/{$name}/Repositories/Interfaces/{$name}ModelRepositoryInterface.php"),
             $interfaceTemplate);
         $this->generatedFiles[] = [
-            'name' => "{$name}RepositoryInterface.php",
+            'name' => "{$name}ModelRepositoryInterface.php",
             'location' => $path
         ];
     }
