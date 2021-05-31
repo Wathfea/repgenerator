@@ -122,7 +122,7 @@ class PatternGenerator extends Command
             mkdir($path, 0777, true);
         }
 
-        //Copy static files
+        //BaseTransactionController
         $baseController = $this->getStub('BaseTransactionController');
         if (!file_exists($path = app_path("Http/Controllers/BaseTransactionController.php"))) {
             file_put_contents($path, $baseController);
@@ -133,6 +133,7 @@ class PatternGenerator extends Command
         }
         $this->info('Base Controller is ready!');
 
+        //BaseModel
         $baseModel = $this->getStub('BaseModel');
         if (!file_exists($path = app_path("Models/BaseModel.php"))) {
             file_put_contents($path, $baseModel);
@@ -143,45 +144,82 @@ class PatternGenerator extends Command
         }
         $this->info('Base Model is ready!');
 
-        $abstractEloquentRepository = $this->getStub('AbstractEloquentRepository');
-        if (!file_exists($path = app_path("Domain/AbstractEloquentRepository.php"))) {
-            file_put_contents($path, $abstractEloquentRepository);
+        //AbstractEloquentModelRepository
+        $abstractEloquentModelRepository = $this->getStub('AbstractEloquentModelRepository');
+        if (!file_exists($path = app_path("Domain/AbstractEloquentModelRepository.php"))) {
+            file_put_contents($path, $abstractEloquentModelRepository);
             $this->generatedFiles[] = [
-                'name' => 'AbstractEloquentRepository.php',
+                'name' => 'AbstractEloquentModelRepository.php',
                 'location' => $path
             ];
         }
-        $this->info('AbstractEloquentRepository is ready!');
+        $this->info('AbstractEloquentModelRepository is ready!');
 
+        //AbstractEloquentPivotRepository
+        $abstractEloquentPivotRepository = $this->getStub('AbstractEloquentPivotRepository');
+        if (!file_exists($path = app_path("Domain/AbstractEloquentPivotRepository.php"))) {
+            file_put_contents($path, $abstractEloquentPivotRepository);
+            $this->generatedFiles[] = [
+                'name' => 'AbstractEloquentPivotRepository.php',
+                'location' => $path
+            ];
+        }
+        $this->info('AbstractEloquentPivotRepository is ready!');
+
+        //BaseQueryFilter
         $baseQueryFilter = $this->getStub('BaseQueryFilter');
-        if (!file_exists($path = app_path("Domain/AbstractQueryFilter.php"))) {
+        if (!file_exists($path = app_path("Domain/BaseQueryFilter.php"))) {
             file_put_contents($path, $baseQueryFilter);
             $this->generatedFiles[] = [
                 'name' => 'BaseQueryFilter.php',
                 'location' => $path
             ];
         }
-        $this->info('AbstractQueryFilter is ready!');
+        $this->info('BaseQueryFilter is ready!');
 
-        $eloquentRepositoryInterface = $this->getStub('EloquentRepositoryInterface');
-        if (!file_exists($path = app_path("Domain/EloquentRepositoryInterface.php"))) {
-            file_put_contents($path, $eloquentRepositoryInterface);
+        //EloquentModelRepositoryInterface
+        $eloquentModelRepositoryInterface = $this->getStub('EloquentModelRepositoryInterface');
+        if (!file_exists($path = app_path("Domain/EloquentModelRepositoryInterface.php"))) {
+            file_put_contents($path, $eloquentModelRepositoryInterface);
             $this->generatedFiles[] = [
-                'name' => 'EloquentRepositoryInterface.php',
+                'name' => 'EloquentModelRepositoryInterface.php',
                 'location' => $path
             ];
         }
-        $this->info('EloquentRepositoryInterface is ready!');
+        $this->info('EloquentModelRepositoryInterface is ready!');
 
-        $repositoryInterface = $this->getStub('RepositoryInterface');
-        if (!file_exists($path = app_path("Domain/RepositoryInterface.php"))) {
-            file_put_contents($path, $repositoryInterface);
+        //EloquentPivotRepositoryInterface
+        $eloquentPivotRepositoryInterface = $this->getStub('EloquentPivotRepositoryInterface');
+        if (!file_exists($path = app_path("Domain/EloquentPivotRepositoryInterface.php"))) {
+            file_put_contents($path, $eloquentPivotRepositoryInterface);
             $this->generatedFiles[] = [
-                'name' => 'RepositoryInterface.php',
+                'name' => 'EloquentPivotRepositoryInterface.php',
                 'location' => $path
             ];
         }
-        $this->info('RepositoryInterface is ready!');
+        $this->info('EloquentPivotRepositoryInterface is ready!');
+
+        //ModelRepositoryInterface
+        $modelRepositoryInterface = $this->getStub('ModelRepositoryInterface');
+        if (!file_exists($path = app_path("Domain/ModelRepositoryInterface.php"))) {
+            file_put_contents($path, $modelRepositoryInterface);
+            $this->generatedFiles[] = [
+                'name' => 'ModelRepositoryInterface.php',
+                'location' => $path
+            ];
+        }
+        $this->info('ModelRepositoryInterface is ready!');
+
+        //PivotRepositoryInterface
+        $pivotRepositoryInterface = $this->getStub('PivotRepositoryInterface');
+        if (!file_exists($path = app_path("Domain/PivotRepositoryInterface.php"))) {
+            file_put_contents($path, $pivotRepositoryInterface);
+            $this->generatedFiles[] = [
+                'name' => 'PivotRepositoryInterface.php',
+                'location' => $path
+            ];
+        }
+        $this->info('PivotRepositoryInterface is ready!');
     }
 
     /**

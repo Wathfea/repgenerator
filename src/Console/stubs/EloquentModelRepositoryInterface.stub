@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 /**
  * Interface EloquentRepositoryInterface.
  */
-interface EloquentRepositoryInterface extends RepositoryInterface
+interface EloquentModelRepositoryInterface extends ModelRepositoryInterface
 {
     /**
      * @param  array  $withRelationships

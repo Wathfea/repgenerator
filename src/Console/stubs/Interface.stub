@@ -3,12 +3,12 @@
 namespace App\Domain\{{modelName}}\Repositories\Interfaces;
 
 
-use App\Domain\RepositoryInterface;
+use App\Domain\ModelRepositoryInterface;
 
 /**
- * Interface {{modelName}}RepositoryInterface.
+ * Interface {{modelName}}ModelRepositoryInterface.
  */
-interface {{modelName}}RepositoryInterface extends RepositoryInterface
+interface {{modelName}}ModelRepositoryInterface extends ModelRepositoryInterface
 {
 
 }

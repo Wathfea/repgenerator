@@ -3,7 +3,7 @@
 namespace App\Domain\{{modelName}}\Providers;
 
 use App\Domain\{{modelName}}\Filters\{{modelName}}Filter;
-use App\Domain\{{modelName}}\Repositories\Eloquent{{modelName}}Repository;
+use App\Domain\{{modelName}}\Repositories\Eloquent{{modelName}}ModelRepository;
 use App\Domain\{{modelName}}\Services\{{modelName}}Service;
 use App\Http\Controllers\Api\v1\{{modelName}}ApiController;
 use App\Http\Controllers\Web\{{modelName}}Controller;
@@ -28,13 +28,13 @@ class {{modelName}}ServiceProvider extends ServiceProvider
                 ]);
         });
 
-        $this->app->singleton(Eloquent{{modelName}}Repository::class, function () {
-            return (new Eloquent{{modelName}}Repository(app({{modelName}}::class)))
+        $this->app->singleton(Eloquent{{modelName}}ModelRepository::class, function () {
+            return (new Eloquent{{modelName}}ModelRepository(app({{modelName}}::class)))
                 ->setFilterClass({{modelName}}Filter::class);
         });
 
         $this->app->singleton({{modelName}}Service::class, function () {
-            return new {{modelName}}Service(app(Eloquent{{modelName}}Repository::class));
+            return new {{modelName}}Service(app(Eloquent{{modelName}}ModelRepository::class));
         });
 
         $this->app->singleton({{modelName}}Controller::class, function () {

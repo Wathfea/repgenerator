@@ -2,10 +2,9 @@
 
 namespace App\Domain\{{modelName}}\Services;
 
-use App\Domain\{{modelName}}\Repositories\Interfaces\{{modelName}}RepositoryInterface;
-use App\Models\{{modelName}};
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Domain\{{modelName}}\Repositories\Interfaces\{{modelName}}ModelRepositoryInterface;
 use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
  * Class {{modelName}}Service
@@ -14,9 +13,9 @@ class {{modelName}}Service
 {
     /**
      * {{modelName}}Service constructor.
-     * @param  {{modelName}}RepositoryInterface  ${{modelNameSingularLowerCase}}Repository
+     * @param  {{modelName}}ModelRepositoryInterface  ${{modelNameSingularLowerCase}}Repository
      */
-    public function __construct(private {{modelName}}RepositoryInterface ${{modelNameSingularLowerCase}}Repository) {
+    public function __construct(private {{modelName}}ModelRepositoryInterface ${{modelNameSingularLowerCase}}Repository) {
     }
 
 
@@ -30,11 +29,12 @@ class {{modelName}}Service
 
     /**
      * @param  array  $requestData
+     * @param  array  $withRelationships
      * @return Collection|LengthAwarePaginator
      */
-    public function getByFilter(array $requestData): LengthAwarePaginator|Collection
+    public function getByFilter(array $requestData, array $withRelationships = []): LengthAwarePaginator | Collection
     {
-        return $this->{{modelNameSingularLowerCase}}Repository->getByFilter($requestData);
+        return $this->{{modelNameSingularLowerCase}}Repository->getByFilter($requestData, $withRelationships);
     }
 
     /**
@@ -70,7 +70,7 @@ class {{modelName}}Service
      * @param  int  $id
      * @return mixed
      */
-    public function get{{modelName}}ById(int $id): {mixed
+    public function get{{modelName}}ById(int $id): mixed
     {
         return $this->{{modelNameSingularLowerCase}}Repository->getById($id);
     }
