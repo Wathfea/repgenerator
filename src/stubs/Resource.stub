@@ -1,0 +1,22 @@
+<?php
+
+namespace App\Domain\{{modelName}}\Resources;
+
+use Illuminate\Http\Resources\Json\JsonResource;
+
+/**
+ * Class {{modelName}}Resource
+ */
+class {{modelName}}Resource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    public function toArray($request): array
+    {
+        return parent::toArray($request);
+    }
+}

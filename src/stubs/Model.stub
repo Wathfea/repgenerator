@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Domain\{{modelName}}\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Kblais\QueryFilter\Filterable;
+use App\Abstraction\Models\BaseModel;
+
+class {{modelName}} extends BaseModel
+{
+    use HasFactory, Filterable;
+
+    /**
+     * The attributes that aren't mass assignable.
+     *
+     * @var string[]|bool
+     */
+    protected $guarded = [];
+}

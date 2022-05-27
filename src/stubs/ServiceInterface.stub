@@ -1,0 +1,14 @@
+<?php
+
+namespace App\Domain\{{modelName}}\Services;
+
+use App\Abstraction\Repository\Service\Model\ModelRepositoryServiceInterface;
+use App\Abstraction\Repository\Service\RepositoryServiceInterface;
+
+/**
+ * Class {{modelName}}ServiceInterface.
+ */
+interface {{modelName}}ServiceInterface extends RepositoryServiceInterface, ModelRepositoryServiceInterface
+{
+
+}

@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Domain\{{modelName}}\Controllers\Api\v1;
+
+
+use App\Abstraction\CRUD\Enums\CRUDConfigType;
+use App\Abstraction\CRUD\Controllers\AbstractApiReadOnlyCRUDController;
+use App\Abstraction\CRUD\Controllers\CRUDControllerInterface;
+use App\Abstraction\CRUD\Controllers\ApiCRUDControllerWriteModifyInterface;
+use App\Abstraction\CRUD\Controllers\ApiCRUDControllerReadOnlyInterface;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+/**
+ * Class {{modelName}}ApiController.
+ */
+class {{modelName}}ApiController extends AbstractApiReadOnlyCRUDController implements CRUDControllerInterface, ApiCRUDControllerReadOnlyInterface
+{
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $this->setCRUDConfig( [
+            CRUDConfigType::LOAD => []
+        ]);
+        return parent::index($request);
+    }
+}
