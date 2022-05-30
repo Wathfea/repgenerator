@@ -15,7 +15,7 @@ class IndexColumnModifier
      */
     public function chainIndex(Method $method, array $column): Method
     {
-        if (key_exists('index', $column)) {
+        if (key_exists('index', $column) && $column['index'] != null) {
             $method->chain($column['index']['type']);
         }
 

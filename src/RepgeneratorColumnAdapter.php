@@ -41,4 +41,26 @@ class RepgeneratorColumnAdapter
     ) {
 
     }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return [
+            'name' => $this->name,
+            'type' => $this->type,
+            'aic' => $this->aic,
+            'nullable' => $this->nullable,
+            'cascade' => $this->cascade,
+            'length' => $this->length,
+            'comment' => $this->comment,
+            'precision' => $this->precision,
+            'scale' => $this->scale,
+            'unsigned' => $this->unsigned,
+            'values' => $this->values,
+            'default' => $this->default,
+            'index' => $this->index,
+        ];
+    }
 }

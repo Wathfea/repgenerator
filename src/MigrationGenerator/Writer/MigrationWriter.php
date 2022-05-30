@@ -35,7 +35,7 @@ class MigrationWriter
             'use Illuminate\Support\Facades\Schema;',
         ]);
 
-        dd($this->migrationStub->populateStub($stub, $use, $up->toString(), $down->toString()));
+        //dd($this->migrationStub->populateStub($stub, $use, $up->toString(), $down->toString()));
 
         File::put($path, $this->migrationStub->populateStub($stub, $use, $up->toString(), $down->toString()));
 

@@ -24,6 +24,8 @@
                     clonedColumn.querySelector('.columnUnsigneds').checked = false;
                     columnsContainer.appendChild(clonedColumn);
                     window.setupDisabledColumns(clonedColumn);
+
+                    document.getElementById('loop-counter').value = loopCounter + 1;
                 } else {
                     alert('Failed to clone column');
                 }
@@ -141,12 +143,12 @@
                     <div class="sm:col-span-1">
                         <div class="mt-3">
                             <div class="relative flex items-start">
-                                <select name="columnIndexes[{{ $loop->index }}]"  class="columnIndexes block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md" multiple>
-                                        <option value="primary">PRIMARY</option>
-                                        <option value="unique">UNIQUE</option>
-                                        <option value="index">INDEX</option>
-                                        <option value="fulltext">FULLTEXT</option>
-                                        <option value="spatial">SPATIAL</option>
+                                <select name="columnIndexes[{{ $loop->index }}][]"  class="columnIndexes block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md" multiple>
+                                        <option value="primary" {{  is_array($data['index']) ? in_array('primary', $data['index']) ? 'selected' : '' : ''}}>PRIMARY</option>
+                                        <option value="unique" {{  is_array($data['index']) ? in_array('unique', $data['index']) ? 'selected' : '' : ''}}>UNIQUE</option>
+                                        <option value="index" {{  is_array($data['index']) ? in_array('index', $data['index']) ? 'selected' : '' : ''}}>INDEX</option>
+                                        <option value="fulltext" {{  is_array($data['index']) ? in_array('fulltext', $data['index']) ? 'selected' : '' : ''}}>FULLTEXT</option>
+                                        <option value="spatial" {{  is_array($data['index']) ? in_array('spatial', $data['index']) ? 'selected' : '' : ''}}>SPATIAL</option>
                                 </select>
                             </div>
                         </div>
@@ -245,9 +247,8 @@
             </div>
             @php($counter++)
         @endforeach
-        <input type="text" value="{{$counter}}" id="loop-counter">
-        <input type="text" name="name" value="{{ $data['name'] }}">
-        <input type="text" name="model" value="{{ $data['model'] }}">
+        <input type="hidden" value="{{$counter}}" id="loop-counter">
+        @csrf
     </div>
     <button onclick="window.addColumn()" type="button" class="inline-flex w-full justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
         Add column

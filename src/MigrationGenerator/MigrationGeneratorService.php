@@ -80,7 +80,7 @@ class MigrationGeneratorService
         $tableBlueprint = new TableBlueprint();
 
         foreach ($columns as $column) {
-            $method = $this->columnGenerator->generate($table, $column);
+            $method = $this->columnGenerator->generate($table, $column->toArray());
             $tableBlueprint->setMethod($method);
         }
 
@@ -202,7 +202,7 @@ class MigrationGeneratorService
                 'scale' => '',
                 'default' => '',
                 'auto_increment' => 1,
-                'nullable' => 1,
+                'nullable' => 0,
                 'reference' => '',
                 'foreign' => '',
                 'cascade' => '',

@@ -31,7 +31,7 @@ class RepgeneratorService
         $fh = fopen($file, 'r');
         while(!feof($fh)){
             $fr = fread($fh, 8192);
-            $count += substr_count($fr, 'a');
+            $count += strlen($fr);
         }
         fclose($fh);
 
@@ -44,10 +44,19 @@ class RepgeneratorService
      * @param  bool  $generatePivot
      * @param  false  $readOnly
      * @param  array  $columns
+     * @param  array  $foreigns
      * @param $callback
      * @param  false  $fromConsole
      */
-    public function generate(string $name, bool $generateModel, bool $generatePivot, bool $readOnly, array $columns, $callback, bool $fromConsole = false
+    public function generate(
+        string $name,
+        bool $generateModel,
+        bool $generatePivot,
+        bool $readOnly,
+        array $columns,
+        array $foreigns,
+        $callback,
+        bool $fromConsole = false
     ) {
 
         $this->createDirectories();
@@ -90,7 +99,7 @@ class RepgeneratorService
         $this->resource($name);
         $callback('Resource is ready!');
 
-        $this->filter($name, $columns);
+        $this->filter($name, $columns, $foreigns);
         $callback('Filter is ready!');
 
         $this->views($name);
@@ -110,6 +119,13 @@ class RepgeneratorService
         $str = "App\Domain\/".$name."\Providers\/".$name."ServiceProvider::class,";
         $str = str_replace('/', '', $str);
         $callback($str);
+
+
+        $callback("Code generation has saved you from typing at least {$this->charsCount} characters");
+        $mins = floor(($this->charsCount / 5) / 25);
+        $hours = floor($mins / 60);
+
+        $callback("If we count an avarage 5 char word and an avarage 25 WPM we saved you around {$mins} minutes -> {$hours} hours");
     }
 
     /**
@@ -583,24 +599,28 @@ class RepgeneratorService
 
     /**
      * @param  string  $name
+     * @param  array  $columns
+     * @param  array  $foreigns
      */
-    private function filter(string $name, array $columns)
+    private function filter(string $name, array $columns, array $foreigns)
     {
         $columnFunctions = '';
         /** @var RepgeneratorColumnAdapter $column */
         foreach ( $columns as $column ) {
-            if ( $column->foreign ) {
-                $supportedForeignColumns = [
-                    'id' => 'int'
-                ];
-                foreach ( $supportedForeignColumns as $supportedForeignColumnName => $supportedForeignColumnType ) {
-                    $stub = $this->getFilterStub('Relationship');
-                    $replacements = [
-                        '{{foreign}}' => Str::singular($column->foreign),
-                        '{{foreignColumnName}}' => ucfirst($supportedForeignColumnName),
-                        '{{foreignColumnType}}' => $supportedForeignColumnType
+            foreach ($foreigns as $foreign) {
+                if($column->name == $foreign['column']) {
+                    $supportedForeignColumns = [
+                        'id' => 'int'
                     ];
-                    $columnFunctions .= str_replace(array_keys($replacements), array_values($replacements), $stub);
+                    foreach ( $supportedForeignColumns as $supportedForeignColumnName => $supportedForeignColumnType ) {
+                        $stub = $this->getFilterStub('Relationship');
+                        $replacements = [
+                            '{{foreign}}' => Str::singular($foreign['column']),
+                            '{{foreignColumnName}}' => ucfirst($supportedForeignColumnName),
+                            '{{foreignColumnType}}' => $supportedForeignColumnType
+                        ];
+                        $columnFunctions .= str_replace(array_keys($replacements), array_values($replacements), $stub);
+                    }
                 }
             }
         }

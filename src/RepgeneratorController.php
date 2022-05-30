@@ -62,7 +62,11 @@ class RepgeneratorController extends Controller
         $indexes = [
             [
                 'type' => 'unique',
-                'columns' => ['email']
+                'columns' => ['email','teszt'] //Composite index
+            ],
+            [
+                'type' => 'primary',
+                'columns' => ['primary_teszt'] //Normál index
             ],
         ];
 
@@ -96,9 +100,9 @@ class RepgeneratorController extends Controller
         $service = app(RepgeneratorService::class);
         $messages = [];
         $columns = [];
+        $foreigns = [];
 
         if ( $request->has('columnNames') ) {
-
 
             $columnTypes = $request->get('columnTypes');
             $columnAutoIncrements = $request->get('columnAutoIncrements', []);
@@ -112,10 +116,10 @@ class RepgeneratorController extends Controller
             $columnValues = $request->get('columnValues',[]);
             $columnDefaults = $request->get('columnDefaults', []);
             $columnIndexes = $request->get('columnIndexes', []);
-
-            //@Todo
             $columnReferences = $request->get('columnReferences', []);
             $columnForeigns = $request->get('columnForeigns', []);
+
+            //TODO
             $columnSearchables = $request->get('columnSearchables', []);
 
             foreach ( $request->get('columnNames') as $index => $columName ) {
@@ -129,7 +133,26 @@ class RepgeneratorController extends Controller
                 $unsigned = key_exists($index,$columnUnsigneds) ? $columnUnsigneds[$index] : false;
                 $value = key_exists($index,$columnValues) ? $columnValues[$index] : null;
                 $default = key_exists($index,$columnDefaults) ? $columnDefaults[$index] : null;
-                $index = key_exists($index,$columnIndexes) ? $columnIndexes[$index] : null;
+                $indexes = key_exists($index,$columnIndexes) ? $columnIndexes[$index] : null;
+                $foreign = key_exists($index,$columnForeigns) ? $columnForeigns[$index] : null;
+                $reference = key_exists($index,$columnReferences) ? $columnReferences[$index] : null;
+
+                $columnIndex = [];
+                if($indexes != null) {
+                    foreach ($indexes as $cIndex) {
+                        $columnIndex['type'] = $cIndex;
+                    }
+                }
+
+                if($foreign) {
+                    $foreigns[] = [
+                        'column' => $columName,
+                        'reference' => $reference,
+                        'on' => $foreign,
+                        'onUpdate' => $cascades ? 'cascade' : null,
+                        'onDelete' => $cascades ? 'cascade' : null,
+                    ];
+                }
 
                 $columns[] = new RepgeneratorColumnAdapter(
                     $columName,
@@ -144,24 +167,41 @@ class RepgeneratorController extends Controller
                     $unsigned,
                     $value,
                     $default,
-                    $index
+                    $columnIndex //Ezzel chainelt index jön létre, nem alkalmas composite felvételre később ezt ha bekerül a composite külön kell kezelni majd
                 );
             }
         }
-
-        dd($columns);
-
-        $service->generate($request->get('name'), $request->has('model'), $request->has('pivot'), $request->has('readonly'), $columns, function($msg) use (&$messages) {
-            $messages[] = $msg;
-        });
 
         /* Migration Creation */
         $table = app(Table::class);
         $table->setName($request->get('name'));
 
-
         $this->migrationGeneratorService->setup(config('pentacom.migration_target_path'), Carbon::now());
+        //Itt az indexes lenne használható composite index létrehozásra de az induláshoz ezt még nem rakjuk bele
+        // Formátum
+        //        $indexes = [
+        //            [
+        //                'type' => 'unique',
+        //                'columns' => ['email','teszt'] //Composite index
+        //            ],
+        //            [
+        //                'type' => 'primary',
+        //                'columns' => ['primary_teszt'] //Normál index
+        //            ],
+        //        ];
+        $indexes = [];
         $this->migrationGeneratorService->generateMigrationFiles($table, $columns, $indexes, $foreigns);
+
+        $service->generate(
+            $request->get('name'),
+            $request->session()->has('model'),
+            $request->session()->has('pivot'),
+            $request->session()->has('readonly'),
+            $columns,
+            $foreigns,
+            function($msg) use (&$messages) {
+                $messages[] = $msg;
+            });
 
         return view('repgenerator-wizzard::finish', [
             'messages' => $messages
@@ -212,7 +252,7 @@ class RepgeneratorController extends Controller
         $data = [];
         $options = [];
 
-        if ( $stepNumber == 1 ) {
+        if ( $stepNumber == 1) {
             $options = [
                 'Model' => 'Generate Eloquent Model',
                 'Pivot' => 'Is this a pivot model?',
@@ -258,7 +298,8 @@ class RepgeneratorController extends Controller
                     if ( $request->has($columnFieldName) && key_exists($index, $request->get($columnFieldName)) ) {
                         if($request->get($columnFieldName)[$index] == 'on') {
                             $data['columns'][$columnName][$columnFieldKey] = 1;
-                        } else {
+                        }
+                        else {
                             $data['columns'][$columnName][$columnFieldKey] = $request->get($columnFieldName)[$index];
                         }
                     } else {

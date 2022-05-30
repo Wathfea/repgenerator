@@ -32,9 +32,9 @@ class RepgeneratorServiceProvider extends ServiceProvider
             $this->loadViewsFrom(__DIR__.'/resources/views', 'repgenerator');
             $this->loadViewsFrom(__DIR__.'/resources/views/wizzard', 'repgenerator-wizzard');
 
-            $this->app['router']->get('repwizz', [RepgeneratorController::class, 'wizzard']);
-            $this->app['router']->get('repwizz/step/{step}', [RepgeneratorController::class, 'wizzardStep'])->name('repwizz.step');
-            $this->app['router']->post('repwizz/finish', [RepgeneratorController::class, 'wizzardInstall'])->name('repwizz.finish');
+            $this->app['router']->middleware('web')->get('repwizz', [RepgeneratorController::class, 'wizzard']);
+            $this->app['router']->middleware('web')->get('repwizz/step/{step}', [RepgeneratorController::class, 'wizzardStep'])->name('repwizz.step');
+            $this->app['router']->middleware('web')->post('repwizz/finish', [RepgeneratorController::class, 'wizzardInstall'])->name('repwizz.finish');
 
             $this->app['router']->get('repwizz/migration', [RepgeneratorController::class, 'migrationTesting'])->name('repwizz.migrationTest');
 
