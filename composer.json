@@ -24,7 +24,6 @@
         "php": "^8.0",
         "laravel/framework": "9.*",
         "kblais/query-filter": "^1.7",
-        "bensampo/laravel-enum": "^4.1",
         "doctrine/dbal": "^3.3"
     },
     "require-dev": {
