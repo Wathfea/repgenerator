@@ -120,8 +120,8 @@ class RepgeneratorController extends Controller
                     'column' => $data['name'],
                     'reference' => $data['reference'],
                     'on' => $data['foreign'],
-                    'onUpdate' => $data['cascades'] ? 'cascade' : null,
-                    'onDelete' => $data['cascades'] ? 'cascade' : null,
+                    'onUpdate' => $data['cascade'] ? 'cascade' : null,
+                    'onDelete' => $data['cascade'] ? 'cascade' : null,
                 ];
             }
         }
