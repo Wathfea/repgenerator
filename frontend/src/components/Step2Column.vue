@@ -197,7 +197,7 @@ const isPrecisionSettable = () => {
                     <div class="col-span-5">
                         <select :disabled="!data.reference" v-model="data.foreign" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                             <option></option>
-                            <option v-for="column in data.reference.columns">{{ column }}</option>
+                            <option v-for="column in data.reference.columns" :value="column">{{ column }}</option>
                         </select>
                     </div>
                 </div>
