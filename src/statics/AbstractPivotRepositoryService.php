@@ -1,70 +1,93 @@
 <?php
 
-namespace App\Abstraction\Repository\Service\Pivot;
+namespace App\Abstraction\Repository;
 
-use App\Abstraction\Repository\PivotRepositoryInterface;
-use App\Abstraction\Repository\RepositoryInterface;
-use App\Abstraction\Repository\Service\AbstractRepositoryService;
-use App\Abstraction\Repository\Service\RepositoryServiceInterface;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
+use JetBrains\PhpStorm\Pure;
 
+/**
+ * Class AbstractEloquentPivotModelRepository.
+ */
 abstract class AbstractPivotRepositoryService extends AbstractRepositoryService implements RepositoryServiceInterface, PivotRepositoryServiceInterface
 {
     /**
+     * AbstractEloquentRepository constructor.
+     * @param  Pivot  $pivot
+     * @param  Model  $parent
+     * @param  string  $parentIdColumName
+     * @param  string  $relationIdColumnName
+     * @param  string  $relation
+     */
+    #[Pure]
+    public function __construct(
+        private Pivot $pivot,
+        private Model $parent,
+        private string $parentIdColumName,
+        private string $relationIdColumnName,
+        private string $relation
+    ) {
+        parent::__construct($pivot);
+    }
+
+    /**
      * @param  int  $parentModelId
-     * @param  int  $childModelId
+     * @param  int  $relationshipModelId
      * @param  array  $data
      * @return bool
      */
-    public function attach(int $parentModelId, int $childModelId, array $data = []): bool
+    public function attach(int $parentModelId, int $relationshipModelId, array $data = []): bool
     {
-        return $this->getRepository()->attach($parentModelId, $childModelId, $data);
-    }
+        $this->getRelation($parentModelId)->attach($relationshipModelId, $data);
 
-    /**
-     * @return PivotRepositoryInterface
-     */
-    public function getRepository(): RepositoryInterface
-    {
-        return $this->repository;
+        return true;
     }
 
     /**
      * @param  int  $parentModelId
-     * @param  int  $childModelId
-     * @return bool
+     * @return BelongsToMany
      */
-    public function detach(int $parentModelId, int $childModelId): bool
+    private function getRelation(int $parentModelId): BelongsToMany
     {
-        return $this->getRepository()->detach($parentModelId, $childModelId);
+        /** @var Model $model */
+        $model = $this->parent->newQuery()->find($parentModelId);
+        $relation = Str::camel($this->relation);
+
+        return $model->$relation();
     }
 
     /**
-     * @param  int  $id
+     * @param  int  $parentModelId
+     * @param  int  $relationshipModelId
+     * @return bool
      */
-    public function exists(int $id)
+    public function detach(int $parentModelId, int $relationshipModelId): bool
     {
-        abort_unless($this->repository->isResourceExists($id), 404, 'Shipping not found');
+        return $this->getRelation($parentModelId)->detach($relationshipModelId) > 0;
     }
 
     /**
      * @param  int  $parentModelId
      * @return Collection
      */
-    public function getById(int $parentModelId): Collection
+    public function get(int $parentModelId): Collection
     {
-        return $this->getRepository()->get($parentModelId);
+        return $this->pivot->newQuery()->where($this->parentIdColumName, $parentModelId)->get();
     }
 
     /**
      * @param  int  $parentModelId
-     * @param  int  $childModelId
-     * @return Pivot|null
+     * @param  int  $relationModelId
+     * @return Model|null
      */
-    public function getSpecific(int $parentModelId, int $childModelId): Pivot|null
+    public function getSpecific(int $parentModelId, int $relationModelId): Model|null
     {
-        return $this->getRepository()->getSpecific($parentModelId, $childModelId);
+        return $this->pivot->newQuery()->where($this->parentIdColumName, $parentModelId)
+            ->where($this->relationIdColumnName, $relationModelId)
+            ->first();
     }
 
     /**
@@ -74,17 +97,19 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
      */
     public function sync(int $parentModelId, array $relations): bool
     {
-        return $this->getRepository()->sync($parentModelId, $relations);
+        $this->getRelation($parentModelId)->sync($relations);
+
+        return true;
     }
 
     /**
      * @param  int  $parentModelId
-     * @param  int  $childModelId
+     * @param  int  $relationModelId
      * @param  array  $data
      * @return bool
      */
-    public function update(int $parentModelId, int $childModelId, array $data = []): bool
+    public function update(int $parentModelId, int $relationModelId, array $data = []): bool
     {
-        return $this->getRepository()->update($parentModelId, $childModelId, $data);
+        return $this->getRelation($parentModelId)->updateExistingPivot($relationModelId, $data) > 0;
     }
 }

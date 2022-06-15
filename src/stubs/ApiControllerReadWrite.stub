@@ -2,29 +2,24 @@
 
 namespace App\Domain\{{modelName}}\Controllers\Api\v1;
 
-
-use App\Abstraction\CRUD\Enums\CRUDConfigType;
-use App\Abstraction\CRUD\Controllers\AbstractApiReadWriteCRUDController;
-use App\Abstraction\CRUD\Controllers\CRUDControllerInterface;
-use App\Abstraction\CRUD\Controllers\ApiCRUDControllerReadWriteInterface;
-use App\Abstraction\CRUD\Controllers\ApiCRUDControllerReadOnlyInterface;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use App\Abstraction\Controllers\AbstractApiReadWriteCRUDController;
+use App\Abstraction\Controllers\CRUDControllerInterface;
+use App\Abstraction\Controllers\ApiCRUDControllerReadWriteInterface;
+use App\Abstraction\Controllers\ApiCRUDControllerReadOnlyInterface;
+use App\Domain\{{modelName}}\Services\{{modelName}}Service;
+use App\Abstraction\Repository\HasRepositoryService;
 
 /**
  * Class {{modelName}}ApiController.
  */
 class {{modelName}}ApiController extends AbstractApiReadWriteCRUDController implements CRUDControllerInterface, ApiCRUDControllerReadWriteInterface, ApiCRUDControllerReadOnlyInterface
 {
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function index(Request $request): JsonResponse
+    public function getService(): HasRepositoryService
     {
-        $this->setCRUDConfig( [
-            CRUDConfigType::LOAD => []
-        ]);
-        return parent::index($request);
+        return $this->service;
+    }
+
+    public function __construct(private {{modelName}}Service $service)
+    {
     }
 }

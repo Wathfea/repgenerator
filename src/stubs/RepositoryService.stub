@@ -1,0 +1,15 @@
+<?php
+
+namespace App\Domain\{{modelName}}\Repositories;
+
+use App\Abstraction\Repository\Abstract{{modelType}}RepositoryService;
+use App\Abstraction\Repository\RepositoryServiceInterface;
+use App\Abstraction\Repository\{{modelType}}RepositoryServiceInterface;
+
+/**
+ * Class {{modelName}}Service.
+ */
+class {{modelName}}RepositoryService extends Abstract{{modelType}}RepositoryService implements RepositoryServiceInterface, {{modelType}}RepositoryServiceInterface
+{
+
+}

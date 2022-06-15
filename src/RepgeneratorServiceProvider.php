@@ -2,8 +2,6 @@
 
 namespace Pentacom\Repgenerator;
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Session;
 use Pentacom\Repgenerator\Console\MigrationGenerator;
 use Illuminate\Support\ServiceProvider;
 use Pentacom\Repgenerator\Console\PatternGenerator;
@@ -29,14 +27,9 @@ class RepgeneratorServiceProvider extends ServiceProvider
         }
 
         if ( config('app.env') === 'local' ) {
-            $this->loadViewsFrom(__DIR__.'/resources/views', 'repgenerator');
-            $this->loadViewsFrom(__DIR__.'/resources/views/wizzard', 'repgenerator-wizzard');
-
-            $this->app['router']->middleware('web')->get('repwizz', [RepgeneratorController::class, 'wizzard']);
-            $this->app['router']->middleware('web')->get('repwizz/step/{step}', [RepgeneratorController::class, 'wizzardStep'])->name('repwizz.step');
-            $this->app['router']->middleware('web')->post('repwizz/finish', [RepgeneratorController::class, 'wizzardInstall'])->name('repwizz.finish');
-
-            $this->app['router']->get('repwizz/migration', [RepgeneratorController::class, 'migrationTesting'])->name('repwizz.migrationTest');
+            $this->app['router']->get('repgenerator/tables', [RepgeneratorController::class, 'getTables'])->name('repgenerator.tables');
+            $this->app['router']->post('repgenerator/generate', [RepgeneratorController::class, 'generate'])->name('repgenerator.generate');
+            $this->app['router']->get('repgenerator/migration', [RepgeneratorController::class, 'migrationTesting'])->name('repwizz.migrationTest');
 
         }
     }

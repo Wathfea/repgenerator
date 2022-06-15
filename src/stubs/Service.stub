@@ -2,22 +2,21 @@
 
 namespace App\Domain\{{modelName}}\Services;
 
-use App\Abstraction\Repository\RepositoryInterface;
-use App\Abstraction\Repository\Service\{{modelType}}\Abstract{{modelType}}RepositoryService;
-use App\Abstraction\Repository\Service\{{modelType}}\{{modelType}}RepositoryServiceInterface;
-use App\Abstraction\Repository\Service\RepositoryServiceInterface;
-use App\Domain\{{modelName}}\Repositories\Interfaces\{{modelName}}{{modelType}}RepositoryInterface;
+use App\Abstraction\Repository\Has{{modelType}}RepositoryService;
+use App\Abstraction\Repository\{{modelType}}RepositoryServiceInterface;
+use App\Domain\{{modelName}}\Repositories\{{modelName}}RepositoryService;
 
 /**
  * Class {{modelName}}Service.
  */
-class {{modelName}}Service extends Abstract{{modelType}}RepositoryService implements RepositoryServiceInterface, {{modelType}}RepositoryServiceInterface, {{modelName}}ServiceInterface
+class {{modelName}}Service implements Has{{modelType}}RepositoryService
 {
-    /**
-     * @return {{modelName}}{{modelType}}RepositoryInterface
-     */
-    public function getRepository(): RepositoryInterface
+    public function getRepositoryService(): {{modelType}}RepositoryServiceInterface
     {
-        return $this->repository;
+        return $this->repositoryService;
+    }
+
+    public function __construct(private {{modelName}}RepositoryService $repositoryService) {
+
     }
 }

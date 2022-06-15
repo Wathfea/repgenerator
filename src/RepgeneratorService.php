@@ -75,9 +75,6 @@ class RepgeneratorService
             $callback('Model is ready!');
         }
 
-        $this->controller($name, $readOnly);
-        $callback('Controller is ready!');
-
         $this->apiController('v1', $name, $readOnly);
         $callback('API Controller is ready!');
 
@@ -85,12 +82,10 @@ class RepgeneratorService
         $this->updateRequest($name);
         $callback('Controller requests are ready!');
 
-        $this->eloquent($name);
-        $this->interface($name);
+        $this->repositoryService($name, $generatePivot);
         $callback('Repository layer is ready!');
 
         $this->service($name, $generatePivot);
-        $this->serviceInterface($name);
         $callback('Controller service is ready!');
 
         $this->provider($name);
@@ -102,8 +97,8 @@ class RepgeneratorService
         $this->filter($name, $columns, $foreigns);
         $callback('Filter is ready!');
 
-        $this->views($name);
-        $callback('Base views are ready!');
+        $this->frontend($name, $columns);
+        $callback('Frontend component is ready!');
 
         if ( $fromConsole ) {
             $this->cmd->newLine();
@@ -135,39 +130,23 @@ class RepgeneratorService
     {
         $files = [
             "Abstraction/Models/BaseModel.php",
-            "Abstraction/Repository/AbstractRepository.php",
             "Abstraction/Filter/BaseQueryFilter.php",
-            "Abstraction/Repository/Eloquent/Model/AbstractEloquentModelRepository.php",
-            "Abstraction/Repository/Eloquent/Model/EloquentModelRepositoryInterface.php",
-            "Abstraction/Repository/Eloquent/Pivot/AbstractEloquentPivotRepository.php",
-            "Abstraction/Repository/Eloquent/Pivot/EloquentPivotRepositoryInterface.php",
-            "Abstraction/Repository/Eloquent/AbstractEloquentRepository.php",
-            "Abstraction/Repository/Eloquent/EloquentRepositoryInterface.php",
-            "Abstraction/Repository/Service/Model/AbstractModelRepositoryService.php",
-            "Abstraction/Repository/Service/Model/ModelRepositoryServiceInterface.php",
-            "Abstraction/Repository/Service/Pivot/AbstractPivotRepositoryService.php",
-            "Abstraction/Repository/Service/Pivot/PivotRepositoryServiceInterface.php",
-            "Abstraction/Repository/Service/AbstractRepositoryService.php",
-            "Abstraction/Repository/Service/RepositoryServiceInterface.php",
-            "Abstraction/Repository/ModelRepositoryInterface.php",
-            "Abstraction/Repository/PivotRepositoryInterface.php",
-            "Abstraction/Repository/RepositoryInterface.php",
+            "Abstraction/Repository/HasRepositoryService.php",
+            "Abstraction/Repository/HasModelRepositoryService.php",
+            "Abstraction/Repository/HasPivotRepositoryService.php",
+            "Abstraction/Repository/AbstractModelRepositoryService.php",
+            "Abstraction/Repository/AbstractPivotRepositoryService.php",
+            "Abstraction/Repository/AbstractRepositoryService.php",
+            "Abstraction/Repository/ModelRepositoryServiceInterface.php",
+            "Abstraction/Repository/PivotRepositoryServiceInterface.php",
+            "Abstraction/Repository/RepositoryServiceInterface.php",
             "Abstraction/Controllers/BaseTransactionController.php",
-            "Abstraction/CRUD/Controllers/AbstractApiReadOnlyCRUDController.php",
-            "Abstraction/CRUD/Controllers/AbstractApiReadWriteCRUDController.php",
-            "Abstraction/CRUD/Controllers/AbstractCRUDController.php",
-            "Abstraction/CRUD/Controllers/CRUDControllerInterface.php",
-            "Abstraction/CRUD/Controllers/AbstractBladeReadOnlyCRUDController.php",
-            "Abstraction/CRUD/Controllers/AbstractBladeReadWriteCRUDController.php",
-            "Abstraction/CRUD/Controllers/AbstractFrontendReadOnlyCRUDController.php",
-            "Abstraction/CRUD/Controllers/AbstractFrontendReadWriteCRUDController.php",
-            "Abstraction/CRUD/Controllers/ApiCRUDControllerReadOnlyInterface.php",
-            "Abstraction/CRUD/Controllers/ApiCRUDControllerReadWriteInterface.php",
-            "Abstraction/CRUD/Controllers/BladeCRUDControllerReadOnlyInterface.php",
-            "Abstraction/CRUD/Controllers/BladeCRUDControllerReadWriteInterface.php",
-            "Abstraction/CRUD/Controllers/FrontendCRUDControllerReadOnlyInterface.php",
-            "Abstraction/CRUD/Controllers/FrontendCRUDControllerReadWriteInterface.php",
-            "Abstraction/CRUD/Enums/CRUDConfigType.php",
+            "Abstraction/Controllers/AbstractApiReadOnlyCRUDController.php",
+            "Abstraction/Controllers/AbstractApiReadWriteCRUDController.php",
+            "Abstraction/Controllers/AbstractCRUDController.php",
+            "Abstraction/Controllers/CRUDControllerInterface.php",
+            "Abstraction/Controllers/ApiCRUDControllerReadOnlyInterface.php",
+            "Abstraction/Controllers/ApiCRUDControllerReadWriteInterface.php",
         ];
 
         foreach ( $files as $fileOriginal ) {
@@ -273,45 +252,6 @@ class RepgeneratorService
     }
 
     /**
-     * @param  string  $name
-     * @param  bool  $readOnly
-     */
-    private function controller(string $name, bool $readOnly = false)
-    {
-        $stub = $this->getStub('ControllerReadWrite');
-        if($readOnly) {
-            $stub = $this->getStub('ControllerReadOnly');
-        }
-
-        $controllerTemplate = str_replace(
-            [
-                '{{modelName}}',
-                '{{modelNamePluralLowerCase}}',
-                '{{modelNameSingularLowerCase}}',
-            ],
-            [
-                $name,
-                strtolower(Str::plural($name)),
-                strtolower($name),
-            ],
-            $stub
-        );
-
-        if (!file_exists($path = app_path("Domain/{$name}/Controllers/"))) {
-            mkdir($path, 0777, true);
-        }
-
-        file_put_contents($path = app_path("Domain/{$name}/Controllers/{$name}Controller.php"), $controllerTemplate);
-
-        $this->countChars($path);
-
-        $this->generatedFiles[] = [
-            'name' => "{$name}Controller.php",
-            'location' => $path
-        ];
-    }
-
-    /**
      * @param  string  $version
      * @param  string  $name
      * @param  bool  $readOnly
@@ -402,69 +342,38 @@ class RepgeneratorService
     }
 
     /**
-     * @param  string  $name
+     * @param string $name
+     * @param bool $generatePivot
      */
-    private function eloquent(string $name)
+    private function repositoryService(string $name, bool $generatePivot)
     {
         $eloquentTemplate = str_replace(
             [
                 '{{modelName}}',
                 '{{modelNamePluralLowerCase}}',
                 '{{modelNameSingularLowerCase}}',
+                '{{modelType}}',
             ],
             [
                 $name,
                 strtolower(Str::plural($name)),
                 strtolower($name),
+                $generatePivot ? 'Pivot' : 'Model'
             ],
-            $this->getStub('Eloquent')
+            $this->getStub('RepositoryService')
         );
 
         if (!file_exists($path = app_path("Domain/{$name}/Repositories"))) {
             mkdir($path, 0777, true);
         }
 
-        file_put_contents($path = app_path("Domain/{$name}/Repositories/Eloquent{$name}ModelRepository.php"),
+        file_put_contents($path = app_path("Domain/{$name}/Repositories/{$name}RepositoryService.php"),
             $eloquentTemplate);
 
         $this->countChars($path);
 
         $this->generatedFiles[] = [
-            'name' => "Eloquent{$name}ModelRepository.php",
-            'location' => $path
-        ];
-    }
-
-    /**
-     * @param  string  $name
-     */
-    private function interface(string $name)
-    {
-        $interfaceTemplate = str_replace(
-            [
-                '{{modelName}}',
-                '{{modelNamePluralLowerCase}}',
-                '{{modelNameSingularLowerCase}}',
-            ],
-            [
-                $name,
-                strtolower(Str::plural($name)),
-                strtolower($name),
-            ],
-            $this->getStub('Interface')
-        );
-
-        if (!file_exists($path = app_path("Domain/{$name}/Repositories/Interfaces"))) {
-            mkdir($path, 0777, true);
-        }
-
-        file_put_contents($path = app_path("Domain/{$name}/Repositories/Interfaces/{$name}ModelRepositoryInterface.php"),
-            $interfaceTemplate);
-
-        $this->countChars($path);
-
-        $this->generatedFiles[] = [
-            'name' => "{$name}ModelRepositoryInterface.php",
+            'name' => "{$name}RepositoryService.php",
             'location' => $path
         ];
     }
@@ -501,40 +410,6 @@ class RepgeneratorService
 
         $this->generatedFiles[] = [
             'name' => "{$name}Service.php",
-            'location' => $path
-        ];
-    }
-
-    /**
-     * @param  string  $name
-     */
-    private function serviceInterface(string $name)
-    {
-        $interfaceInterfaceTemplate = str_replace(
-            [
-                '{{modelName}}',
-                '{{modelNamePluralLowerCase}}',
-                '{{modelNameSingularLowerCase}}',
-            ],
-            [
-                $name,
-                strtolower(Str::plural($name)),
-                strtolower($name),
-            ],
-            $this->getStub('ServiceInterface')
-        );
-
-        if (!file_exists($path = app_path("Domain/{$name}/Services"))) {
-            mkdir($path, 0777, true);
-        }
-
-        file_put_contents($path = app_path("Domain/{$name}/Services/{$name}ServiceInterface.php"),
-            $interfaceInterfaceTemplate);
-
-        $this->countChars($path);
-
-        $this->generatedFiles[] = [
-            'name' => "{$name}ServiceInterface.php",
             'location' => $path
         ];
     }
@@ -650,46 +525,52 @@ class RepgeneratorService
         ];
     }
 
-    /**
-     * @param  string  $name
-     */
-    private function views(string $name)
-    {
-        $viewTemplate = str_replace(
-            ['{{modelName}}'],
-            [$name],
-            $this->getStub('viewIndex')
+    public function frontend(string $name, array $columns) {
+        $columnsToShowOnTable = [];
+        /**
+         * @var  $column
+         * @var  RepgeneratorColumnAdapter $data
+         */
+        foreach ( $columns as $data ) {
+            if ( $data->showOnTable  ) {
+                $nameParts = explode('_', $data->name);
+                foreach ( $nameParts as $index => $namePart ) {
+                    $nameParts[$index] = ucfirst(strtolower($namePart));
+                }
+                $columnsToShowOnTable[implode(' ', $nameParts)] = $data->name;
+            }
+        }
+        $indexTemplate = str_replace(
+            [
+                '{{modelName}}',
+                '{{modelNames}}',
+                '{{modelColumns}}',
+                '{{modelRoute}}',
+            ],
+            [
+                $name,
+                $name . 's',
+                json_encode($columnsToShowOnTable),
+                strtolower($name.'s')
+            ],
+            $this->getStub('Frontend/Vue/index')
         );
 
-        $lower = strtolower(Str::plural($name));
-
-        if (!file_exists($path = resource_path("views/{$lower}"))) {
+        if (!file_exists($path = resource_path("js"))) {
             mkdir($path, 0777, true);
         }
 
-        file_put_contents($path = resource_path("views/{$lower}/index.blade.php"), $viewTemplate);
-        $this->generatedFiles[] = [
-            'name' => "views/{$lower}/index.blade.php",
-            'location' => $path
-        ];
+        if (!file_exists($path = resource_path("js/" . $name))) {
+            mkdir($path, 0777, true);
+        }
 
-        file_put_contents($path = resource_path("views/{$lower}/create.blade.php"), $viewTemplate);
+        if (!file_exists($path = resource_path("js/" . $name . '/vue'))) {
+            mkdir($path, 0777, true);
+        }
 
-        $this->countChars($path);
-
-        $this->generatedFiles[] = [
-            'name' => "views/{$lower}/create.blade.php",
-            'location' => $path
-        ];
-
-        file_put_contents($path = resource_path("views/{$lower}/edit.blade.php"), $viewTemplate);
+        file_put_contents($path = resource_path("js/{$name}/vue/index.vue"), $indexTemplate);
 
         $this->countChars($path);
-
-        $this->generatedFiles[] = [
-            'name' => "views/{$lower}/edit.blade.php",
-            'location' => $path
-        ];
     }
 
     /**
@@ -717,48 +598,15 @@ class RepgeneratorService
             mkdir($path, 0777, true);
         }
 
-
         if (!file_exists($path = app_path("Abstraction/Repository"))) {
             mkdir($path, 0777, true);
         }
 
-        if (!file_exists($path = app_path("Abstraction/Repository/Eloquent"))) {
+        if (!file_exists($path = app_path("Abstraction/Controllers"))) {
             mkdir($path, 0777, true);
         }
 
-        if (!file_exists($path = app_path("Abstraction/Repository/Eloquent/Model"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Repository/Eloquent/Pivot"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Repository/Service"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Repository/Service/Model"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Repository/Service/Pivot"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/CRUD"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/CRUD/Controllers"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/CRUD/Enums"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/CRUD/Services"))) {
+        if (!file_exists($path = app_path("Abstraction/Enums"))) {
             mkdir($path, 0777, true);
         }
     }

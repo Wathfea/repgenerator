@@ -1,23 +1,12 @@
 <?php
 
-namespace App\Abstraction\Repository\Service;
+namespace App\Abstraction\Repository;
 
-use App\Abstraction\Repository\RepositoryInterface;
 
+/**
+ * Interface RepositoryInterface.
+ */
 interface RepositoryServiceInterface
 {
-    /**
-     * @param  RepositoryInterface  $repository
-     */
-    public function __construct(RepositoryInterface $repository);
 
-    /**
-     * @param  int  $id
-     */
-    public function exists(int $id);
-
-    /**
-     * @return string
-     */
-    public function getModelName(): string;
 }

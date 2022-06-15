@@ -10,19 +10,20 @@ class RepgeneratorColumnAdapter
 {
 
     /**
-     * @param  string  $name
-     * @param  string  $type
-     * @param  bool  $aic
-     * @param  bool  $nullable
-     * @param  bool  $cascade
-     * @param  int|null  $length
-     * @param  string|null  $comment
-     * @param  int|null  $precision
-     * @param  int|null  $scale
-     * @param  bool  $unsigned
-     * @param  array|null  $values
-     * @param  string|null  $default
-     * @param  array|null  $index
+     * @param string $name
+     * @param string $type
+     * @param bool $aic
+     * @param bool $nullable
+     * @param bool $cascade
+     * @param int|null $length
+     * @param string|null $comment
+     * @param int|null $precision
+     * @param int|null $scale
+     * @param bool $unsigned
+     * @param array|null $values
+     * @param string|null $default
+     * @param array|null $index
+     * @param bool|null $showOnTable
      */
     public function __construct(
         public string $name,
@@ -37,7 +38,8 @@ class RepgeneratorColumnAdapter
         public bool $unsigned = false,
         public ?array $values = null,
         public ?string $default = null,
-        public ?array $index = []
+        public ?array $index = [],
+        public ?bool $showOnTable = false,
     ) {
 
     }

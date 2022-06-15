@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Abstraction\CRUD\Controllers;
+namespace App\Abstraction\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;

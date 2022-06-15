@@ -1,29 +1,26 @@
 <?php
 
-namespace App\Abstraction\Repository\Service;
+namespace App\Abstraction\Repository;
 
-use App\Abstraction\Repository\RepositoryInterface;
+use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class AbstractRepository.
+ */
 abstract class AbstractRepositoryService implements RepositoryServiceInterface
 {
     /**
-     * @var RepositoryInterface
+     * AbstractRepository constructor.
+     * @param  string  $model
      */
-    protected RepositoryInterface $repository;
-
-    /**
-     * @param  RepositoryInterface  $repository
-     */
-    public function __construct(RepositoryInterface $repository)
+    public function __construct(protected string $model)
     {
-        $this->repository = $repository;
     }
 
     /**
-     * @return string
+     * @return Model
      */
-    public function getModelName(): string
-    {
-        return $this->repository->getModelName();
+    public function getModel(): Model {
+        return new $this->model;
     }
 }

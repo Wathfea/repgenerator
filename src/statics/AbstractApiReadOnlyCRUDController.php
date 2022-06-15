@@ -1,49 +1,86 @@
 <?php
 
-namespace App\Abstraction\CRUD\Controllers;
+namespace App\Abstraction\Controllers;
 
-
+use App\Abstraction\Filter\BaseQueryFilter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Exception;
-use Illuminate\Support\Facades\Response;
-use App\Providers\RouteServiceProvider;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController implements CRUDControllerInterface, ApiCRUDControllerReadOnlyInterface
 {
     /**
      * @var string
      */
-    private string $modelRouteName = '';
+    private string $resourceClass = JsonResource::class;
+    private string $filterClass = BaseQueryFilter::class;
+    private int $perPage = 10;
 
     /**
-     * @param string $modelRouteName
+     * @return string
      */
-    public function setModelRouteName(string $modelRouteName): void
+    public function getResourceClass(): string
     {
-        $this->modelRouteName = $modelRouteName;
+        return $this->resourceClass;
     }
 
     /**
-     * @param string $action
+     * @param string $resourceClass
+     * @return AbstractCrudController
+     */
+    public function setResourceClass(string $resourceClass): AbstractCrudController
+    {
+        $this->resourceClass = $resourceClass;
+        return $this;
+    }
+
+    /**
      * @return string
      */
-    public function getModelRoute(string $action = 'index'): string
+    public function getFilterClass(): string
     {
-        if ( $this->modelRouteName ) {
-            route($this->modelRouteName . '.' . $action);
-        }
-        return RouteServiceProvider::HOME;
+        return $this->filterClass;
+    }
+
+    /**
+     * @param string $filterClass
+     * @return AbstractCrudController
+     */
+    public function setFilterClass(string $filterClass): AbstractCrudController
+    {
+        $this->filterClass = $filterClass;
+        return $this;
+    }
+
+    /**
+     * @param int $perPage
+     * @return AbstractCrudController
+     */
+    public function setPerPage(int $perPage): AbstractCrudController
+    {
+        $this->perPage = $perPage;
+        return $this;
     }
 
     /**
      * @param Request $request
-     * @return JsonResponse
+     * @return mixed
      */
+    protected function getPerPage(Request $request): mixed {
+        $perPage = $request->get('per_page');
+        if ( $perPage > 0 ) {
+            return $perPage;
+        }
+        return $this->perPage;
+    }
+
     public function index(Request $request): JsonResponse
     {
-        return response()->json($this->getIndexData($request));
+        /** @var JsonResource $resource */
+        $resource = $this->getResourceClass();
+        $filter = app($this->getFilterClass(),$request->all());
+        $perPage = $this->getPerPage($request);
+        return response()->json($resource::collection($this->getService()->getRepositoryService()->getByFilter($filter, [],$perPage)));
     }
 
     /**
@@ -52,6 +89,8 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController 
      */
     public function show($id): JsonResponse
     {
-        return response()->json($this->service->getById($id));
+        /** @var JsonResource $resource */
+        $resource = $this->getResourceClass();
+        return response()->json($resource::make($this->getService()->getRepositoryService()->getById($id)));
     }
 }

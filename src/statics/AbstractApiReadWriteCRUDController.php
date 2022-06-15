@@ -1,63 +1,26 @@
 <?php
 
-namespace App\Abstraction\CRUD\Controllers;
-
+namespace App\Abstraction\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Response;
-use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Log;
 
-abstract class AbstractApiReadWriteCRUDController extends AbstractCRUDController implements CRUDControllerInterface, ApiCRUDControllerReadWriteInterface, ApiCRUDControllerReadOnlyInterface
+abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRUDController implements CRUDControllerInterface, ApiCRUDControllerReadWriteInterface, ApiCRUDControllerReadOnlyInterface
 {
-    /**
-     * @var string
-     */
-    private string $modelRouteName = '';
-
-    /**
-     * @param string $modelRouteName
-     */
-    public function setModelRouteName(string $modelRouteName): void
-    {
-        $this->modelRouteName = $modelRouteName;
-    }
-
-    /**
-     * @param string $action
-     * @return string
-     */
-    public function getModelRoute(string $action = 'index'): string
-    {
-        if ( $this->modelRouteName ) {
-            route($this->modelRouteName . '.' . $action);
-        }
-        return RouteServiceProvider::HOME;
-    }
-
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function index(Request $request): JsonResponse
-    {
-        return response()->json($this->getIndexData($request));
-    }
-
     /**
      * @param Request  $request
      * @return JsonResponse
      */
     public function store(Request $request): JsonResponse {
         try {
-            $model = $this->service->create($request->all());
+            $model = $this->getService()->getRepositoryService()->create($request->all());
             if ( $model->exists ) {
                 return Response::json(
                     [
                         'model' => $model,
-                        'redirect_url' => $this->getModelRoute(),
                         'success' => true,
                     ]);
             }
@@ -66,22 +29,13 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractCRUDController
                     'success' => false,
                 ], 202);
         } catch (Exception $exception) {
-            Log::error('New ' . $this->service->getModelName() . ' Save: '.$exception->getMessage());
+            Log::error('New ' . $this->getService()->getRepositoryService()->getModelName() . ' Save: '.$exception->getMessage());
             return Response::json(
                 [
                     'success' => false,
                     'failed' => $exception->getMessage(),
                 ], 202);
         }
-    }
-
-    /**
-     * @param  int  $id
-     * @return JsonResponse
-     */
-    public function show($id): JsonResponse
-    {
-        return response()->json($this->service->getById($id));
     }
 
     /**
@@ -92,14 +46,13 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractCRUDController
     public function update(Request $request, $id): JsonResponse
     {
         try {
-            $modelUpdated = $this->service->update($id, $request->all());
+            $modelUpdated = $this->getService()->getRepositoryService()->update($id, $request->all());
             return Response::json(
                 [
                     'success' => $modelUpdated,
-                    'redirect_url' => $this->getModelRoute(),
                 ], $modelUpdated ? 200 : 202);
         } catch (Exception $exception) {
-            Log::error('Update ' . $this->service->getModelName() . ': '.$exception->getMessage());
+            Log::error('Update ' . $this->getService()->getRepositoryService()->getModelName() . ': '.$exception->getMessage());
             return Response::json(
                 [
                     'success' => false,
@@ -115,7 +68,7 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractCRUDController
     public function destroy($id): JsonResponse
     {
         try {
-            $model = $this->service->getById($id);
+            $model = $this->getService()->getRepositoryService()->getById($id);
 
             if(!$model) {
                 return Response::json(
@@ -125,16 +78,15 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractCRUDController
                     ], 202);
             }
 
-            $modelDestroyed = $this->service->destroy($id);
+            $modelDestroyed = $this->getService()->getRepositoryService()->destroy($id);
 
             return Response::json(
                 [
                     'success' => $modelDestroyed,
                     'message' => $modelDestroyed ? trans('model.deleted') : trans('model.delete_failed'),
-                    'redirect_url' => $this->getModelRoute(),
                 ], $modelDestroyed ? 200 : 202);
         } catch (Exception $exception) {
-            Log::error('New ' . $this->service->getModelName() . ' Save: '.$exception->getMessage());
+            Log::error('New ' . $this->getService()->getRepositoryService()->getModelName() . ' Save: '.$exception->getMessage());
             return Response::json(
                 [
                     'success' => false,
