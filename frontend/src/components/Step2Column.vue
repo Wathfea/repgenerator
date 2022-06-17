@@ -250,7 +250,7 @@ const isPrecisionSettable = () => {
                             <input v-model="data.show_on_table" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
                         </div>
                         <div class="ml-3 text-sm">
-                            <label class="font-medium text-gray-700">Table column</label>
+                            <label class="font-medium text-gray-700">Add to CRUD</label>
                         </div>
                     </div>
                 </div>

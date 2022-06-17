@@ -26,62 +26,6 @@ class RepgeneratorController extends Controller
     }
 
     /**
-     * @param  Request  $request
-     */
-    public function migrationTesting(Request $request) {
-        $columns = [
-            [
-                'name' => 'id',
-                'type' => 'integer',
-                'aic' => false,
-                'nullable' => false,
-                'cascade' => true, //Nincs kezelve
-                'length' => null,
-                'comment' => null,
-                'precision' => 0,
-                'scale' => 0,
-                'unsigned' => false,
-                'values' => null, // Enum esetén, tömb egyébként null
-                'default' => null,
-                'index' => [
-                    'type' => 'index', //primary,unique,index,fulltext,spatialIndex
-                ]
-            ],
-        ];
-
-        $indexes = [
-            [
-                'type' => 'unique',
-                'columns' => ['email','teszt'] //Composite index
-            ],
-            [
-                'type' => 'primary',
-                'columns' => ['primary_teszt'] //Normál index
-            ],
-        ];
-
-        $foreigns = [
-          [
-              'column' => 'user_id',
-              'reference' => 'id',
-              'on' => 'users',
-              'onUpdate' => null,
-              'onDelete' => null
-          ]
-        ];
-
-        /* Migration Creation */
-        $table = app(Table::class);
-        $table->setName($request->get('name'));
-
-
-        //@TODO a path és migration date kivezetése a wizzardba mint állítható paraméter
-        $this->migrationGeneratorService->setup($request->get('path'), $request->get('migration_date'));
-        $this->migrationGeneratorService->generateMigrationFiles($table, $columns, $indexes, $foreigns);
-
-    }
-
-    /**
      * @param  RepgeneratorGenerationRequest  $request
      * @return JsonResponse
      */
