@@ -2,7 +2,6 @@
 
 namespace Pentacom\Repgenerator\Domain\Migration;
 
-use Pentacom\Repgenerator\Domain\Migration\Generators\MigrationConstants\Method\Foreign;
 use Pentacom\Repgenerator\Domain\Migration\Blueprint\Method;
 use Pentacom\Repgenerator\Domain\Migration\Blueprint\Table;
 
