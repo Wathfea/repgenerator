@@ -51,7 +51,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Pentacom\\Repgenerator\\RepgeneratorServiceProvider"
+                "Pentacom\\Repgenerator\\Domain\\Repgenerator\\Providers\\RepgeneratorServiceProvider"
             ]
         },
         "npm": {
