@@ -4,6 +4,7 @@ namespace Pentacom\Repgenerator\Domain\Pattern\Providers;
 
 use Pentacom\Repgenerator\Console\MigrationGenerator;
 use Pentacom\Repgenerator\Console\PatternGenerator;
+use Pentacom\Repgenerator\Console\PatternGeneratorInit;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorFilterService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorStaticFilesService;
@@ -28,6 +29,7 @@ class RepgeneratorServiceProvider extends RouteServiceProvider
 
             // Registering package commands.
             $this->commands([PatternGenerator::class]);
+            $this->commands([PatternGeneratorInit::class]);
             $this->commands([MigrationGenerator::class]);
         }
 
