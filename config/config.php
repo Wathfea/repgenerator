@@ -5,7 +5,7 @@
  */
 return [
     // Migration stub file location.
-    'migration_stub_path'      => __DIR__.'/../src/MigrationGenerator/stub/Migration.stub',
+    'migration_stub_path'      => __DIR__ . '/../src/resources/stubs/Migration.stub',
 
     // Where the generated files will be saved.
     'migration_target_path'        => base_path('database/migrations'),

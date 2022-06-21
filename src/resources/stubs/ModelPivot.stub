@@ -1,0 +1,15 @@
+<?php
+
+namespace App\Domain\{{modelName}}\Models;
+
+use Illuminate\Database\Eloquent\Relations\Pivot;
+
+class {{modelName}} extends Pivot
+{
+    /**
+     * The attributes that aren't mass assignable.
+     *
+     * @var string[]|bool
+     */
+    protected $guarded = [];
+}

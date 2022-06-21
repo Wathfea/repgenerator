@@ -3,9 +3,8 @@
 namespace Pentacom\Repgenerator\Console;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use Pentacom\Repgenerator\RepgeneratorService;
+use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorService;
 
 /**
  * Class PatternGenerator.
@@ -13,8 +12,6 @@ use Pentacom\Repgenerator\RepgeneratorService;
 class PatternGenerator extends Command
 {
     /**
-     * The name and signature of the console command.
-     *
      * @var string
      */
     protected $signature = 'pattern:generate
@@ -26,8 +23,6 @@ class PatternGenerator extends Command
     ;
 
     /**
-     * The console command description.
-     *
      * @var string
      */
     protected $description = 'Generate Laravel Repository Pattern';
@@ -35,11 +30,9 @@ class PatternGenerator extends Command
     /**
      * @var array
      */
-    protected $generatedFiles = [];
+    protected array $generatedFiles = [];
 
     /**
-     * Create a new command instance.
-     *
      * @return void
      */
     public function __construct()
@@ -74,7 +67,7 @@ class PatternGenerator extends Command
         $service = app(RepgeneratorService::class);
         $service->setCmd($this);
 
-        $service->generate($name, $generateModel, $generatePivot, $readOnly, [], function($msg){
+        $service->generate($name, $generateModel, $generatePivot, $readOnly, [], [], function($msg){
             $this->info($msg);
         }, true);
 
