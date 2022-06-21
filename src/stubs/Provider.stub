@@ -1,0 +1,63 @@
+<?php
+
+namespace App\Domain\{{modelName}}\Providers;
+
+use App\Domain\{{modelName}}\Filters\{{modelName}}Filter;
+use App\Domain\{{modelName}}\Services\{{modelName}}Service;
+use App\Domain\{{modelName}}\Repositories\{{modelName}}RepositoryService;
+use App\Domain\{{modelName}}\Controllers\Api\v1\{{modelName}}ApiController;
+use App\Domain\{{modelName}}\Models\{{modelName}};
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+
+/**
+ * Class {{modelName}}ServiceProvider.
+ */
+class {{modelName}}ServiceProvider extends ServiceProvider
+{
+    /**
+     * @return void
+     */
+    public function register()
+    {
+        $this->app->bind({{modelName}}Filter::class, function (Application $application, array $data) {
+            return (new {{modelName}}Filter(request()->merge($data)))
+                ->setSearchableColumns([]);
+        });
+
+        $this->app->singleton({{modelName}}RepositoryService::class, function () {
+            return (new {{modelName}}RepositoryService({{repoParams}}));
+        });
+
+        $this->app->singleton({{modelName}}Service::class, function () {
+            return new {{modelName}}Service(app({{modelName}}RepositoryService::class));
+        });
+
+        $this->app->singleton({{modelName}}ApiController::class, function () {
+            return (new {{modelName}}ApiController(app({{modelName}}Service::class)))
+                ->setFilterClass({{modelName}}Filter::class);
+        });
+    }
+
+    /**
+     * Bootstrap services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        $this->routes(function(){
+            Route::prefix('api/v1')->namespace($this->namespace)->middleware(['api'])->group(function () {
+                Route::resource('{{modelNamePluralLowerCase}}', {{modelName}}ApiController::class, [
+                    'names' => [
+                        'index' => 'api.{{modelNamePluralLowerCase}}.index',
+                        'store' => 'api.{{modelNamePluralLowerCase}}.store',
+                        'update' => 'api.{{modelNamePluralLowerCase}}.update',
+                        'destroy' => 'api.{{modelNamePluralLowerCase}}.destroy',
+                    ],
+                ])->only(['index', 'store', 'update', 'destroy']);
+            });
+        })->loadRoutes();
+    }
+}

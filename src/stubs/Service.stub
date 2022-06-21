@@ -1,0 +1,22 @@
+<?php
+
+namespace App\Domain\{{modelName}}\Services;
+
+use App\Abstraction\Repository\Has{{modelType}}RepositoryService;
+use App\Abstraction\Repository\{{modelType}}RepositoryServiceInterface;
+use App\Domain\{{modelName}}\Repositories\{{modelName}}RepositoryService;
+
+/**
+ * Class {{modelName}}Service.
+ */
+class {{modelName}}Service implements Has{{modelType}}RepositoryService
+{
+    public function getRepositoryService(): {{modelType}}RepositoryServiceInterface
+    {
+        return $this->repositoryService;
+    }
+
+    public function __construct(private {{modelName}}RepositoryService $repositoryService) {
+
+    }
+}

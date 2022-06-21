@@ -1,0 +1,62 @@
+{
+    "name": "pentacom/repgenerator",
+    "description": "A Laravel repository pattern generator",
+    "keywords": [
+        "pentacom",
+        "repgenerator"
+    ],
+    "homepage": "https://github.com/pentacom/repgenerator",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Simon Tamás",
+            "email": "simon.tamas@pentacom.hu",
+            "role": "Developer"
+        },
+        {
+            "name": "Perlusz Dávid",
+            "email": "perlusz.david@pentacom.hu",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "laravel/framework": "9.*",
+        "kblais/query-filter": "^3.0",
+        "doctrine/dbal": "^3.3"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^4.0",
+        "phpunit/phpunit": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Pentacom\\Repgenerator\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Pentacom\\Repgenerator\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage",
+        "post-install-cmd": "cd vendor/pentacom/repgenerator/frontend && npm install && npm run build"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Pentacom\\Repgenerator\\RepgeneratorServiceProvider"
+            ]
+        },
+        "npm": {
+            "tailwindcss": "^3.0.18",
+            "@tailwindcss/forms": "^0.4.0"
+        }
+    }
+}

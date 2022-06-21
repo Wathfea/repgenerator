@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Domain\{{modelName}}\Controllers\Api\v1;
+
+use App\Abstraction\Controllers\AbstractApiReadOnlyCRUDController;
+use App\Abstraction\Controllers\CRUDControllerInterface;
+use App\Abstraction\Controllers\ApiCRUDControllerReadOnlyInterface;
+use App\Domain\{{modelName}}\Services\{{modelName}}Service;
+use App\Abstraction\Repository\HasRepositoryService;
+
+/**
+ * Class {{modelName}}ApiController.
+ */
+class {{modelName}}ApiController extends AbstractApiReadOnlyCRUDController implements CRUDControllerInterface, ApiCRUDControllerReadOnlyInterface
+{
+    public function getService(): HasRepositoryService
+    {
+        return $this->service;
+    }
+
+    public function __construct(private {{modelName}}Service $service)
+    {
+    }
+}
