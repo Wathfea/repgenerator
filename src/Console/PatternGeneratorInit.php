@@ -42,10 +42,10 @@ class PatternGeneratorInit extends Command
                 'EXAMPLE_URL'
             ],
             [$baseUrl],
-            file_get_contents(__DIR__. '/../../frontend/.env')
+            file_get_contents(base_path('vendor').'/pentacom/repgenerator/frontend/.env.example')
         );
 
-        file_put_contents(__DIR__. '/../../frontend/.env', $envFile);
+        file_put_contents(base_path('vendor').'/pentacom/repgenerator/frontend/.env', $envFile);
 
         //Megnyitni a package.json-t és lecserélni benne az EXAMPLE_URL-t
         $packageJsonFile = str_replace(
@@ -53,13 +53,13 @@ class PatternGeneratorInit extends Command
                 'EXAMPLE_URL'
             ],
             [$baseUrl],
-            file_get_contents(__DIR__. '/../../frontend/package.json')
+            file_get_contents(base_path('vendor').'/pentacom/repgenerator/frontend/package.json')
         );
 
-        file_put_contents(__DIR__. '/../../frontend/package.json', $packageJsonFile);
+        file_put_contents(base_path('vendor').'/pentacom/repgenerator/frontend/package.json', $packageJsonFile);
 
         //Futtatni egy npm instalt a frontend mappába
-        $path = __DIR__. '/../../frontend/';
+        $path = base_path('vendor').'/pentacom/repgenerator/frontend/';
         exec("cd $path; npm instal; npm run build");
     }
 }
