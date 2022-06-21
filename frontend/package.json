@@ -3,11 +3,12 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --base=http://repgenerator.test/wizzard/ --emptyOutDir",
+    "build": "vite build --base=EXAMPLE_URL/wizzard/ --emptyOutDir",
     "preview": "vite preview --port 4173"
   },
   "dependencies": {
     "@headlessui/vue": "^1.6.4",
+    "axios": "^0.27.2",
     "vue": "^3.2.36"
   },
   "devDependencies": {

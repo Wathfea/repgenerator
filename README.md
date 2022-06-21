@@ -3,38 +3,22 @@
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/pentacom/repgenerator.svg?style=flat-square)](https://packagist.org/packages/pentacom/repgenerator)
 [![Total Downloads](https://img.shields.io/packagist/dt/pentacom/repgenerator.svg?style=flat-square)](https://packagist.org/packages/pentacom/repgenerator)
 
-## !!! Warning !!!
-
-If you are used older version than: v1.1.5 maybe you encounter 
-some problems with the new version. Make sure you update your old files for the new abstraction!
-
 ## Installation
 
-You can install the package via composer:
+Install the package via composer:
 
 ```bash
 composer require pentacom/repgenerator
 ```
 
+Then run
+```bash
+php artisan pattern:init http://yoursite.com
+```
+
 ## Usage
 
-To generate the files run 
-
-```bash
-php artisan pattern:generate 
-    {name : Class (singular) for example User} 
-    {--M|model : Whether the generator should generate a model}
-    {--m|migration : Whether the generator should generate a migration}
-    {--P|pivot : Whether the generator should generate a pivot repo or default to model}
-    {--I|inertia : Whether the generator should generate a inertia controller or default to blade}
-```
-
-## Example
-
-
-```bash
-php artisan pattern:generate Book --model --migration
-```
+Navigate in your browser to http://yoursite.com/wizzard and follow the wizzard
 
 ### Changelog
 

@@ -2,6 +2,9 @@
 
 All notable changes to `repgenerator` will be documented in this file
 
+## 1.2.7 - 2022-06-21
+- Added install command
+
 ## 1.2.6 - 2022-06-21
 - Fixed typo in composer.json
 
