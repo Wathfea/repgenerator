@@ -2,7 +2,6 @@
 
 namespace Pentacom\Repgenerator\Domain\Pattern\Providers;
 
-use Illuminate\Support\Facades\Route;
 use Pentacom\Repgenerator\Console\MigrationGenerator;
 use Pentacom\Repgenerator\Console\PatternGenerator;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorFilterService;
