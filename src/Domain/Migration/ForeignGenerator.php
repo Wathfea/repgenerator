@@ -2,6 +2,7 @@
 
 namespace Pentacom\Repgenerator\Domain\Migration;
 
+use Pentacom\Repgenerator\Domain\Migration\Generators\MigrationConstants\Method\Foreign;
 use Pentacom\Repgenerator\Domain\Migration\Blueprint\Method;
 use Pentacom\Repgenerator\Domain\Migration\Blueprint\Table;
 
@@ -19,8 +20,8 @@ class ForeignGenerator
         $method = new Method('foreign', $foreign['column']);
 
         if($foreign['reference'] !== null && $foreign['on'] !== null) {
-            $method->chain('references', $foreign['reference']);
-            $method->chain('on', $foreign['on']);
+            $method->chain('references', $foreign['on']);
+            $method->chain('on', $foreign['reference']['name']);
         }
 
         if ($foreign['onUpdate'] !== null) {

@@ -176,7 +176,7 @@ const onAddColumn = () => {
         'comment': '',
         'unsigned': false,
         'index': [],
-        'show_on_table' : false
+        'show_on_table' : true
     });
 }
 const onRemoveColumn = (data) => {

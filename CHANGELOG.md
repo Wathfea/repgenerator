@@ -2,11 +2,16 @@
 
 All notable changes to `repgenerator` will be documented in this file
 
-## 1.2.3 - 2020-12-22
+## 1.2.4 - 2022-06-21
+- Added migration generation
+- Added CRUD generation
+- Refactored domain static layer
+
+## 1.2.3 - 2021-12-22
 - Fixed wrong file paths,
 - Added basic index method for listing
 
-## 1.2.2 - 2020-12-22
+## 1.2.2 - 2021-12-22
 - Fixed wrong file paths,
 - Fixed file exists bug
 - Added missing Model and Api Controller path check
@@ -18,33 +23,33 @@ All notable changes to `repgenerator` will be documented in this file
 - Added proper path for uses
 - Removed auth middleware from routes
 
-## 1.2.1 - 2020-12-22
+## 1.2.1 - 2021-12-22
 - Small fixes 
 
-## 1.2.0 - 2020-12-21
+## 1.2.0 - 2021-12-21
 - Added repository check
 - Added name check
 - Fixed QeeryFilter.stub wrong use statement
 
-## 1.1.9 - 2020-12-21
+## 1.1.9 - 2021-12-21
 - Migration updated
 - Fixed missing service interface bug
 
-## 1.1.8 - 2020-12-21
+## 1.1.8 - 2021-12-21
 - Base migration creation added
 
-## 1.1.7 - 2020-12-21
+## 1.1.7 - 2021-12-21
 - Printed console text fix, replaced slashes
 
-## 1.1.6 - 2020-12-21
+## 1.1.6 - 2021-12-21
 - Directory creation bug fixed
 
-## 1.1.5 - 2020-12-21
+## 1.1.5 - 2021-12-21
 - Added more abstract separation
 - Fixed some small bugs
 - Refactored route handling
 
-## 1.1.4 - 2020-05-31
+## 1.1.4 - 2021-05-31
 - Added more abstract separation
 - Fixed some small bugs
 

@@ -367,19 +367,22 @@ class RepgeneratorService
 
     /**
      * @param  string  $name
+     * @param  bool  $isPivot
      */
-    private function provider(string $name)
+    private function provider(string $name, bool $isPivot = false)
     {
         $providerTemplate = str_replace(
             [
                 '{{modelName}}',
                 '{{modelNamePluralLowerCase}}',
                 '{{modelNameSingularLowerCase}}',
+                '{{repoParams}}'
             ],
             [
                 $name,
                 strtolower(Str::plural($name)),
                 strtolower($name),
+                $isPivot ? 'TODO::class' : $name.'::class'
             ],
             $this->repgeneratorStubService->getStub('Provider')
         );
