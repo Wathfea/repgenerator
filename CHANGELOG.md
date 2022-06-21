@@ -2,6 +2,12 @@
 
 All notable changes to `repgenerator` will be documented in this file
 
+## 1.2.5 - 2022-06-21
+- Cleanup code structure into DDD
+- Column types is now an enum
+- Start adding tests
+- Start working on factory generation
+
 ## 1.2.4 - 2022-06-21
 - Added migration generation
 - Added CRUD generation
