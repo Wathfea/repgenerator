@@ -2,73 +2,93 @@
 
 All notable changes to `repgenerator` will be documented in this file
 
-## 1.2.8 - 2022-06-21
+## [Unreleased]
+- Factory and seeder generation for CRUD
+- How it works section
+- Composite index generation
+
+## [1.2.9] - 2022-06-22
+### Fixed
+- Fixed factory generation error, removed not yet finished method call from live code base
+
+## [1.2.8] - 2022-06-21
+### Fixed
 - Fixed install command error
 
-## 1.2.7 - 2022-06-21
+## [1.2.7] - 2022-06-21
+### Added
 - Added install command
 
-## 1.2.6 - 2022-06-21
+## [1.2.6] - 2022-06-21
+### Fixed
 - Fixed typo in composer.json
 
-## 1.2.5 - 2022-06-21
+## [1.2.5] - 2022-06-21
+### Added
 - Cleanup code structure into DDD
 - Column types is now an enum
 - Start adding tests
 - Start working on factory generation
 
-## 1.2.4 - 2022-06-21
+## [1.2.4] - 2022-06-21
+### Added
 - Added migration generation
 - Added CRUD generation
+### Fixed
 - Refactored domain static layer
 
-## 1.2.3 - 2021-12-22
-- Fixed wrong file paths,
+## [1.2.3] - 2021-12-22
+### Added
 - Added basic index method for listing
+### Fixed
+- Fixed wrong file paths,
 
-## 1.2.2 - 2021-12-22
+## [1.2.2] - 2021-12-22
+### Added
+- Added missing Model and Api Controller path check
+- Added new blank view template
+- Added proper path for uses
+### Fixed
 - Fixed wrong file paths,
 - Fixed file exists bug
-- Added missing Model and Api Controller path check
 - Refactored view insert
-- Added new blank view template
 - Fixed update method response type
 - Fixed wrong interface use
+### Removed
 - Removed unused usese
-- Added proper path for uses
 - Removed auth middleware from routes
 
-## 1.2.1 - 2021-12-22
+## [1.2.1] - 2021-12-22
 - Small fixes 
 
-## 1.2.0 - 2021-12-21
+## [1.2.0] - 2021-12-21
 - Added repository check
 - Added name check
 - Fixed QeeryFilter.stub wrong use statement
 
-## 1.1.9 - 2021-12-21
+## [1.1.9] - 2021-12-21
 - Migration updated
 - Fixed missing service interface bug
 
-## 1.1.8 - 2021-12-21
+## [1.1.8] - 2021-12-21
 - Base migration creation added
 
-## 1.1.7 - 2021-12-21
+## [1.1.7] - 2021-12-21
 - Printed console text fix, replaced slashes
 
-## 1.1.6 - 2021-12-21
+## [1.1.6] - 2021-12-21
 - Directory creation bug fixed
 
-## 1.1.5 - 2021-12-21
+## [1.1.5] - 2021-12-21
 - Added more abstract separation
 - Fixed some small bugs
 - Refactored route handling
 
-## 1.1.4 - 2021-05-31
+## [1.1.4] - 2021-05-31
 - Added more abstract separation
 - Fixed some small bugs
 
-## 1.1.3 - 2021-05-18
+## [1.1.3] - 2021-05-18
 - Missing use from web route added
 - AbstractEloquentrepository now uses pivot and relations
 - Api controller http header status codes added
@@ -76,38 +96,38 @@ All notable changes to `repgenerator` will be documented in this file
 - BaseTransactionController updated
 - Return types changed for better separation
 
-## 1.1.2 - 2021-05-06
+## [1.1.2] - 2021-05-06
 - Upgrade to PHP 8
 - Added searching options for filtering
 
-## 1.1.1 - 2021-05-03
+## [1.1.1] - 2021-05-03
 
 - Refactored filtering, for better DI separation
 - Removed DataTable depedency
 - Fixed wrong namespace in requests, 
 - Fixed destroy method in abstract eloquent repository
 
-## 1.1.0 - 2021-04-28
+## [1.1.0]- 2021-04-28
 
 - Added missing BaseModel
 - Fixed api route use missing
 - Removed Requests under Domain
 
-## 1.0.9 - 2021-04-28
+## [1.0.9] - 2021-04-28
 
 - Refactored pattern generation
 
-## 1.0.8 - 2021-04-27
+## [1.0.8] - 2021-04-27
 
 - New pattern generation signature `pattern:generate
   {name : Class (singular) for example User}
   {--model : Whether the generator should generate a model}`
 
-## 1.0.7 - 2021-04-27
+## [1.0.7] - 2021-04-27
 
 - Added optional model generation flag
 
-## 1.0.6 - 2021-04-23
+## [1.0.6] - 2021-04-23
 
 - Fixed return types
 
