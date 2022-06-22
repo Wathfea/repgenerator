@@ -40,6 +40,9 @@ const step1Options = ref({
         text: 'Is the repository readonly?'
     }
 });
+const scrollToTop = () => {
+    document.getElementById('scroll-anchor').scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"});
+}
 const resetWizzard = () => {
     stepNumber.value = 1;
     modelName.value = '';
@@ -73,6 +76,7 @@ const onNextStep = (e) => {
     } else if ( isOverview() ) {
         generate();
     } else {
+        scrollToTop();
         ++stepNumber.value;
     }
 }

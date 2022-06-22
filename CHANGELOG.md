@@ -2,10 +2,16 @@
 
 All notable changes to `repgenerator` will be documented in this file
 
-## [Unreleased]
+## [TODO]
 - Factory and seeder generation for CRUD
 - How it works section
 - Composite index generation
+- Remove Generate model selection it is a redundant question we always need to generate model
+
+
+## [Unreleased]
+- In the final result list somehow we should outline the things to still do: "Add this line to your ...."
+- The review step should scroll at the top and show this is a review phase
 
 ## [1.2.9] - 2022-06-22
 ### Fixed
