@@ -114,8 +114,8 @@ class RepgeneratorService
         $this->resource($name);
         $callback('Resource is ready!');
 
-        $this->factory($name, $columns);
-        $callback('Factory is ready!');
+        //$this->factory($name, $columns);
+        //$callback('Factory is ready!');
 
         $this->generateFilters($name, $columns, $foreigns, $callback);
 
