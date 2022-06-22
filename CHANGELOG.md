@@ -7,6 +7,10 @@ All notable changes to `repgenerator` will be documented in this file
 - How it works section
 - Composite index generation
 
+## [1.2.9] - 2022-06-22
+### Fixed
+- Fixed factory generation error, removed not yet finished method call from live code base
+
 ## [1.2.8] - 2022-06-21
 ### Fixed
 - Fixed install command error
