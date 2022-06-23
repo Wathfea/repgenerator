@@ -10,12 +10,12 @@ use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorStaticFilesService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorStubService;
 use Pentacom\Repgenerator\Http\Controllers\RepgeneratorController;
-use App\Providers\RouteServiceProvider;
+use Illuminate\Support\ServiceProvider;
 
 /**
  * Class RepgeneratorServiceProvider
  */
-class RepgeneratorServiceProvider extends RouteServiceProvider
+class RepgeneratorServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap the application services.
@@ -57,10 +57,7 @@ class RepgeneratorServiceProvider extends RouteServiceProvider
         });
 
         if ( config('app.env') === 'local' ) {
-            $this->app['router']->get('repgenerator/tables', [RepgeneratorController::class, 'getTables'])->name('repgenerator.tables');
-            $this->app['router']->post('repgenerator/generate', [RepgeneratorController::class, 'generate'])->name('repgenerator.generate');
-            $this->app['router']->get('repgenerator/migration', [RepgeneratorController::class, 'migrationTesting'])->name('repwizz.migrationTest');
-
+            $this->loadRoutesFrom(__DIR__.'/../../../routes/web.php');
         }
     }
 
