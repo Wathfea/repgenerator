@@ -80,17 +80,18 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController 
         $resource = $this->getResourceClass();
         $filter = app($this->getFilterClass(),$request->all());
         $perPage = $this->getPerPage($request);
-        return response()->json($resource::collection($this->getService()->getRepositoryService()->getByFilter($filter, [],$perPage)));
+        return $resource::collection($this->getService()->getRepositoryService()->getByFilter($filter, [],$perPage))->toResponse($request);
     }
 
     /**
+     * @param  Request  $request
      * @param  int  $id
      * @return JsonResponse
      */
-    public function show($id): JsonResponse
+    public function show(Request $request, int $id): JsonResponse
     {
         /** @var JsonResource $resource */
         $resource = $this->getResourceClass();
-        return response()->json($resource::make($this->getService()->getRepositoryService()->getById($id)));
+        return $resource::make($this->getService()->getRepositoryService()->getById($id))->toResponse($request);
     }
 }
