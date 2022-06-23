@@ -45,7 +45,7 @@ defineProps({
         </div>
     </li>
     <li v-else-if="current" class="relative md:flex-1 md:flex">
-        <a href="#" class="px-6 py-4 flex items-center text-sm font-medium" aria-current="step">
+        <a href="#" class="px-6 py-4 flex items-center text-sm font-medium" aria-current="step" id="scroll-anchor">
     <span class="flex-shrink-0 w-10 h-10 flex items-center justify-center border-2 border-indigo-600 rounded-full">
       <span class="text-indigo-600">{{ index }}</span>
     </span>

@@ -24,11 +24,6 @@ const steps = [
     }
 ];
 const step1Options = ref({
-    'model': {
-        label: 'Model',
-        enabled : false,
-        text: 'Generate Eloquent Model'
-    },
     'pivot': {
         label : 'Pivot',
         enabled : false,
@@ -40,6 +35,9 @@ const step1Options = ref({
         text: 'Is the repository readonly?'
     }
 });
+const scrollToTop = () => {
+    document.getElementById('scroll-anchor').scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"});
+}
 const resetWizzard = () => {
     stepNumber.value = 1;
     modelName.value = '';
@@ -59,6 +57,8 @@ const generate = () => {
     for ( let index in step1Options.value ) {
         payload[index] = step1Options.value[index].enabled;
     }
+    payload['model'] = true;
+
     axios.post(import.meta.env.VITE_API_URL + '/repgenerator/generate', payload).then((response) => {
         messages.value = response.data;
     }).finally(() => {
@@ -73,6 +73,7 @@ const onNextStep = (e) => {
     } else if ( isOverview() ) {
         generate();
     } else {
+        scrollToTop();
         ++stepNumber.value;
     }
 }

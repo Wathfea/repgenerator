@@ -85,7 +85,7 @@ const getPage = (page) => {
         page: page,
         per_page: perPage,
     });
-    axios.get(import.meta.env.VITE_API_URL + '/api/v1/{{modelRoute}}?' + params).then((response) => {
+    axios.get('{{baseUrl}}/api/v1/{{modelRoute}}?' + params).then((response) => {
         models.value = response.data.data;
         meta.value = response.data.meta;
     })

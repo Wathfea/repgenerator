@@ -135,7 +135,8 @@ class RepgeneratorService
         $callback('Please add this line to config/app.php Application Service Providers section:');
         $str = "App\Domain\/".$name."\Providers\/".$name."ServiceProvider::class,";
         $str = str_replace('/', '', $str);
-        $callback($str);
+        $code['code'] = $str;
+        $callback($code);
 
 
         $callback("Code generation has saved you from typing at least " . CharacterCounterStore::$charsCount . " characters");
@@ -477,12 +478,14 @@ class RepgeneratorService
                 '{{modelNames}}',
                 '{{modelColumns}}',
                 '{{modelRoute}}',
+                '{{baseUrl}}'
             ],
             [
                 $name,
                 $name . 's',
                 json_encode($columnsToShowOnTable),
-                strtolower($name.'s')
+                strtolower($name.'s'),
+                url('')
             ],
             $this->repgeneratorStubService->getStub('Frontend/Vue/index')
         );
