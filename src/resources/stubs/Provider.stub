@@ -54,9 +54,10 @@ class {{modelName}}ServiceProvider extends ServiceProvider
                         'index' => 'api.{{modelNamePluralLowerCase}}.index',
                         'store' => 'api.{{modelNamePluralLowerCase}}.store',
                         'update' => 'api.{{modelNamePluralLowerCase}}.update',
+                        'show' => 'api.{{modelNamePluralLowerCase}}.show',
                         'destroy' => 'api.{{modelNamePluralLowerCase}}.destroy',
                     ],
-                ])->only(['index', 'store', 'update', 'destroy']);
+                ])->only(['index', 'store', 'update', 'show', 'destroy']);
             });
         })->loadRoutes();
     }

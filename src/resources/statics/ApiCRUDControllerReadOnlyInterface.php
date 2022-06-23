@@ -8,5 +8,5 @@ use Illuminate\Http\JsonResponse;
 interface ApiCRUDControllerReadOnlyInterface extends CRUDControllerInterface
 {
     public function index(Request $request): JsonResponse;
-    public function show($id): JsonResponse;
+    public function show(Request $request, int $id): JsonResponse;
 }

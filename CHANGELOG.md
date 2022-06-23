@@ -3,13 +3,22 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
-- Factory and seeder generation for CRUD
-- How it works section
-- Composite index generation
+### VUE3 - Tailwind
+- CRUD create
+- CRUD edit
+- CRUD delete
+- CRUD search
 
+- Factory and seeder generation for CRUD
+- Composite index generation
+- How it works section
+- CRUD UI in other Frontend frameworks
 
 ## [Unreleased]
 
+## [1.3.1] - 2022-06-23
+### Fixed
+- CRUDController now returns the proper unwrapped json data
 
 ## [1.3.0] - 2022-06-23
 ## Added
