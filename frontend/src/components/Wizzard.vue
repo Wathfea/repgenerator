@@ -24,11 +24,6 @@ const steps = [
     }
 ];
 const step1Options = ref({
-    'model': {
-        label: 'Model',
-        enabled : false,
-        text: 'Generate Eloquent Model'
-    },
     'pivot': {
         label : 'Pivot',
         enabled : false,
@@ -62,6 +57,8 @@ const generate = () => {
     for ( let index in step1Options.value ) {
         payload[index] = step1Options.value[index].enabled;
     }
+    payload['model'] = true;
+
     axios.post(import.meta.env.VITE_API_URL + '/repgenerator/generate', payload).then((response) => {
         messages.value = response.data;
     }).finally(() => {

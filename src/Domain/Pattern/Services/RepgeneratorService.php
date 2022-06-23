@@ -478,12 +478,14 @@ class RepgeneratorService
                 '{{modelNames}}',
                 '{{modelColumns}}',
                 '{{modelRoute}}',
+                '{{baseUrl}}'
             ],
             [
                 $name,
                 $name . 's',
                 json_encode($columnsToShowOnTable),
-                strtolower($name.'s')
+                strtolower($name.'s'),
+                url('')
             ],
             $this->repgeneratorStubService->getStub('Frontend/Vue/index')
         );
