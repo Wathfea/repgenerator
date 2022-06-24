@@ -18,9 +18,12 @@ import imgUrl from './assets/banner.jpg'
 
 </script>
 <template>
-    <div class="max-w-screen-2xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div>
         <div v-if="choosing">
-            <div class="grid grid-cols-12 gap-4">
+            <header class="p-5 mb-5 bg-gray-700 text-white text-left">
+                <h1 class="navbar-brand">Repository Generator</h1>
+            </header>
+            <div class="grid grid-cols-12 gap-4 px-5">
                 <div class="col-span-6">
                     <img :src="imgUrl" class="banner" alt="Repository Generator Factory" >
                 </div>
@@ -36,7 +39,7 @@ import imgUrl from './assets/banner.jpg'
             </div>
         </div>
         <div v-else>
-            <Wizzard v-if="usingWizzard" class="bg-white p-10 shadow"/>
+            <Wizzard  v-if="usingWizzard" class="bg-white p-10 shadow max-w-screen-2xl mx-auto py-12 px-4 sm:px-6 lg:px-8"/>
             <Dashboard v-else-if="usingDashboard"/>
         </div>
     </div>
