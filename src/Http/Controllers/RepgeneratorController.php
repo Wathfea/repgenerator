@@ -4,9 +4,9 @@ namespace Pentacom\Repgenerator\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Doctrine\DBAL\Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
 use Pentacom\Repgenerator\Http\Requests\GenerationRequest;
 use Pentacom\Repgenerator\Domain\Migration\Blueprint\Table;
@@ -19,6 +19,8 @@ use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorService;
  */
 class RepgeneratorController extends Controller
 {
+    const CRUD_MENU_TABLE_NAME = 'crud_menu';
+    const CRUD_MENU_NAME = 'CrudMenu';
 
     /**
      * @param MigrationGeneratorService $migrationGeneratorService
@@ -31,6 +33,7 @@ class RepgeneratorController extends Controller
     /**
      * @param  GenerationRequest  $request
      * @return JsonResponse
+     * @throws Exception
      */
     public function generate(GenerationRequest $request): JsonResponse {
         $messages = [];
@@ -75,16 +78,40 @@ class RepgeneratorController extends Controller
 
         /* Migration Creation */
         $table = app(Table::class);
-        $table->setName($request->get('name'));
 
         $this->migrationGeneratorService->setup(config('pentacom.migration_target_path'), Carbon::now());
         $indexes = [];
-        $this->migrationGeneratorService->generateMigrationFiles($table, $columns, $indexes, $foreigns);
+
+        //Vizsgálni létezik-e a crud_menu tábla
+        if(!DB::connection()->getDoctrineSchemaManager()->tablesExist(Str::plural(self::CRUD_MENU_TABLE_NAME))) {
+            $table->setName(self::CRUD_MENU_TABLE_NAME);
+            $columns[] = new RepgeneratorColumnAdapter(
+                'name_key',
+                'string');
+
+            $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], [], self::CRUD_MENU_NAME);
+
+            $this->repgeneratorService->generate(
+                self::CRUD_MENU_NAME,
+                true,
+                false,
+                false,
+                $migrationName,
+                $columns,
+                [],
+                function($msg) use (&$messages) {
+                    $messages[] = null;
+                });
+        }
+
+        $table->setName($request->get('name'));
+        $this->migrationGeneratorService->generateMigrationFiles($table, $columns, $indexes, $foreigns,$request->get('name'));
         $this->repgeneratorService->generate(
             $request->get('name'),
             $request->get('model', false),
             $request->get('pivot', false),
             $request->get('read_only', false),
+            null,
             $columns,
             $foreigns,
             function($msg) use (&$messages) {

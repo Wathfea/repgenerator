@@ -54,8 +54,11 @@ class MigrationGeneratorService
      * @param  array  $columns
      * @param  array  $indexes
      * @param  array  $foreigns
+     * @param  string  $modelName
+     * @return string
      */
-    public function generateMigrationFiles(Table $table, array $columns, array $indexes, array $foreigns) {
+    public function generateMigrationFiles(Table $table, array $columns, array $indexes, array $foreigns, string $modelName): string
+    {
         $up   = $this->up($table, $columns, $indexes, $foreigns);
         $down = $this->down($table, $foreigns);
 
@@ -64,7 +67,14 @@ class MigrationGeneratorService
             $this->makeTablePath($table->getName()),
             $this->settings->getStubPath(),
             $up,
-            $down
+            $down,
+            $modelName
+        );
+
+        return $this->makePathLessFilename(
+            $this->settings->getTableFilename(),
+            $this->settings->getDate()->format('Y_m_d_His'),
+            $table->getName()
         );
     }
 
@@ -187,5 +197,24 @@ class MigrationGeneratorService
         ];
         $filename = str_replace(array_keys($replace), $replace, $filename);
         return "$path/$filename";
+    }
+
+    /**
+     * Makes migration filename by given naming pattern.
+     *
+     * @param  string  $pattern  Naming pattern for migration filename.
+     * @param  string  $datetimePrefix  Current datetime for filename prefix.
+     * @param  string  $table  Table name.
+     * @return string
+     */
+    private function makePathLessFilename(string $pattern, string $datetimePrefix, string $table): string
+    {
+        $filename = $pattern;
+        $replace  = [
+            '[datetime_prefix]' => $datetimePrefix,
+            '[table]'           => $table,
+        ];
+        $filename = str_replace(array_keys($replace), $replace, $filename);
+        return "$filename";
     }
 }

@@ -9,10 +9,12 @@ All notable changes to `repgenerator` will be documented in this file
 - CRUD delete
 - CRUD search
 
+- Error during index generation?
 - Factory and seeder generation for CRUD
 - Composite index generation
 - How it works section
 - CRUD UI in other Frontend frameworks
+- CSV import
 
 ## [Unreleased]
 - Added search to listing page
