@@ -15,6 +15,7 @@ All notable changes to `repgenerator` will be documented in this file
 - CRUD UI in other Frontend frameworks
 
 ## [Unreleased]
+- Added search to listing page
 
 ## [1.3.1] - 2022-06-23
 ### Fixed

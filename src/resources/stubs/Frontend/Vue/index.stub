@@ -12,6 +12,11 @@
             <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
                 <div class="inline-block min-w-full py-2 align-middle">
                     <div class="overflow-hidden shadow-sm ring-1 ring-black ring-opacity-5">
+                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="search-input">
+                            Search
+                        </label>
+                        <input v-model="searchInput" v-on:keyup="getSearch" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-red-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" id="search-input" type="text" placeholder="Search ...">
+
                         <table class="min-w-full divide-y divide-gray-300">
                             <thead class="bg-gray-50">
                             <tr>
@@ -69,6 +74,7 @@
 <script setup>
 import axios from 'axios'
 import {ref} from "vue";
+
 const currentPage = ref(1);
 const perPage = 5;
 const models = ref([]);
@@ -80,6 +86,9 @@ const meta = ref({
     total: 0
 });
 const columns = {{modelColumns}}
+
+let searchInput = ref("");
+
 const getPage = (page) => {
     const params = new URLSearchParams({
         page: page,
@@ -90,12 +99,27 @@ const getPage = (page) => {
         meta.value = response.data.meta;
     })
 }
+
+const getSearch = () => {
+    const params = new URLSearchParams({
+        page: 1,
+        search: searchInput.value,
+        per_page: perPage,
+    });
+    axios.get('{{baseUrl}}/api/v1/dogs?' + params).then((response) => {
+        models.value = response.data.data;
+        meta.value = response.data.meta;
+    })
+}
+
 const prevPage = () => {
     getPage(--currentPage.value);
 }
+
 const nextPage = () => {
     getPage(++currentPage.value);
 }
+
 getPage(1);
 
 </script>
