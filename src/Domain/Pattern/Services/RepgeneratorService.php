@@ -2,6 +2,7 @@
 
 namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 
+use App\Domain\CrudMenu\Providers\CrudMenuServiceProvider;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 USE Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
@@ -148,6 +149,7 @@ class RepgeneratorService
         $callback("If we count an average 5 char word and an average 25 WPM we saved you around {$minutes} minutes -> {$hours} hours");
 
         if($migrationName) {
+            app()->register(CrudMenuServiceProvider::class);
             Artisan::call('migrate',
                 [
                     '--path' => '/database/migrations/'.$migrationName,
@@ -425,24 +427,48 @@ class RepgeneratorService
         $resourceArray = [
             'actions' => []
         ];
+
         foreach ( $actions as $route ) {
-            $resourceArray['actions'][$route] = "route(api.$routeName.index)";
+            $resourceArray['actions'][$route] = "route('api.$routeName.index')";
         }
         $use = "";
+
         foreach ( $columns as $column ) {
-            $setColumnResourceValue = $column->name;
+            $setColumnResourceValue = '$this->'.$column->name;
             if ( $column->references ) {
                 $referenceSingular = Str::singular($column->references['name']);
                 $referenceName = ucfirst($referenceSingular);
                 $setColumnResourceValue = $referenceName . 'Resource::make($this->whenLoaded(' . $referenceSingular . '));';
-                $use .= "use App\Domain\\" . $referenceName . "\\Resources\\" .  $referenceModelName . "Resource;\n";
+                $use .= "use App\Domain\\" . $referenceName . "\\Resources\\" .  $referenceName . "Resource;\n";
             }
             $resourceArray[$column->name] = $setColumnResourceValue;
         }
+
         $resourceArray = var_export($resourceArray, true);
+
+        $pattern = "/'(route\()(.*?)(\))'/";
+        $replacement = "/route.*?\)/";
+
+        $matches = [];
+        preg_match($pattern, $resourceArray, $matches);
+
+        $matches2 = [];
+        preg_match($replacement, $resourceArray, $matches2);
+
+        dd($matches, $matches2);
+        $resourceArray = preg_replace($matches, $matches2, $resourceArray);
+
         $resourceTemplate = str_replace(
-            ['{{modelName}}', '{{modelResourceArray}}', '{{use}}'],
-            [$name, $resourceArray, $use],
+            [
+                '{{modelName}}',
+                '{{modelResourceArray}}',
+                '{{use}}'
+            ],
+            [
+                $name,
+                $resourceArray,
+                $use
+            ],
             $this->repgeneratorStubService->getStub('Resource')
         );
 

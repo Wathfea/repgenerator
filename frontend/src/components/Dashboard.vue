@@ -101,7 +101,7 @@ import axios from 'axios'
 const navigation = ref([]);
 const userNavigation = ref([]);
 const sidebarOpen = ref(false);
-axios.get(import.meta.env.VITE_API_URL + '/api/v1/crud_menus').then((response) => {
+axios.get(import.meta.env.VITE_API_URL + '/api/v1/crudmenus').then((response) => {
     navigation.value = response.data.data.map((menu) => {
         menu.current = false;
         menu.href = menu.actions.index;

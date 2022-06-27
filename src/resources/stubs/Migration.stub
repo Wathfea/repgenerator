@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         {{ up }}
 
-        $repository = new CrudMenuRepositoryService(CrudMenu::class);
+        $repository = app(CrudMenuRepositoryService::class);
         $repository->save(['name_key' => '{{ nameKey }}']);
     }
 

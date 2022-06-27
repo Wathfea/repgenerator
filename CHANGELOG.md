@@ -15,6 +15,7 @@ All notable changes to `repgenerator` will be documented in this file
 - How it works section
 - CRUD UI in other Frontend frameworks
 - CSV import
+- Add migration automatic run
 
 ## [Unreleased]
 - Added search to listing page
