@@ -5,6 +5,8 @@ namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 use App\Domain\CrudMenu\Providers\CrudMenuServiceProvider;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
+use Pentacom\Repgenerator\Traits\Stringable;
+use Pentacom\Repgenerator\Helpers\Constants;
 USE Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
 use Pentacom\Repgenerator\Domain\Pattern\Helpers\CharacterCounterStore;
 
@@ -13,6 +15,7 @@ use Pentacom\Repgenerator\Domain\Pattern\Helpers\CharacterCounterStore;
  */
 class RepgeneratorService
 {
+    use Stringable;
 
     protected string $cmd;
     protected array $generatedFiles = [];
@@ -423,45 +426,46 @@ class RepgeneratorService
     private function resource(string $name, array $columns)
     {
         $routeName =  strtolower(Str::plural($name));
+
         $actions = ['index', 'store', 'update', 'show', 'destroy'];
-        $resourceArray = [
-            'actions' => []
-        ];
 
+        $lines[] = "'actions' => [";
         foreach ( $actions as $route ) {
-            $resourceArray['actions'][$route] = "route('api.$routeName.index')";
+            $actionRouteTemplate = str_replace(
+                [
+                    '{{route}}', '{{routeName}}'
+                ],
+                [
+                    $route, $routeName
+                ],
+                $this->repgeneratorStubService->getStub('actionRoute')
+            );
+            $lines[] = Constants::TAB.Constants::TAB.$actionRouteTemplate;
         }
-        $use = "";
+        $lines[] = "],";
 
+        $use = "";
         foreach ( $columns as $column ) {
-            $setColumnResourceValue = '$this->'.$column->name;
             if ( $column->references ) {
                 $referenceSingular = Str::singular($column->references['name']);
                 $referenceName = ucfirst($referenceSingular);
-                $setColumnResourceValue = $referenceName . 'Resource::make($this->whenLoaded(' . $referenceSingular . '));';
                 $use .= "use App\Domain\\" . $referenceName . "\\Resources\\" .  $referenceName . "Resource;\n";
+                $resourceElementTemplate = str_replace(
+                    [
+                        '{{field}}',
+                        '{{referenceName}}',
+                        '{{referenceSingular}}',
+                    ],
+                    [
+                        $column->name,
+                        $referenceName,
+                        $referenceSingular
+                    ], $this->repgeneratorStubService->getStub('resourceElementRelation'));
+            } else {
+                $resourceElementTemplate = str_replace(['{{field}}'], [$column->name], $this->repgeneratorStubService->getStub('resourceElement'));
             }
-            $resourceArray[$column->name] = $setColumnResourceValue;
+            $lines[] = Constants::TAB.Constants::TAB.$resourceElementTemplate;
         }
-
-        $str = var_export($resourceArray, true);
-        $regex1 = '/\'(route\()(.*?)(\))\'/m';
-        $regex2 = '/(route\()(.*?)(\))/m';
-        preg_match_all($regex1, $str, $matches1, PREG_SET_ORDER, 0);
-        preg_match_all($regex2, $str, $matches2, PREG_SET_ORDER, 0);
-        $pattern1Finals = [];
-        foreach ($matches1 as $match) {
-            $pattern1Finals[] = $match[0];
-        }
-
-        $pattern2Finals = [];
-        foreach ($matches2 as $match) {
-            $pattern2Finals[] = $match[0];
-        }
-
-        preg_replace($pattern1Finals, $pattern2Finals, $resourceArray);
-
-        dd($resourceArray);
 
         $resourceTemplate = str_replace(
             [
@@ -471,7 +475,7 @@ class RepgeneratorService
             ],
             [
                 $name,
-                $resourceArray,
+                $this->implodeLines($lines, 2),
                 $use
             ],
             $this->repgeneratorStubService->getStub('Resource')
