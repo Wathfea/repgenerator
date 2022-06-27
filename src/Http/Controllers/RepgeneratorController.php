@@ -85,9 +85,18 @@ class RepgeneratorController extends Controller
         //Vizsgálni létezik-e a crud_menu tábla
         if(!DB::connection()->getDoctrineSchemaManager()->tablesExist(Str::plural(self::CRUD_MENU_TABLE_NAME))) {
             $table->setName(self::CRUD_MENU_TABLE_NAME);
-            $columns[] = new RepgeneratorColumnAdapter(
-                'name_key',
-                'string');
+            $columns = [];
+
+            $migrationColumns = [
+                'id' => 'id',
+                'name_key' => 'string',
+                'created_at' => 'timestamp',
+                'updated_at' => 'timestamp',
+            ];
+
+            foreach ($migrationColumns as $name => $type) {
+                $columns[] = new RepgeneratorColumnAdapter($name,$type);
+            }
 
             $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], [], self::CRUD_MENU_NAME);
 
@@ -105,7 +114,7 @@ class RepgeneratorController extends Controller
         }
 
         $table->setName($request->get('name'));
-        $this->migrationGeneratorService->generateMigrationFiles($table, $columns, $indexes, $foreigns,$request->get('name'));
+        $this->migrationGeneratorService->generateMigrationFiles($table, $columns, $indexes, $foreigns, $request->get('name'));
         $this->repgeneratorService->generate(
             $request->get('name'),
             $request->get('model', false),
