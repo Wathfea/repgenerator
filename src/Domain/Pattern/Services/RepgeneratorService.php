@@ -444,19 +444,24 @@ class RepgeneratorService
             $resourceArray[$column->name] = $setColumnResourceValue;
         }
 
-        $resourceArray = var_export($resourceArray, true);
+        $str = var_export($resourceArray, true);
+        $regex1 = '/\'(route\()(.*?)(\))\'/m';
+        $regex2 = '/(route\()(.*?)(\))/m';
+        preg_match_all($regex1, $str, $matches1, PREG_SET_ORDER, 0);
+        preg_match_all($regex2, $str, $matches2, PREG_SET_ORDER, 0);
+        $pattern1Finals = [];
+        foreach ($matches1 as $match) {
+            $pattern1Finals[] = $match[0];
+        }
 
-        $pattern = "/'(route\()(.*?)(\))'/";
-        $replacement = "/route.*?\)/";
+        $pattern2Finals = [];
+        foreach ($matches2 as $match) {
+            $pattern2Finals[] = $match[0];
+        }
 
-        $matches = [];
-        preg_match($pattern, $resourceArray, $matches);
+        preg_replace($pattern1Finals, $pattern2Finals, $resourceArray);
 
-        $matches2 = [];
-        preg_match($replacement, $resourceArray, $matches2);
-
-        dd($matches, $matches2);
-        $resourceArray = preg_replace($matches, $matches2, $resourceArray);
+        dd($resourceArray);
 
         $resourceTemplate = str_replace(
             [
