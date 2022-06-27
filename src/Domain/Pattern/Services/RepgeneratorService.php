@@ -2,6 +2,7 @@
 
 namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 USE Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
 use Pentacom\Repgenerator\Domain\Pattern\Helpers\CharacterCounterStore;
@@ -65,6 +66,7 @@ class RepgeneratorService
      * @param  bool  $generateModel
      * @param  bool  $generatePivot
      * @param  false  $readOnly
+     * @param  string|null  $migrationName
      * @param  RepgeneratorColumnAdapter[]  $columns
      * @param  array  $foreigns
      * @param $callback
@@ -75,12 +77,12 @@ class RepgeneratorService
         bool $generateModel,
         bool $generatePivot,
         bool $readOnly,
+        string $migrationName = null,
         array $columns,
         array $foreigns,
         $callback,
         bool $fromConsole = false
     ) {
-
         $this->createDirectories();
         $callback('Directories generated!');
 
@@ -144,6 +146,14 @@ class RepgeneratorService
         $hours = floor($minutes / 60);
 
         $callback("If we count an average 5 char word and an average 25 WPM we saved you around {$minutes} minutes -> {$hours} hours");
+
+        if($migrationName) {
+            Artisan::call('migrate',
+                [
+                    '--path' => '/database/migrations/'.$migrationName,
+                    '--force' => true]);
+            $callback('CRUD migration migrated');
+        }
     }
 
 
@@ -157,7 +167,9 @@ class RepgeneratorService
             [
                 '{{modelName}}'
             ],
-            [$name],
+            [
+                $name
+            ],
             $this->repgeneratorStubService->getStub('Model')
         );
 
