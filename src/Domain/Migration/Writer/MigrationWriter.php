@@ -4,6 +4,7 @@ namespace Pentacom\Repgenerator\Domain\Migration\Writer;
 
 use Illuminate\Support\Facades\File;
 use Pentacom\Repgenerator\Domain\Migration\Blueprint\ToStringInterface;
+use Pentacom\Repgenerator\Helpers\Constants;
 
 /**
  * Class MigrationWriter
