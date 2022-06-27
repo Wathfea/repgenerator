@@ -7,6 +7,7 @@ use App\Domain\{{modelName}}\Services\{{modelName}}Service;
 use App\Domain\{{modelName}}\Repositories\{{modelName}}RepositoryService;
 use App\Domain\{{modelName}}\Controllers\Api\v1\{{modelName}}ApiController;
 use App\Domain\{{modelName}}\Models\{{modelName}};
+use App\Domain\{{modelName}}\Resources\{{modelName}}Resource;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -36,6 +37,7 @@ class {{modelName}}ServiceProvider extends ServiceProvider
 
         $this->app->singleton({{modelName}}ApiController::class, function () {
             return (new {{modelName}}ApiController(app({{modelName}}Service::class)))
+                ->setResourceClass({{modelName}}Resource::class)
                 ->setFilterClass({{modelName}}Filter::class);
         });
     }

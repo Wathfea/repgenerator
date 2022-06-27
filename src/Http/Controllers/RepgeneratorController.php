@@ -52,7 +52,9 @@ class RepgeneratorController extends Controller
                 $data['values'],
                 $data['default'],
                 $data['index'], //Ezzel chainelt index jön létre, nem alkalmas composite felvételre később ezt ha bekerül a composite külön kell kezelni majd
-                $data['show_on_table']
+                $data['show_on_table'],
+                $data['reference'],
+                $data['foreign'],
             );
 
             $columnIndex = [];
@@ -103,9 +105,14 @@ class RepgeneratorController extends Controller
     {
         $tables = DB::connection()->getDoctrineSchemaManager()->listTableNames();
         foreach ( $tables as $index => $tableName ) {
+            $columnNames = array_keys(DB::connection()->getDoctrineSchemaManager()->listTableColumns($tableName));
+            $columnData = [];
+            foreach ( $columnNames as $columnName ) {
+                $columnData[$columnName] = DB::connection()->getDoctrineColumn($tableName,$columnName)->getType()->getName();
+            }
             $tables[$index] = [
                 'name' => $tableName,
-                'columns' => array_keys(DB::connection()->getDoctrineSchemaManager()->listTableColumns($tableName))
+                'columns' => $columnData,
             ];
         }
         return response()->json($tables);

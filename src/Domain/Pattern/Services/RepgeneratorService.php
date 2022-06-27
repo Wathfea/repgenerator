@@ -65,7 +65,7 @@ class RepgeneratorService
      * @param  bool  $generateModel
      * @param  bool  $generatePivot
      * @param  false  $readOnly
-     * @param  array  $columns
+     * @param  RepgeneratorColumnAdapter[]  $columns
      * @param  array  $foreigns
      * @param $callback
      * @param  false  $fromConsole
@@ -111,7 +111,7 @@ class RepgeneratorService
         $this->provider($name);
         $callback('Provider is ready!');
 
-        $this->resource($name);
+        $this->resource($name, $columns);
         $callback('Resource is ready!');
 
         //$this->factory($name, $columns);
@@ -404,12 +404,33 @@ class RepgeneratorService
 
     /**
      * @param  string  $name
+     * @param  RepgeneratorColumnAdapter[]  $columns
      */
-    private function resource(string $name)
+    private function resource(string $name, array $columns)
     {
+        $routeName =  strtolower(Str::plural($name));
+        $actions = ['index', 'store', 'update', 'show', 'destroy'];
+        $resourceArray = [
+            'actions' => []
+        ];
+        foreach ( $actions as $route ) {
+            $resourceArray['actions'][$route] = "route(api.$routeName.index)";
+        }
+        $use = "";
+        foreach ( $columns as $column ) {
+            $setColumnResourceValue = $column->name;
+            if ( $column->references ) {
+                $referenceSingular = Str::singular($column->references['name']);
+                $referenceName = ucfirst($referenceSingular);
+                $setColumnResourceValue = $referenceName . 'Resource::make($this->whenLoaded(' . $referenceSingular . '));';
+                $use .= "use App\Domain\\" . $referenceName . "\\Resources\\" .  $referenceModelName . "Resource;\n";
+            }
+            $resourceArray[$column->name] = $setColumnResourceValue;
+        }
+        $resourceArray = var_export($resourceArray, true);
         $resourceTemplate = str_replace(
-            ['{{modelName}}'],
-            [$name],
+            ['{{modelName}}', '{{modelResourceArray}}', '{{use}}'],
+            [$name, $resourceArray, $use],
             $this->repgeneratorStubService->getStub('Resource')
         );
 
