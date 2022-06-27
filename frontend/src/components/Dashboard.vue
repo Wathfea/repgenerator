@@ -76,8 +76,6 @@
 
             <main>
                 <div class="py-6">
-
-
                 </div>
             </main>
         </div>
