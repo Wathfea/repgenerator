@@ -77,8 +77,9 @@ const onNextStep = (e) => {
         ++stepNumber.value;
     }
 }
-const onPreviousStep = () => {
-    --stepNumber.value;
+const onPreviousStep = (e) => {
+    e.preventDefault();
+    stepNumber.value = stepNumber.value - 1;
 }
 const isPreviousDisabled = () => {
     return stepNumber.value <= 1;
@@ -181,8 +182,8 @@ const onAddColumn = () => {
     });
 }
 const onRemoveColumn = (data) => {
-    for ( let index in columns ) {
-        if ( columns[index] === data ) {
+    for ( let index in columns.value ) {
+        if ( columns.value[index] === data ) {
             columns.value.splice(parseInt(index),1);
             break;
         }
@@ -206,7 +207,7 @@ axios.get(import.meta.env.VITE_API_URL + '/repgenerator/tables').then((response)
             <Step1 :modelName="modelName" @nameChanged="onNameChanged"/>
             <Options :options="step1Options"/>
         </div>
-        <Step2 v-if="stepNumber === 2 || isOverview()" :columns="columns" :models="models" @addColumn="onAddColumn" @removeColumn="onRemoveColumn"/>
+        <Step2 v-if="stepNumber === 2 || isOverview()" :disableAdd="isOverview()" :columns="columns" :models="models" @addColumn="onAddColumn" @removeColumn="onRemoveColumn"/>
         <Result v-if="isLastStep()" :messages="messages"/>
 
         <div class="pt-5 grid grid-cols-12 gap-4" v-if="!isLastStep()">

@@ -24,6 +24,8 @@ class RepgeneratorColumnAdapter
      * @param string|null $default
      * @param array|null $index
      * @param bool|null $showOnTable
+     * @param string|null $references
+     * @param string|null $foreign
      */
     public function __construct(
         public string $name,
@@ -40,6 +42,8 @@ class RepgeneratorColumnAdapter
         public ?string $default = null,
         public ?array $index = [],
         public ?bool $showOnTable = false,
+        public ?array $references = null,
+        public ?string $foreign = null,
     ) {
 
     }
@@ -63,6 +67,8 @@ class RepgeneratorColumnAdapter
             'values' => $this->values,
             'default' => $this->default,
             'index' => $this->index,
+            'references' => $this->references,
+            'foreign' => $this->foreign,
         ];
     }
 }

@@ -1,6 +1,6 @@
 <script setup>
 import { defineEmits } from 'vue'
-const emit = defineEmits(['onRemoveColumn'])
+const emit = defineEmits(['removeColumn'])
 const columnTypes = [
     'id',
     'integer',
@@ -96,6 +96,36 @@ const isScaleSettable = () => {
 const isPrecisionSettable = () => {
     return ['dateTimeTz', 'dateTime', 'decimal', 'double', 'float', 'softDeletesTz', 'softDeletes', 'time', 'timeTz', 'timestamp', 'timestampTz', 'timestamps', 'timestampsTz', 'unsignedDecimal'].indexOf(props.data.type) >= 0;
 }
+const onRemoveColumn = () => {
+    emit('removeColumn', props.data);
+}
+const onForeignChosen = (e) => {
+    let setType = null;
+    let foreignType = props.data.reference.columns[props.data.foreign];
+    switch(foreignType) {
+        case 'bigint' :
+            setType = 'unsignedBigInteger';
+            break;
+        case 'integer' :
+            setType = 'unsignedInteger';
+            break;
+        case 'datetime' :
+            setType = 'dateTime';
+            break;
+        case 'string':
+        case 'decimal':
+        case 'boolean':
+            setType = foreignType;
+            break;
+        default:
+            console.log("Add support for: " + foreignType);
+            break;
+    }
+    props.data.type = setType;
+}
+const onReferenceChanged = () => {
+    props.data.foreign = null;
+}
 </script>
 <template>
     <div class="migration-line border border-gray-300 rounded-md p-2 mb-10 bg-gray-50">
@@ -189,15 +219,15 @@ const isPrecisionSettable = () => {
                         <label class="text-gray-700 ml-2">References</label>
                     </div>
                     <div class="col-span-5">
-                        <select v-model="data.reference" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        <select v-model="data.reference" @change="onReferenceChanged" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                             <option></option>
                             <option v-for="model in models" :value="model">{{ model.name }}</option>
                         </select>
                     </div>
                     <div class="col-span-5">
-                        <select :disabled="!data.reference" v-model="data.foreign" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        <select :disabled="!data.reference" v-model="data.foreign" @change="onForeignChosen" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                             <option></option>
-                            <option v-for="column in data.reference.columns" :value="column">{{ column }}</option>
+                            <option v-for="(type,name) in data.reference.columns" :value="name">{{ name }}</option>
                         </select>
                     </div>
                 </div>
@@ -237,7 +267,7 @@ const isPrecisionSettable = () => {
                 </div>
             </div>
             <div class="sm:col-span-1">
-                <button @click="emit('remove', data)" class="uppercase p-3 flex items-center bg-red-500 text-white max-w-max shadow-sm hover:shadow-lg rounded-full w-10 h-10">
+                <button type="button" @click="onRemoveColumn" class="uppercase p-3 flex items-center bg-red-500 text-white max-w-max shadow-sm hover:shadow-lg rounded-full w-10 h-10">
                     <svg width="32" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 32 32" style="transform: rotate(360deg);"><path d="M12 12h2v12h-2z" fill="currentColor"></path><path d="M18 12h2v12h-2z" fill="currentColor"></path><path d="M4 6v2h2v20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h2V6zm4 22V8h16v20z" fill="currentColor"></path><path d="M12 2h8v2h-8z" fill="currentColor"></path></svg>
                 </button>
             </div>
