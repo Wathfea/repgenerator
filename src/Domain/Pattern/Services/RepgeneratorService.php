@@ -431,6 +431,11 @@ class RepgeneratorService
 
         $lines[] = "'actions' => [";
         foreach ( $actions as $route ) {
+            $templete = match ($route) {
+                'index', 'store' => $this->repgeneratorStubService->getStub('actionRoute'),
+                'update', 'show', 'destroy' => $this->repgeneratorStubService->getStub('actionRouteWithParam'),
+            };
+
             $actionRouteTemplate = str_replace(
                 [
                     '{{route}}', '{{routeName}}'
@@ -438,7 +443,7 @@ class RepgeneratorService
                 [
                     $route, $routeName
                 ],
-                $this->repgeneratorStubService->getStub('actionRoute')
+                $templete
             );
             $lines[] = Constants::TAB.Constants::TAB.$actionRouteTemplate;
         }

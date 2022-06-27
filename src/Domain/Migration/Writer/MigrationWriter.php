@@ -25,9 +25,9 @@ class MigrationWriter
      * @param  string  $stubPath  Migration stub file path.
      * @param  ToStringInterface  $up  migration up method
      * @param  ToStringInterface  $down  migration down method
-     * @param  string  $nameKey
+     * @param  string  $name
      */
-    public function writeTo(string $path, string $stubPath, ToStringInterface $up, ToStringInterface $down, string $nameKey): void {
+    public function writeTo(string $path, string $stubPath, ToStringInterface $up, ToStringInterface $down, string $name): void {
         $stub = $this->migrationStub->getStub($stubPath);
 
 
@@ -35,11 +35,10 @@ class MigrationWriter
             'use Illuminate\Database\Migrations\Migration;',
             'use Illuminate\Database\Schema\Blueprint;',
             'use Illuminate\Support\Facades\Schema;',
-            'use App\Domain\CrudMenu\Repositories\CrudMenuRepositoryService;',
-            'use App\Domain\CrudMenu\Models\CrudMenu;'
+            'use App\Domain\CrudMenu\Repositories\CrudMenuRepositoryService;'
         ]);
 
-        File::put($path, $this->migrationStub->populateStub($stub, $use, $up->toString(), $down->toString(), $nameKey));
+        File::put($path, $this->migrationStub->populateStub($stub, $use, $up->toString(), $down->toString(), $name));
 
     }
 }

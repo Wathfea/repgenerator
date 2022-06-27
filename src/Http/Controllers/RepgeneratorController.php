@@ -91,7 +91,7 @@ class RepgeneratorController extends Controller
 
             $migrationColumns = [
                 'id' => 'id',
-                'name_key' => 'string',
+                'name' => 'string',
                 'created_at' => 'timestamp',
                 'updated_at' => 'timestamp',
             ];
@@ -129,7 +129,7 @@ class RepgeneratorController extends Controller
                 $messages[] = $msg;
             });
 
-        return response()->json($messages);
+        return response()->json(array_filter($messages, fn($value) => !is_null($value) && $value !== ''));
     }
 
 
