@@ -75,7 +75,7 @@ export default function use{{modelNamePlural}}() {
     }
 
     const destroy{{modelNameSingular}} = async (id) => {
-        await axios.delete(`{{baseUrl}}/api/{{modelNamePluralLowerCase}}/${id}`)
+        await axios.delete(`{{baseUrl}}/api/v1/{{modelNamePluralLowerCase}}/${id}`)
     }
 
     return {
