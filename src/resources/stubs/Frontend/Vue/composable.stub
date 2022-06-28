@@ -28,7 +28,7 @@ export default function use{{modelNamePlural}}() {
         meta.value = response.data.meta;
     }
 
-    const get{{modelSingular}} = async (id) => {
+    const get{{modelNameSingular}} = async (id) => {
         let response = await axios.get(`{{baseUrl}}/api/v1/{{modelNamePluralLowerCase}}/${id}`)
         {{modelNameSingularLowerCase}}.value = response.data.data
     }
@@ -45,7 +45,7 @@ export default function use{{modelNamePlural}}() {
         })
     }
 
-    const store{{modelSingular}} = async (data) => {
+    const store{{modelNameSingular}} = async (data) => {
         errors.value = ''
         try {
             await axios.post('{{baseUrl}}/api/v1/{{modelNamePluralLowerCase}}', data)
@@ -60,7 +60,7 @@ export default function use{{modelNamePlural}}() {
 
     }
 
-    const update{{modelSingular}} = async (id) => {
+    const update{{modelNameSingular}} = async (id) => {
         errors.value = ''
         try {
             await axios.patch(`{{baseUrl}}/api/v1/{{modelNamePluralLowerCase}}/${id}`, {{modelNameSingularLowerCase}}.value)
@@ -74,15 +74,20 @@ export default function use{{modelNamePlural}}() {
         }
     }
 
+    const destroy{{modelNameSingular}} = async (id) => {
+        await axios.delete(`{{baseUrl}}/api/{{modelNamePluralLowerCase}}/${id}`)
+    }
+
     return {
         errors,
         {{modelNameSingularLowerCase}},
         {{modelNamePluralLowerCase}},
         meta,
-        get{{modelSingular}},
+        get{{modelNameSingular}},
         get{{modelNamePlural}},
         getSearch,
-        store{{modelSingular}},
-        update{{modelSingular}}
+        store{{modelNameSingular}},
+        update{{modelNameSingular}},
+        destroy{{modelNameSingular}}
     }
 }

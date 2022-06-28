@@ -34,9 +34,12 @@
                                     {{ model[column] }}
                                 </td>
                                 <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6 lg:pr-8">
-                                    <a href="#" class="text-indigo-600 hover:text-indigo-900"
-                                    >Edit<span class="sr-only">, {{ model.name }}</span></a
-                                    >
+                                    <a href="#" class="text-indigo-600 hover:text-indigo-900">
+                                        Edit
+                                    </a>
+                                    <a href="#" @click.prevent="delete{{modelNameSingular}}(model.id)" class="text-indigo-600 hover:text-indigo-900">
+                                        Delete
+                                    </a>
                                 </td>
                             </tr>
                             </tbody>
@@ -74,16 +77,16 @@
 </template>
 
 <script setup>
-import use{{modelNamePlural}} from './{{modelNameSingularLowerCase}} '
+import use{{modelNamePlural}} from './{{modelNameSingularLowerCase}}'
 import Create{{modelNameSingular}} from './create'
 import { ref } from 'vue';
 
 const columns = {{modelColumns}}
 const currentPage = ref(1);
-const perPage = 2;
+const perPage = 10;
 const searchInput = ref("");
 
-const { {{modelNamePluralLowerCase}}, meta, get{{modelNamePlural}}, getSearch } = use{{modelNamePlural}}()
+const { {{modelNamePluralLowerCase}}, meta, get{{modelNamePlural}}, getSearch, destroy{{modelNameSingular}} } = use{{modelNamePlural}}()
 
 const prevPage = () => {
     get{{modelNamePlural}}(--currentPage.value, perPage);
@@ -92,6 +95,15 @@ const prevPage = () => {
 const nextPage = () => {
     get{{modelNamePlural}}(++currentPage.value, perPage);
 }
+
+const delete{{modelNameSingular}} = async (id) => {
+            if (!window.confirm('You sure?')) {
+                return
+            }
+
+            await destroy{{modelNameSingular}}(id)
+            await get{{modelNamePlural}}(1, perPage)
+        }
 
 get{{modelNamePlural}}(1, perPage)
 </script>
