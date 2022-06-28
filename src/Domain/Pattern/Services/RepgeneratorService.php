@@ -29,14 +29,17 @@ class RepgeneratorService
     }
 
     /**
-     * @param RepgeneratorStubService $repgeneratorStubService
-     * @param RepgeneratorStaticFilesService $repgeneratorStaticFilesService
-     * @param RepgeneratorFilterService $repgeneratorFilterService
+     * @param  RepgeneratorStubService  $repgeneratorStubService
+     * @param  RepgeneratorStaticFilesService  $repgeneratorStaticFilesService
+     * @param  RepgeneratorFilterService  $repgeneratorFilterService
+     * @param  RepgeneratorFrontendService  $repgeneratorFrontendService
      */
     public function __construct(
         private RepgeneratorStubService $repgeneratorStubService,
         private RepgeneratorStaticFilesService $repgeneratorStaticFilesService,
-        private RepgeneratorFilterService $repgeneratorFilterService) {
+        private RepgeneratorFilterService $repgeneratorFilterService,
+        private RepgeneratorFrontendService $repgeneratorFrontendService
+    ) {
 
     }
 
@@ -60,7 +63,7 @@ class RepgeneratorService
      * @param array $foreigns
      * @param $callback
      */
-    private function generateFilters(string $name, array $columns, array $foreigns, $callback) {
+    private function filters(string $name, array $columns, array $foreigns, $callback) {
         $this->generatedFiles[] = $this->repgeneratorFilterService->generate($name, $columns, $foreigns);
         $callback('Filter is ready!');
     }
@@ -123,10 +126,9 @@ class RepgeneratorService
         //$this->factory($name, $columns);
         //$callback('Factory is ready!');
 
-        $this->generateFilters($name, $columns, $foreigns, $callback);
+        $this->filters($name, $columns, $foreigns, $callback);
 
-        $this->frontend($name, $columns);
-        $callback('Frontend component is ready!');
+        $this->frontend($name, $columns, $callback);
 
         if ( $fromConsole ) {
             $this->cmd->newLine();
@@ -500,9 +502,11 @@ class RepgeneratorService
         ];
     }
 
-
-
-    public function factory(string $name, array $columns)
+    /**
+     * @param  string  $name
+     * @param  array  $columns
+     */
+    private function factory(string $name, array $columns)
     {
         $columnFactoriesString = '';
 
@@ -528,56 +532,17 @@ class RepgeneratorService
 
     }
 
+    /**
+     * @param  string  $name
+     * @param  array  $columns
+     * @param $callback
+     */
+    private function frontend(string $name, array $columns, $callback) {
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateIndex($name, $columns);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable($name);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateCreate($name, $columns);
 
-    public function frontend(string $name, array $columns) {
-
-        $columnsToShowOnTable = [];
-        /**
-         * @var  $column
-         * @var  RepgeneratorColumnAdapter $data
-         */
-        foreach ( $columns as $data ) {
-            if ( $data->showOnTable  ) {
-                $nameParts = explode('_', $data->name);
-                foreach ( $nameParts as $index => $namePart ) {
-                    $nameParts[$index] = ucfirst(strtolower($namePart));
-                }
-                $columnsToShowOnTable[implode(' ', $nameParts)] = $data->name;
-            }
-        }
-        $indexTemplate = str_replace(
-            [
-                '{{modelName}}',
-                '{{modelNames}}',
-                '{{modelColumns}}',
-                '{{modelRoute}}',
-                '{{baseUrl}}'
-            ],
-            [
-                $name,
-                $name . 's',
-                json_encode($columnsToShowOnTable),
-                strtolower($name.'s'),
-                url('')
-            ],
-            $this->repgeneratorStubService->getStub('Frontend/Vue/index')
-        );
-
-        if (!file_exists($path = resource_path("js"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = resource_path("js/" . $name))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = resource_path("js/" . $name . '/vue'))) {
-            mkdir($path, 0777, true);
-        }
-
-        file_put_contents($path = resource_path("js/{$name}/vue/index.vue"), $indexTemplate);
-
-        CharacterCounterStore::addFileCharacterCount($path);
+        $callback('Frontend components are ready!');
     }
 
     /**
