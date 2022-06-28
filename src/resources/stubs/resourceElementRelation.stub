@@ -1,1 +1,1 @@
-'{{field}}' => {{referenceName}}Resource::make($this->whenLoaded('{{referenceSingular}}')),
+'{{referenceSingular}}' => {{referenceName}}Resource::make($this->whenLoaded('{{referenceSingular}}')),

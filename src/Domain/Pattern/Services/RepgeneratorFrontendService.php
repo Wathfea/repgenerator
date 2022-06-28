@@ -137,6 +137,13 @@ class RepgeneratorFrontendService
                 $columnsToShowOnTable[implode(' ', $nameParts)] = $data->name;
             }
         }
+
+        //Típus vizsgálat
+        //ha text -> textarea
+        //ha enum -> select
+        //minden másra meg input
+
+
         $createTemplate = str_replace(
             [
                 '{{modelNameSingular}}',
