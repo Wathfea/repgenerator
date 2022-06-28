@@ -52,7 +52,7 @@ class RepgeneratorController extends Controller
                 $data['precision'],
                 $data['scale'],
                 $data['unsigned'],
-                $data['values'],
+                explode(',', $data['values']),
                 $data['default'],
                 $data['index'], //Ezzel chainelt index jön létre, nem alkalmas composite felvételre később ezt ha bekerül a composite külön kell kezelni majd
                 $data['show_on_table'],
@@ -80,49 +80,21 @@ class RepgeneratorController extends Controller
 
         /* Migration Creation */
         $table = app(Table::class);
-
         $this->migrationGeneratorService->setup(config('pentacom.migration_target_path'), Carbon::now());
-        $indexes = [];
 
-        //Vizsgálni létezik-e a crud_menu tábla
-        if(!DB::connection()->getDoctrineSchemaManager()->tablesExist(Str::plural(self::CRUD_MENU_TABLE_NAME))) {
-            $table->setName(self::CRUD_MENU_TABLE_NAME);
-            $columns = [];
+        $indexes = []; //Itt kell átadni majd ha composite akarunk készíteni külön sorban nem chainelve.
 
-            $migrationColumns = [
-                'id' => 'id',
-                'name' => 'string',
-                'created_at' => 'timestamp',
-                'updated_at' => 'timestamp',
-            ];
-
-            foreach ($migrationColumns as $name => $type) {
-                $columns[] = new RepgeneratorColumnAdapter($name,$type);
-            }
-
-            $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], [], self::CRUD_MENU_NAME);
-
-            $this->repgeneratorService->generate(
-                self::CRUD_MENU_NAME,
-                true,
-                false,
-                false,
-                $migrationName,
-                $columns,
-                [],
-                function($msg) use (&$messages) {
-                    $messages[] = null;
-                });
-        }
+        //Detect if CrudMenus exists or we need to create it
+        $messages = $this->shouldCreateCrudMenuTable($table);
 
         $table->setName($request->get('name'));
-        $this->migrationGeneratorService->generateMigrationFiles($table, $columns, $indexes, $foreigns, $request->get('name'));
+        $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, $indexes, $foreigns, $request->get('name'));
         $this->repgeneratorService->generate(
             $request->get('name'),
             $request->get('model', false),
             $request->get('pivot', false),
             $request->get('read_only', false),
-            null,
+            $migrationName,
             $columns,
             $foreigns,
             function($msg) use (&$messages) {
@@ -152,5 +124,47 @@ class RepgeneratorController extends Controller
             ];
         }
         return response()->json($tables);
+    }
+
+    /**
+     * @param  mixed  $table
+     * @return array
+     * @throws Exception
+     */
+    private function shouldCreateCrudMenuTable(mixed $table): array
+    {
+        $messages = [];
+        if (!DB::connection()->getDoctrineSchemaManager()->tablesExist(Str::plural(self::CRUD_MENU_TABLE_NAME))) {
+            $table->setName(self::CRUD_MENU_TABLE_NAME);
+            $columns = [];
+
+            $migrationColumns = [
+                'id' => 'id',
+                'name' => 'string',
+                'created_at' => 'timestamp',
+                'updated_at' => 'timestamp',
+            ];
+
+            foreach ($migrationColumns as $name => $type) {
+                $columns[] = new RepgeneratorColumnAdapter($name, $type);
+            }
+
+            $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], [],
+                self::CRUD_MENU_NAME);
+
+            $this->repgeneratorService->generate(
+                self::CRUD_MENU_NAME,
+                true,
+                false,
+                false,
+                $migrationName,
+                $columns,
+                [],
+                function ($msg) use (&$messages) {
+                    $messages[] = null;
+                });
+        }
+
+        return $messages;
     }
 }

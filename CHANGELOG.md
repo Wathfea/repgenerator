@@ -9,16 +9,19 @@ All notable changes to `repgenerator` will be documented in this file
 - CRUD delete
 - CRUD search
 
-- Error during index generation?
+
 - Factory and seeder generation for CRUD
 - Composite index generation
 - How it works section
 - CRUD UI in other Frontend frameworks
 - CSV import
-- Add migration automatic run
+
 
 ## [Unreleased]
 - Added search to listing page
+- Add migration automatic run
+- Fixed Error during index generation
+- Fixed enum generation
 
 ## [1.3.1] - 2022-06-23
 ### Fixed

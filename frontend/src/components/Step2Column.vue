@@ -132,7 +132,7 @@ const onReferenceChanged = () => {
         <div class="grid grid-cols-12 gap-y-6 gap-x-4 sm:grid-cols-12">
             <div class="sm:col-span-2">
                 <div class="mt-1">
-                    <input type="text" required="required" v-model="data.name"  class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    <input placeholder="Field name" type="text" required="required" v-model="data.name"  class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
                 </div>
             </div>
             <div class="sm:col-span-2">
@@ -177,7 +177,7 @@ const onReferenceChanged = () => {
             <div class="sm:col-span-1">
                 <div class="mt-3">
                     <div class="relative flex items-start">
-                        <select class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md" multiple>
+                        <select v-model="data.index" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md" multiple>
                             <option value="primary">PRIMARY</option>
                             <option value="unique">UNIQUE</option>
                             <option value="index">INDEX</option>
@@ -258,7 +258,7 @@ const onReferenceChanged = () => {
             </div>
             <div class="sm:col-span-2">
                 <div class="mt-1">
-                    <input type="text" placeholder="Values" v-model="data.values" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    <input type="text" placeholder="Values (coma separated)" v-model="data.values" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
                 </div>
             </div>
             <div class="sm:col-span-2">

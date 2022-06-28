@@ -157,7 +157,7 @@ class RepgeneratorService
                 [
                     '--path' => '/database/migrations/'.$migrationName,
                     '--force' => true]);
-            $callback('CRUD migration migrated');
+            $callback($migrationName.' migration migrated to database!');
         }
     }
 
