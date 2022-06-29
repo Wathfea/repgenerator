@@ -16,7 +16,7 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
      */
     public function store(Request $request): JsonResponse {
         try {
-            $model = $this->getService()->getRepositoryService()->create($request->all());
+            $model = $this->getService()->getRepositoryService()->save($request->all());
             if ( $model->exists ) {
                 return Response::json(
                     [

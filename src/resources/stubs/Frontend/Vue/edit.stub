@@ -28,23 +28,27 @@
 
 <script>
 import use{{modelNamePlural}} from './{{modelNameSingularLowerCase}}'
-import { reactive } from 'vue'
+import { onMounted } from 'vue';
 
 export default {
-    setup() {
-        const {{modelNameSingularLowerCase}} = reactive({
-            {{columnList}}
-        })
+    props: {
+        id: {
+            required: true,
+            type: Number
+        }
+    },
+    setup(props) {
+        const { errors, {{modelNameSingularLowerCase}}, update{{modelNameSingular}}, get{{modelNameSingular}} } = use{{modelNamePlural}}()
 
-        const { errors, store{{modelNameSingular}} } = use{{modelNamePlural}}()
+        onMounted(() => get{{modelNameSingular}}(props.id))
 
         const save{{modelNameSingular}} = async () => {
-            await store{{modelNameSingular}}({ ...{{modelNameSingularLowerCase}} })
+            await update{{modelNameSingular}}(props.id)
         }
 
         return {
-            {{modelNameSingularLowerCase}},
             errors,
+            {{modelNameSingularLowerCase}},
             save{{modelNameSingular}}
         }
     }

@@ -541,6 +541,7 @@ class RepgeneratorService
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateIndex($name, $columns);
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable($name);
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateCreate($name, $columns);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateEdit($name, $columns);
 
         $callback('Frontend components are ready!');
     }

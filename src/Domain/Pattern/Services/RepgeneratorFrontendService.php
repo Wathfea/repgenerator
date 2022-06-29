@@ -5,9 +5,12 @@ namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 use Illuminate\Support\Str;
 use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
 use Pentacom\Repgenerator\Domain\Pattern\Helpers\CharacterCounterStore;
+use Pentacom\Repgenerator\Traits\Stringable;
 
 class RepgeneratorFrontendService
 {
+    use Stringable;
+
     public function __construct(protected RepgeneratorStubService $repgeneratorStubService) {
 
     }
@@ -121,9 +124,15 @@ class RepgeneratorFrontendService
         ];
     }
 
-    public function generateCreate(string $name, array $columns)
+    /**
+     * @param  string  $name
+     * @param  array  $columns
+     * @return array
+     */
+    public function generateCreate(string $name, array $columns): array
     {
-        $columnsToShowOnTable = [];
+        $createFormStr = [];
+        $columnListStr = [];
         /**
          * @var  $column
          * @var  RepgeneratorColumnAdapter $data
@@ -134,15 +143,71 @@ class RepgeneratorFrontendService
                 foreach ($nameParts as $index => $namePart) {
                     $nameParts[$index] = ucfirst(strtolower($namePart));
                 }
-                $columnsToShowOnTable[implode(' ', $nameParts)] = $data->name;
+                $field = implode(' ', $nameParts);
+
+                $template = match ($data->type) {
+                    'id', 'integer', 'string', 'bigIncrements', 'bigInteger', 'binary', 'char', 'dateTimeTz', 'dateTime', 'date', 'decimal',
+                    'double', 'float', 'geometryCollection', 'geometry', 'increments', 'ipAddress', 'mediumIncrements', 'mediumInteger', 'nullableTimestamps',
+                    'rememberToken', 'set', 'smallIncrements', 'smallInteger', 'softDeletesTz', 'softDeletes', 'timeTz', 'time',
+                    'timestampTz', 'timestamp', 'timestampsTz', 'timestamps', 'tinyIncrements', 'tinyInteger', 'unsignedBigInteger', 'unsignedDecimal',
+                    'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger', 'unsignedTinyInteger', 'uuidMorphs', 'uuid', 'year' => 'inputText',
+                    'text', 'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumText', 'multiLineString',
+                    'multiPoint', 'multiPolygon', 'point', 'polygon','tinyText' => 'inputTextarea',
+                    'enum' => 'inputOption',
+                    'boolean' => 'inputCheckbox',
+                };
+
+                if($template == 'inputOption') {
+                    $selectOptions = [];
+                    foreach ($data->values as $option) {
+                        if($option == '' || $option == null) continue;
+                        $selectOptions[] = str_replace(
+                            [
+                                '{{optionValue}}',
+                                '{{optionName}}'
+                            ],
+                            [
+                                strtolower($option),
+                                $option
+                            ],
+                            $this->repgeneratorStubService->getStub('Frontend/Vue/fields/'.$template)
+                        );
+                    }
+
+                    $createFormStr[] = str_replace(
+                        [
+                            '{{field}}',
+                            '{{fieldLower}}',
+                            '{{options}}',
+                            '{{modelNameSingularLowerCase}}',
+                        ],
+                        [
+                            $field,
+                            $data->name,
+                            $this->implodeLines($selectOptions, 2),
+                            strtolower($name)
+                        ],
+                        $this->repgeneratorStubService->getStub('Frontend/Vue/fields/inputSelect')
+                    );
+                } else {
+                    $createFormStr[] = str_replace(
+                        [
+                            '{{field}}',
+                            '{{fieldLower}}',
+                            '{{modelNameSingularLowerCase}}',
+                        ],
+                        [
+                            $field,
+                            $data->name,
+                            strtolower($name)
+                        ],
+                        $this->repgeneratorStubService->getStub('Frontend/Vue/fields/'.$template)
+                    );
+                }
+                //Create column list
+                $columnListStr[] = $data->name.": '',";
             }
         }
-
-        //Típus vizsgálat
-        //ha text -> textarea
-        //ha enum -> select
-        //minden másra meg input
-
 
         $createTemplate = str_replace(
             [
@@ -150,16 +215,16 @@ class RepgeneratorFrontendService
                 '{{modelNamePlural}}',
                 '{{modelNameSingularLowerCase}}',
                 '{{modelNamePluralLowerCase}}',
-                '{{baseUrl}}',
-                '{{modelColumns}}'
+                '{{form}}',
+                '{{columnList}}'
             ],
             [
                 $name,
                 Str::plural($name),
                 strtolower($name),
                 Str::plural(strtolower($name)),
-                url(''),
-                json_encode($columnsToShowOnTable)
+                $this->implodeLines($createFormStr, 2),
+                $this->implodeLines($columnListStr, 2),
             ],
             $this->repgeneratorStubService->getStub('Frontend/Vue/create')
         );
@@ -182,6 +247,133 @@ class RepgeneratorFrontendService
 
         return [
             'name' => 'create.vue',
+            'location' => $path
+        ];
+    }
+
+    /**
+     * @param  string  $name
+     * @param  array  $columns
+     * @return array
+     */
+    public function generateEdit(string $name, array $columns): array
+    {
+        $editFormStr = [];
+        $columnListStr = [];
+        /**
+         * @var  $column
+         * @var  RepgeneratorColumnAdapter $data
+         */
+        foreach ($columns as $data) {
+            if ($data->showOnTable) {
+                $nameParts = explode('_', $data->name);
+                foreach ($nameParts as $index => $namePart) {
+                    $nameParts[$index] = ucfirst(strtolower($namePart));
+                }
+                $field = implode(' ', $nameParts);
+
+                $template = match ($data->type) {
+                    'id', 'integer', 'string', 'bigIncrements', 'bigInteger', 'binary', 'char', 'dateTimeTz', 'dateTime', 'date', 'decimal',
+                    'double', 'float', 'geometryCollection', 'geometry', 'increments', 'ipAddress', 'mediumIncrements', 'mediumInteger', 'nullableTimestamps',
+                    'rememberToken', 'set', 'smallIncrements', 'smallInteger', 'softDeletesTz', 'softDeletes', 'timeTz', 'time',
+                    'timestampTz', 'timestamp', 'timestampsTz', 'timestamps', 'tinyIncrements', 'tinyInteger', 'unsignedBigInteger', 'unsignedDecimal',
+                    'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger', 'unsignedTinyInteger', 'uuidMorphs', 'uuid', 'year' => 'inputText',
+                    'text', 'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumText', 'multiLineString',
+                    'multiPoint', 'multiPolygon', 'point', 'polygon','tinyText' => 'inputTextarea',
+                    'enum' => 'inputOption',
+                    'boolean' => 'inputCheckbox',
+                };
+
+                if($template == 'inputOption') {
+                    $selectOptions = [];
+                    foreach ($data->values as $option) {
+                        if($option == '' || $option == null) continue;
+                        $selectOptions[] = str_replace(
+                            [
+                                '{{optionValue}}',
+                                '{{optionName}}'
+                            ],
+                            [
+                                strtolower($option),
+                                $option
+                            ],
+                            $this->repgeneratorStubService->getStub('Frontend/Vue/fields/'.$template)
+                        );
+                    }
+
+                    $editFormStr[] = str_replace(
+                        [
+                            '{{field}}',
+                            '{{fieldLower}}',
+                            '{{options}}',
+                            '{{modelNameSingularLowerCase}}',
+                        ],
+                        [
+                            $field,
+                            $data->name,
+                            $this->implodeLines($selectOptions, 2),
+                            strtolower($name)
+                        ],
+                        $this->repgeneratorStubService->getStub('Frontend/Vue/fields/inputSelect')
+                    );
+                } else {
+                    $editFormStr[] = str_replace(
+                        [
+                            '{{field}}',
+                            '{{fieldLower}}',
+                            '{{modelNameSingularLowerCase}}',
+                        ],
+                        [
+                            $field,
+                            $data->name,
+                            strtolower($name)
+                        ],
+                        $this->repgeneratorStubService->getStub('Frontend/Vue/fields/'.$template)
+                    );
+                }
+                //Create column list
+                $columnListStr[] = $data->name.": '',";
+            }
+        }
+
+        $createTemplate = str_replace(
+            [
+                '{{modelNameSingular}}',
+                '{{modelNamePlural}}',
+                '{{modelNameSingularLowerCase}}',
+                '{{modelNamePluralLowerCase}}',
+                '{{form}}',
+                '{{columnList}}'
+            ],
+            [
+                $name,
+                Str::plural($name),
+                strtolower($name),
+                Str::plural(strtolower($name)),
+                $this->implodeLines($editFormStr, 2),
+                $this->implodeLines($columnListStr, 2),
+            ],
+            $this->repgeneratorStubService->getStub('Frontend/Vue/edit')
+        );
+
+        if (!file_exists($path = resource_path('js'))) {
+            mkdir($path, 0777, true);
+        }
+
+        if (!file_exists($path = resource_path('js/'.$name))) {
+            mkdir($path, 0777, true);
+        }
+
+        if (!file_exists($path = resource_path('js/'.$name.'/vue'))) {
+            mkdir($path, 0777, true);
+        }
+
+        file_put_contents($path = resource_path("js/{$name}/vue/edit.vue"), $createTemplate);
+
+        CharacterCounterStore::addFileCharacterCount($path);
+
+        return [
+            'name' => 'edit.vue',
             'location' => $path
         ];
     }
