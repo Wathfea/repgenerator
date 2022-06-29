@@ -16,6 +16,11 @@ const props = defineProps({
         default : () => {
             return []
         }
+    },
+    disableAdd : {
+        required : false,
+        type: Boolean,
+        default : false
     }
 })
 
@@ -30,9 +35,9 @@ const onAddColumn = () => {
 <template>
     <div class="space-y-8 divide-y divide-gray-200">
         <div class="mt-6">
-            <Step2Column v-for="column in columns" :data="column" :models="models" @remove="onRemoveColumn"/>
+            <Step2Column v-for="column in columns" :data="column" :models="models" @removeColumn="onRemoveColumn"/>
         </div>
-        <button @click="onAddColumn" type="button" class="inline-flex w-full justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700">
+        <button v-if="!disableAdd" @click="onAddColumn" type="button" class="inline-flex w-full justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700">
             Add column
         </button>
     </div>

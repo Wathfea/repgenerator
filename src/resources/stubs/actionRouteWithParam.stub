@@ -1,0 +1,1 @@
+'{{route}}' => route('api.{{routeName}}.{{route}}', $this->id),

@@ -1,6 +1,6 @@
 <?php
 
-namespace Pentacom\Repgenerator\Domain\Migration\Writer;
+namespace Pentacom\Repgenerator\Helpers;
 
 /**
  * Class Constants

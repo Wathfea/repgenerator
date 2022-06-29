@@ -29,6 +29,6 @@ class RepgeneratorStubService
      */
     public function getFilterStub(string $name): bool|string
     {
-        return $this->getFilterStub('/Filters/' . $name);
+        return file_get_contents($this->stubsLocation.'/Filter/'.$name.'.stub');
     }
 }

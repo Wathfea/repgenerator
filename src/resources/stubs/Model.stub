@@ -19,7 +19,7 @@ class {{modelName}} extends BaseModel
     protected $guarded = [];
 
 
-     protected static function newFactory(): {{modelName}}Factory
+    protected static function newFactory(): {{modelName}}Factory
     {
         return {{modelName}}Factory::new();
     }

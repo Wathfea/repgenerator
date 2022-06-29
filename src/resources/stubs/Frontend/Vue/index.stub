@@ -2,16 +2,21 @@
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold text-gray-900">{{modelNames}}</h1>
+                <h1 class="text-xl font-semibold text-gray-900">{{modelNamePlural}}</h1>
             </div>
             <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                <button type="button" class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">Add {{modelName}}</button>
+                <button type="button" v-on:click="add{{modelNameSingular}}" class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">Add {{modelNamePlural}}</button>
             </div>
         </div>
         <div class="mt-8 flex flex-col">
             <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
                 <div class="inline-block min-w-full py-2 align-middle">
                     <div class="overflow-hidden shadow-sm ring-1 ring-black ring-opacity-5">
+                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="search-input">
+                            Search
+                        </label>
+                        <input v-model="searchInput" v-on:keyup="getSearch(searchInput, perPage)" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-red-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" id="search-input" type="text" placeholder="Search ...">
+
                         <table class="min-w-full divide-y divide-gray-300">
                             <thead class="bg-gray-50">
                             <tr>
@@ -24,14 +29,17 @@
                             </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white">
-                            <tr v-for="model in models" :key="model.id">
+                            <tr v-for="model in {{modelNamePluralLowerCase}}" :key="model.id">
                                 <td v-for="(column,key) in columns" class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     {{ model[column] }}
                                 </td>
                                 <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6 lg:pr-8">
-                                    <a href="#" class="text-indigo-600 hover:text-indigo-900"
-                                    >Edit<span class="sr-only">, {{ model.name }}</span></a
-                                    >
+                                    <a href="#" @click.prevent="edit{{modelNameSingular}}(model.id)" class="text-indigo-600 hover:text-indigo-900">
+                                        Edit
+                                    </a>
+                                    <a href="#" @click.prevent="delete{{modelNameSingular}}(model.id)" class="text-indigo-600 hover:text-indigo-900">
+                                        Delete
+                                    </a>
                                 </td>
                             </tr>
                             </tbody>
@@ -63,39 +71,65 @@
                 </div>
             </div>
         </div>
+
+        <div class="mt-8 flex flex-col" v-if="showAddForm">
+            <Create{{modelNameSingular}} />
+        </div>
+
+        <div class="mt-8 flex flex-col" v-if="showEditForm">
+            <Edit{{modelNameSingular}} :id="{{modelNameSingularLowerCase}}.id"/>
+        </div>
     </div>
 </template>
 
 <script setup>
-import axios from 'axios'
-import {ref} from "vue";
-const currentPage = ref(1);
-const perPage = 5;
-const models = ref([]);
-const meta = ref({
-    current_page : 0,
-    last_page : 0,
-    from: 0,
-    to : 0,
-    total: 0
-});
-const columns = {{modelColumns}}
-const getPage = (page) => {
-    const params = new URLSearchParams({
-        page: page,
-        per_page: perPage,
-    });
-    axios.get('{{baseUrl}}/api/v1/{{modelRoute}}?' + params).then((response) => {
-        models.value = response.data.data;
-        meta.value = response.data.meta;
-    })
-}
-const prevPage = () => {
-    getPage(--currentPage.value);
-}
-const nextPage = () => {
-    getPage(++currentPage.value);
-}
-getPage(1);
+import use{{modelNamePlural}} from './{{modelNameSingularLowerCase}}'
+import Create{{modelNameSingular}} from './create'
+import Edit{{modelNameSingular}} from './edit'
+import { reactive, ref } from 'vue';
 
+const columns = {{modelColumns}}
+const currentPage = ref(1);
+const perPage = 10;
+
+let searchInput = ref("");
+let showAddForm = ref(false);
+let showEditForm = ref(false);
+let {{modelNameSingularLowerCase}} = reactive({
+    id: 0,
+})
+
+const { {{modelNamePluralLowerCase}}, meta, get{{modelNamePlural}}, getSearch, destroy{{modelNameSingular}} } = use{{modelNamePlural}}()
+
+const prevPage = () => {
+    get{{modelNamePlural}}(--currentPage.value, perPage);
+}
+
+const nextPage = () => {
+    get{{modelNamePlural}}(++currentPage.value, perPage);
+}
+
+const delete{{modelNameSingular}} = async (id) => {
+            if (!window.confirm('You sure?')) {
+                return
+            }
+
+            await destroy{{modelNameSingular}}(id)
+            await get{{modelNamePlural}}(1, perPage)
+        }
+
+const edit{{modelNameSingular}} = (id) => {
+    //If add form is active hide it
+    if(showAddForm.value) showAddForm.value = !showAddForm.value;
+    showEditForm.value = true;
+    {{modelNameSingularLowerCase}}.id = id;
+}
+
+const add{{modelNameSingular}} = () => {
+    //If add form is active hide it
+    if(showEditForm.value) showEditForm.value = !showEditForm.value;
+    showAddForm.value = true;
+}
+
+get{{modelNamePlural}}(1, perPage)
 </script>

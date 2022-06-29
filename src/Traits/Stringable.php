@@ -1,9 +1,9 @@
 <?php
 
-namespace Pentacom\Repgenerator\Domain\Migration\Blueprint\Traits;
+namespace Pentacom\Repgenerator\Traits;
 
 use Illuminate\Support\Collection;
-use Pentacom\Repgenerator\Domain\Migration\Writer\Constants;
+use Pentacom\Repgenerator\Helpers\Constants;
 
 /**
  * Trait Stringable

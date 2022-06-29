@@ -2,8 +2,8 @@
 
 namespace Pentacom\Repgenerator\Domain\Migration\Blueprint;
 
-use Pentacom\Repgenerator\Domain\Migration\Blueprint\Traits\Stringable;
-use Pentacom\Repgenerator\Domain\Migration\Writer\Constants;
+use Pentacom\Repgenerator\Traits\Stringable;
+use Pentacom\Repgenerator\Helpers\Constants;
 
 /**
  * Class SchemaBlueprint

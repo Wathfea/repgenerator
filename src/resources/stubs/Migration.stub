@@ -11,6 +11,9 @@ return new class extends Migration {
     public function up()
     {
         {{ up }}
+
+        $repository = app(CrudMenuRepositoryService::class);
+        $repository->save(['name' => '{{ name }}']);
     }
 
     /**

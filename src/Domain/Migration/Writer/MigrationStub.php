@@ -27,15 +27,17 @@ class MigrationStub
      * @param  string  $use
      * @param  string  $upContent  Content for migration `up`.
      * @param  string  $downContent  Content for migration `down`.
+     * @param  string  $name
      * @return string Migration content.
      */
-    public function populateStub(string $stub, string $use, string $upContent, string $downContent): string
+    public function populateStub(string $stub, string $use, string $upContent, string $downContent, string $name): string
     {
         $content = $stub;
         $replace = [
             '{{ use }}'   => $use,
             '{{ up }}'    => $upContent,
             '{{ down }}'  => $downContent,
+            '{{ name }}'  => $name,
         ];
         return str_replace(array_keys($replace), $replace, $content);
     }

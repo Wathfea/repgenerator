@@ -1,11 +1,11 @@
-    public function {{foreign}}{{foreignColumnName}}s(array ${{foreign}}{{foreignColumnName}}s) {
-        $this->builder->whereHas('{{foreign}}s', function(Builder ${{foreign}}Builder) use (${{foreign}}{{foreignColumnName}}s) {
-            ${{foreign}}Builder->whereIn('id', ${{foreign}}{{foreignColumnName}}s);
-        });
-    }
+public function {{foreign}}{{foreignColumnName}}s(array ${{foreign}}{{foreignColumnName}}s) {
+    $this->builder->whereHas('{{foreign}}s', function(Builder ${{foreign}}Builder) use (${{foreign}}{{foreignColumnName}}s) {
+        ${{foreign}}Builder->whereIn('id', ${{foreign}}{{foreignColumnName}}s);
+    });
+}
 
-    public function {{foreign}}{{foreignColumnName}}({{foreignColumnType}} ${{foreign}}{{foreignColumnName}}) {
-        $this->builder->whereHas('{{foreign}}s', function(Builder ${{foreign}}Builder) use (${{foreign}}{{foreignColumnName}}) {
-            ${{foreign}}Builder->where('id', ${{foreign}}{{foreignColumnName}});
-        });
-    }
+public function {{foreign}}{{foreignColumnName}}({{foreignColumnType}} ${{foreign}}{{foreignColumnName}}) {
+    $this->builder->whereHas('{{foreign}}s', function(Builder ${{foreign}}Builder) use (${{foreign}}{{foreignColumnName}}) {
+        ${{foreign}}Builder->where('id', ${{foreign}}{{foreignColumnName}});
+    });
+}

@@ -3,18 +3,32 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
-### VUE3 - Tailwind
+- Factory and seeder generation for CRUD
+- Composite index generation
+- How it works section
+- CRUD UI in other Frontend frameworks
+- CSV import
+
+
+## [Unreleased]
+
+
 - CRUD create
 - CRUD edit
 - CRUD delete
 - CRUD search
 
-- Factory and seeder generation for CRUD
-- Composite index generation
-- How it works section
-- CRUD UI in other Frontend frameworks
-
-## [Unreleased]
+## [1.3.2] - 2022-06-29
+### Fixed
+- Error during index generation
+- Enum generation
+## Added
+- Search to listing page
+- Migration automatic run
+- CRUD create
+- CRUD edit
+- CRUD delete
+- CRUD search
 
 ## [1.3.1] - 2022-06-23
 ### Fixed

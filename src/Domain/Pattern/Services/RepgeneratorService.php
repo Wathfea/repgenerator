@@ -2,7 +2,11 @@
 
 namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 
+use App\Domain\CrudMenu\Providers\CrudMenuServiceProvider;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
+use Pentacom\Repgenerator\Traits\Stringable;
+use Pentacom\Repgenerator\Helpers\Constants;
 USE Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
 use Pentacom\Repgenerator\Domain\Pattern\Helpers\CharacterCounterStore;
 
@@ -11,6 +15,7 @@ use Pentacom\Repgenerator\Domain\Pattern\Helpers\CharacterCounterStore;
  */
 class RepgeneratorService
 {
+    use Stringable;
 
     protected string $cmd;
     protected array $generatedFiles = [];
@@ -24,14 +29,17 @@ class RepgeneratorService
     }
 
     /**
-     * @param RepgeneratorStubService $repgeneratorStubService
-     * @param RepgeneratorStaticFilesService $repgeneratorStaticFilesService
-     * @param RepgeneratorFilterService $repgeneratorFilterService
+     * @param  RepgeneratorStubService  $repgeneratorStubService
+     * @param  RepgeneratorStaticFilesService  $repgeneratorStaticFilesService
+     * @param  RepgeneratorFilterService  $repgeneratorFilterService
+     * @param  RepgeneratorFrontendService  $repgeneratorFrontendService
      */
     public function __construct(
         private RepgeneratorStubService $repgeneratorStubService,
         private RepgeneratorStaticFilesService $repgeneratorStaticFilesService,
-        private RepgeneratorFilterService $repgeneratorFilterService) {
+        private RepgeneratorFilterService $repgeneratorFilterService,
+        private RepgeneratorFrontendService $repgeneratorFrontendService
+    ) {
 
     }
 
@@ -55,7 +63,7 @@ class RepgeneratorService
      * @param array $foreigns
      * @param $callback
      */
-    private function generateFilters(string $name, array $columns, array $foreigns, $callback) {
+    private function filters(string $name, array $columns, array $foreigns, $callback) {
         $this->generatedFiles[] = $this->repgeneratorFilterService->generate($name, $columns, $foreigns);
         $callback('Filter is ready!');
     }
@@ -65,7 +73,8 @@ class RepgeneratorService
      * @param  bool  $generateModel
      * @param  bool  $generatePivot
      * @param  false  $readOnly
-     * @param  array  $columns
+     * @param  string|null  $migrationName
+     * @param  RepgeneratorColumnAdapter[]  $columns
      * @param  array  $foreigns
      * @param $callback
      * @param  false  $fromConsole
@@ -75,12 +84,12 @@ class RepgeneratorService
         bool $generateModel,
         bool $generatePivot,
         bool $readOnly,
+        string $migrationName = null,
         array $columns,
         array $foreigns,
         $callback,
         bool $fromConsole = false
     ) {
-
         $this->createDirectories();
         $callback('Directories generated!');
 
@@ -111,16 +120,15 @@ class RepgeneratorService
         $this->provider($name);
         $callback('Provider is ready!');
 
-        $this->resource($name);
+        $this->resource($name, $columns);
         $callback('Resource is ready!');
 
         //$this->factory($name, $columns);
         //$callback('Factory is ready!');
 
-        $this->generateFilters($name, $columns, $foreigns, $callback);
+        $this->filters($name, $columns, $foreigns, $callback);
 
-        $this->frontend($name, $columns);
-        $callback('Frontend component is ready!');
+        $this->frontend($name, $columns, $callback);
 
         if ( $fromConsole ) {
             $this->cmd->newLine();
@@ -144,6 +152,15 @@ class RepgeneratorService
         $hours = floor($minutes / 60);
 
         $callback("If we count an average 5 char word and an average 25 WPM we saved you around {$minutes} minutes -> {$hours} hours");
+
+        if($migrationName) {
+            app()->register(CrudMenuServiceProvider::class);
+            Artisan::call('migrate',
+                [
+                    '--path' => '/database/migrations/'.$migrationName,
+                    '--force' => true]);
+            $callback($migrationName.' migration migrated to database!');
+        }
     }
 
 
@@ -157,7 +174,9 @@ class RepgeneratorService
             [
                 '{{modelName}}'
             ],
-            [$name],
+            [
+                $name
+            ],
             $this->repgeneratorStubService->getStub('Model')
         );
 
@@ -404,12 +423,68 @@ class RepgeneratorService
 
     /**
      * @param  string  $name
+     * @param  RepgeneratorColumnAdapter[]  $columns
      */
-    private function resource(string $name)
+    private function resource(string $name, array $columns)
     {
+        $routeName =  strtolower(Str::plural($name));
+
+        $actions = ['index', 'store', 'update', 'show', 'destroy'];
+
+        $lines[] = "'actions' => [";
+        foreach ( $actions as $route ) {
+            $templete = match ($route) {
+                'index', 'store' => $this->repgeneratorStubService->getStub('actionRoute'),
+                'update', 'show', 'destroy' => $this->repgeneratorStubService->getStub('actionRouteWithParam'),
+            };
+
+            $actionRouteTemplate = str_replace(
+                [
+                    '{{route}}', '{{routeName}}'
+                ],
+                [
+                    $route, $routeName
+                ],
+                $templete
+            );
+            $lines[] = Constants::TAB.Constants::TAB.$actionRouteTemplate;
+        }
+        $lines[] = "],";
+
+        $use = "";
+        foreach ( $columns as $column ) {
+            if ( $column->references ) {
+                $referenceSingular = Str::singular($column->references['name']);
+                $referenceName = ucfirst($referenceSingular);
+                $use .= "use App\Domain\\" . $referenceName . "\\Resources\\" .  $referenceName . "Resource;\n";
+                $resourceElementTemplate = str_replace(
+                    [
+                        '{{field}}',
+                        '{{referenceName}}',
+                        '{{referenceSingular}}',
+                    ],
+                    [
+                        $column->name,
+                        $referenceName,
+                        $referenceSingular
+                    ], $this->repgeneratorStubService->getStub('resourceElementRelation'));
+            } else {
+                $resourceElementTemplate = str_replace(['{{field}}'], [$column->name], $this->repgeneratorStubService->getStub('resourceElement'));
+            }
+            $lines[] = Constants::TAB.Constants::TAB.$resourceElementTemplate;
+        }
+
         $resourceTemplate = str_replace(
-            ['{{modelName}}'],
-            [$name],
+            [
+                '{{modelName}}',
+                '{{modelResourceArray}}',
+                '{{use}}'
+            ],
+            [
+                $name,
+                $this->implodeLines($lines, 2),
+                $use
+            ],
             $this->repgeneratorStubService->getStub('Resource')
         );
 
@@ -427,9 +502,11 @@ class RepgeneratorService
         ];
     }
 
-
-
-    public function factory(string $name, array $columns)
+    /**
+     * @param  string  $name
+     * @param  array  $columns
+     */
+    private function factory(string $name, array $columns)
     {
         $columnFactoriesString = '';
 
@@ -455,56 +532,18 @@ class RepgeneratorService
 
     }
 
+    /**
+     * @param  string  $name
+     * @param  array  $columns
+     * @param $callback
+     */
+    private function frontend(string $name, array $columns, $callback) {
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateIndex($name, $columns);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable($name);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateCreate($name, $columns);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateEdit($name, $columns);
 
-    public function frontend(string $name, array $columns) {
-
-        $columnsToShowOnTable = [];
-        /**
-         * @var  $column
-         * @var  RepgeneratorColumnAdapter $data
-         */
-        foreach ( $columns as $data ) {
-            if ( $data->showOnTable  ) {
-                $nameParts = explode('_', $data->name);
-                foreach ( $nameParts as $index => $namePart ) {
-                    $nameParts[$index] = ucfirst(strtolower($namePart));
-                }
-                $columnsToShowOnTable[implode(' ', $nameParts)] = $data->name;
-            }
-        }
-        $indexTemplate = str_replace(
-            [
-                '{{modelName}}',
-                '{{modelNames}}',
-                '{{modelColumns}}',
-                '{{modelRoute}}',
-                '{{baseUrl}}'
-            ],
-            [
-                $name,
-                $name . 's',
-                json_encode($columnsToShowOnTable),
-                strtolower($name.'s'),
-                url('')
-            ],
-            $this->repgeneratorStubService->getStub('Frontend/Vue/index')
-        );
-
-        if (!file_exists($path = resource_path("js"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = resource_path("js/" . $name))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = resource_path("js/" . $name . '/vue'))) {
-            mkdir($path, 0777, true);
-        }
-
-        file_put_contents($path = resource_path("js/{$name}/vue/index.vue"), $indexTemplate);
-
-        CharacterCounterStore::addFileCharacterCount($path);
+        $callback('Frontend components are ready!');
     }
 
     /**

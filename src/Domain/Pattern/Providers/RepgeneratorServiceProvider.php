@@ -6,6 +6,7 @@ use Pentacom\Repgenerator\Console\MigrationGenerator;
 use Pentacom\Repgenerator\Console\PatternGenerator;
 use Pentacom\Repgenerator\Console\PatternGeneratorInit;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorFilterService;
+use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorFrontendService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorStaticFilesService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorStubService;
@@ -48,11 +49,18 @@ class RepgeneratorServiceProvider extends ServiceProvider
             ));
         });
 
+        $this->app->singleton(RepgeneratorFrontendService::class, function() {
+            return (new RepgeneratorFrontendService(
+                app(RepgeneratorStubService::class)
+            ));
+        });
+
         $this->app->singleton(RepgeneratorService::class, function() {
             return (new RepgeneratorService(
                 app(RepgeneratorStubService::class),
                 app(RepgeneratorStaticFilesService::class),
-                app(RepgeneratorFilterService::class)
+                app(RepgeneratorFilterService::class),
+                app(RepgeneratorFrontendService::class)
             ));
         });
 
