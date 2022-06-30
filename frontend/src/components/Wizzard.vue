@@ -181,7 +181,8 @@ const onAddColumn = () => {
         'comment': '',
         'unsigned': false,
         'index': [],
-        'show_on_table' : true
+        'show_on_table' : true,
+        'uploads_files_path' : ''
     });
 }
 const onRemoveColumn = (data) => {
