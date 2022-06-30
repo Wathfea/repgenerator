@@ -39,7 +39,8 @@ class {{modelName}}ServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton({{modelName}}Service::class, function () {
-            return new {{modelName}}Service(app({{modelName}}RepositoryService::class));
+            return (new {{modelName}}Service(app({{modelName}}RepositoryService::class)))
+                {{serviceSetters}};
         });
 
         $this->app->singleton({{modelName}}ApiController::class, function () {

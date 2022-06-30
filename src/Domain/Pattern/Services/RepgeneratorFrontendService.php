@@ -145,17 +145,22 @@ class RepgeneratorFrontendService
                 }
                 $field = implode(' ', $nameParts);
 
-                $template = match ($data->type) {
-                    'id', 'integer', 'string', 'bigIncrements', 'bigInteger', 'binary', 'char', 'dateTimeTz', 'dateTime', 'date', 'decimal',
-                    'double', 'float', 'geometryCollection', 'geometry', 'increments', 'ipAddress', 'mediumIncrements', 'mediumInteger', 'nullableTimestamps',
-                    'rememberToken', 'set', 'smallIncrements', 'smallInteger', 'softDeletesTz', 'softDeletes', 'timeTz', 'time',
-                    'timestampTz', 'timestamp', 'timestampsTz', 'timestamps', 'tinyIncrements', 'tinyInteger', 'unsignedBigInteger', 'unsignedDecimal',
-                    'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger', 'unsignedTinyInteger', 'uuidMorphs', 'uuid', 'year' => 'inputText',
-                    'text', 'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumText', 'multiLineString',
-                    'multiPoint', 'multiPolygon', 'point', 'polygon','tinyText' => 'inputTextarea',
-                    'enum' => 'inputOption',
-                    'boolean' => 'inputCheckbox',
-                };
+                if ( $data->fileUploadLocation ) {
+                    $template = 'inputFile';
+                } else {
+                    $template = match ($data->type) {
+                        'id', 'integer', 'string', 'bigIncrements', 'bigInteger', 'binary', 'char', 'dateTimeTz', 'dateTime', 'date', 'decimal',
+                        'double', 'float', 'geometryCollection', 'geometry', 'increments', 'ipAddress', 'mediumIncrements', 'mediumInteger', 'nullableTimestamps',
+                        'rememberToken', 'set', 'smallIncrements', 'smallInteger', 'softDeletesTz', 'softDeletes', 'timeTz', 'time',
+                        'timestampTz', 'timestamp', 'timestampsTz', 'timestamps', 'tinyIncrements', 'tinyInteger', 'unsignedBigInteger', 'unsignedDecimal',
+                        'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger', 'unsignedTinyInteger', 'uuidMorphs', 'uuid', 'year' => 'inputText',
+                        'text', 'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumText', 'multiLineString',
+                        'multiPoint', 'multiPolygon', 'point', 'polygon','tinyText' => 'inputTextarea',
+                        'enum' => 'inputOption',
+                        'boolean' => 'inputCheckbox',
+                    };
+                }
+
 
                 if($template == 'inputOption') {
                     $selectOptions = [];
