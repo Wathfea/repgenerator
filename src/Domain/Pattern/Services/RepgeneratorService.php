@@ -69,15 +69,16 @@ class RepgeneratorService
     }
 
     /**
-     * @param  string  $name
-     * @param  bool  $generateModel
-     * @param  bool  $generatePivot
-     * @param  false  $readOnly
-     * @param  string|null  $migrationName
-     * @param  RepgeneratorColumnAdapter[]  $columns
-     * @param  array  $foreigns
+     * @param string $name
+     * @param bool $generateModel
+     * @param bool $generatePivot
+     * @param false $readOnly
+     * @param string $uploadsFilesTo
+     * @param string|null $migrationName
+     * @param RepgeneratorColumnAdapter[] $columns
+     * @param array $foreigns
      * @param $callback
-     * @param  false  $fromConsole
+     * @param false $fromConsole
      */
     public function generate(
         string $name,

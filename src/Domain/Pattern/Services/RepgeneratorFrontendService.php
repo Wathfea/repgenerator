@@ -146,7 +146,7 @@ class RepgeneratorFrontendService
                 $field = implode(' ', $nameParts);
 
                 if ( $data->fileUploadLocation ) {
-
+                    $template = 'inputFile';
                 } else {
                     $template = match ($data->type) {
                         'id', 'integer', 'string', 'bigIncrements', 'bigInteger', 'binary', 'char', 'dateTimeTz', 'dateTime', 'date', 'decimal',
