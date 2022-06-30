@@ -194,7 +194,22 @@ class RepgeneratorFrontendService
                         ],
                         $this->repgeneratorStubService->getStub('Frontend/Vue/fields/inputSelect')
                     );
-                } else {
+                } elseif ($template == 'inputFile') {
+                    $createFormStr[] = str_replace(
+                        [
+                            '{{field}}',
+                            '{{fieldLower}}',
+                            '{{modelNameSingularLowerCase}}',
+                        ],
+                        [
+                            $field,
+                            $data->name,
+                            strtolower($name)
+                        ],
+                        $this->repgeneratorStubService->getStub('Frontend/Vue/fields/inputFile')
+                    );
+                }
+                else {
                     $createFormStr[] = str_replace(
                         [
                             '{{field}}',

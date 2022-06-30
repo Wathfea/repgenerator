@@ -69,23 +69,23 @@ class RepgeneratorService
     }
 
     /**
-     * @param string $name
-     * @param bool $generateModel
-     * @param bool $generatePivot
-     * @param false $readOnly
-     * @param string $uploadsFilesTo
-     * @param string|null $migrationName
-     * @param RepgeneratorColumnAdapter[] $columns
-     * @param array $foreigns
+     * @param  string  $name
+     * @param  bool  $generateModel
+     * @param  bool  $generatePivot
+     * @param  false  $readOnly
+     * @param  string|null  $uploadsFilesTo
+     * @param  string|null  $migrationName
+     * @param  RepgeneratorColumnAdapter[]  $columns
+     * @param  array  $foreigns
      * @param $callback
-     * @param false $fromConsole
+     * @param  false  $fromConsole
      */
     public function generate(
         string $name,
         bool $generateModel,
         bool $generatePivot,
         bool $readOnly,
-        string $uploadsFilesTo,
+        string $uploadsFilesTo = null,
         string $migrationName = null,
         array $columns,
         array $foreigns,
@@ -603,6 +603,10 @@ class RepgeneratorService
         }
 
         if (!file_exists($path = app_path("Abstraction/Enums"))) {
+            mkdir($path, 0777, true);
+        }
+
+        if (!file_exists($path = app_path('Abstraction/Traits'))) {
             mkdir($path, 0777, true);
         }
     }
