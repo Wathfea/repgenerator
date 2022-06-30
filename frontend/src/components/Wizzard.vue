@@ -117,7 +117,8 @@ const getDefaultColumns = () => {
             'comment': '',
             'unsigned': false,
             'index': [],
-            'show_on_table' : true
+            'show_on_table' : true,
+            'uploads_files_path' : '',
         },
         {
             'name' : 'created_at',
@@ -136,7 +137,8 @@ const getDefaultColumns = () => {
             'comment': '',
             'unsigned': false,
             'index': [],
-            'show_on_table' : true
+            'show_on_table' : true,
+            'uploads_files_path' : '',
         },
         {
             'name' : 'updated_at',
@@ -155,7 +157,8 @@ const getDefaultColumns = () => {
             'comment': '',
             'unsigned': false,
             'index': [],
-            'show_on_table' : false
+            'show_on_table' : false,
+            'uploads_files_path' : '',
         }
     ]
 }
