@@ -95,6 +95,9 @@ class RepgeneratorService
 
         $this->generateStaticFiles($callback);
 
+        //Make sure name is singular
+        $name = Str::singular($name);
+
         if ($generateModel) {
             if($generatePivot) {
                 $this->modelPivot($name);

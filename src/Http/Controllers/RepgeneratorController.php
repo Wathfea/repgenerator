@@ -90,7 +90,7 @@ class RepgeneratorController extends Controller
         $table->setName($request->get('name'));
         $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, $indexes, $foreigns, $request->get('name'));
         $this->repgeneratorService->generate(
-            $request->get('name'),
+            $this->getTransformedName($request->get('name')),
             $request->get('model', false),
             $request->get('pivot', false),
             $request->get('read_only', false),
@@ -103,8 +103,6 @@ class RepgeneratorController extends Controller
 
         return response()->json(array_filter($messages, fn($value) => !is_null($value) && $value !== ''));
     }
-
-
 
     /**
      * @throws Exception
@@ -166,5 +164,14 @@ class RepgeneratorController extends Controller
         }
 
         return $messages;
+    }
+
+    /**
+     * @param  string  $name
+     * @return array|string|string[]
+     */
+    private function getTransformedName(string $name): string|array
+    {
+        return str_replace(' ', '', Str::singular($name));
     }
 }

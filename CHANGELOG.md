@@ -3,6 +3,14 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
+- Make sure name is transformed 
+  - Rules: 
+    - singular
+    - remove space
+    - not registered already
+    - for migration: 
+      - replace space to _
+      - lower case
 - Factory and seeder generation for CRUD
 - Composite index generation
 - How it works section

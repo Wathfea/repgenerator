@@ -19,10 +19,7 @@ class Table
      */
     public function getName(): string
     {
-        $plural = Str::plural($this->name);
-        $smallCase = Str::lower($plural);
-
-        return $smallCase;
+        return Str::lower(str_replace(' ', '_',Str::plural($this->name)));
     }
 
     /**
