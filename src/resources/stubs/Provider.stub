@@ -20,11 +20,9 @@ class {{modelName}}ServiceProvider extends ServiceProvider
     /**
      * The controller namespace for the application.
      *
-     * When present, controller route declarations will automatically be prefixed with this namespace.
-     *
      * @var string|null
      */
-     protected string $namespace = 'App\\Domain\\{{modelName}}\\Controllers\\Api\\v1';
+     protected $namespace = 'App\\Domain\\{{modelName}}\\Controllers\\Api\\v1';
 
     /**
      * @return void
