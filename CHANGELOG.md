@@ -18,6 +18,14 @@ All notable changes to `repgenerator` will be documented in this file
 - CRUD delete
 - CRUD search
 
+## [1.3.4] - 2022-06-30
+### Fixed
+- Namespace typeing error fixed
+
+## [1.3.3] - 2022-06-30
+### Fixed
+- Values type error for column adapter
+
 ## [1.3.2] - 2022-06-29
 ### Fixed
 - Error during index generation

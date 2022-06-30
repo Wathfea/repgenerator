@@ -52,7 +52,7 @@ class RepgeneratorController extends Controller
                 $data['precision'],
                 $data['scale'],
                 $data['unsigned'],
-                explode(',', $data['values']),
+                empty($data['values']) ? null : explode(',', $data['values']),
                 $data['default'],
                 $data['index'], //Ezzel chainelt index jön létre, nem alkalmas composite felvételre később ezt ha bekerül a composite külön kell kezelni majd
                 $data['show_on_table'],
