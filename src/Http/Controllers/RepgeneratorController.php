@@ -58,6 +58,8 @@ class RepgeneratorController extends Controller
                 $data['show_on_table'],
                 $data['reference'],
                 $data['foreign'],
+                $data['uploads_files_path'],
+                false
             );
 
             $columnIndex = [];

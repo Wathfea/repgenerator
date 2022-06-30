@@ -133,6 +133,7 @@ class RepgeneratorFrontendService
     {
         $createFormStr = [];
         $columnListStr = [];
+
         /**
          * @var  $column
          * @var  RepgeneratorColumnAdapter $data
