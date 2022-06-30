@@ -44,6 +44,8 @@ class RepgeneratorColumnAdapter
         public ?bool $showOnTable = false,
         public ?array $references = null,
         public ?string $foreign = null,
+        public ?string $fileUploadLocation = null,
+        public ?bool $isMultiFileUpload = false,
     ) {
 
     }

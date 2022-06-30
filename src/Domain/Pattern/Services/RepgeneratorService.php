@@ -84,6 +84,7 @@ class RepgeneratorService
         bool $generateModel,
         bool $generatePivot,
         bool $readOnly,
+        string $uploadsFilesTo,
         string $migrationName = null,
         array $columns,
         array $foreigns,
@@ -114,10 +115,10 @@ class RepgeneratorService
         $this->repositoryService($name, $generatePivot);
         $callback('Repository layer is ready!');
 
-        $this->service($name, $generatePivot);
+        $this->service($name, $generatePivot, $uploadsFilesTo);
         $callback('Controller service is ready!');
 
-        $this->provider($name);
+        $this->provider($name, false, $uploadsFilesTo);
         $callback('Provider is ready!');
 
         $this->resource($name, $columns);
@@ -350,23 +351,34 @@ class RepgeneratorService
     }
 
     /**
-     * @param  string  $name
-     * @param  bool  $generatePivot
+     * @param string $name
+     * @param bool $generatePivot
+     * @param string|null $uploadsFilesTo
      */
-    private function service(string $name, bool $generatePivot = false)
+    private function service(string $name, bool $generatePivot = false, string $uploadsFilesTo = null)
     {
+        $use = "";
+        $traits = "";
+        if ( $uploadsFilesTo ) {
+            $use .= "use App\Abstraction\Traits\UploadsFiles;\n";
+            $traits .= "use UploadsFiles;\n";
+        }
         $serviceTemplate = str_replace(
             [
                 '{{modelName}}',
                 '{{modelNamePluralLowerCase}}',
                 '{{modelNameSingularLowerCase}}',
                 '{{modelType}}',
+                '{{use}}',
+                '{{traits}}',
             ],
             [
                 $name,
                 strtolower(Str::plural($name)),
                 strtolower($name),
-                $generatePivot ? 'Pivot' : 'Model'
+                $generatePivot ? 'Pivot' : 'Model',
+                $use,
+                $traits
             ],
             $this->repgeneratorStubService->getStub('Service')
         );
@@ -386,23 +398,30 @@ class RepgeneratorService
     }
 
     /**
-     * @param  string  $name
-     * @param  bool  $isPivot
+     * @param string $name
+     * @param bool $isPivot
+     * @param string|null $uploadsFilesTo
      */
-    private function provider(string $name, bool $isPivot = false)
+    private function provider(string $name, bool $isPivot = false, string $uploadsFilesTo = null)
     {
+        $serviceSetters = "";
+        if ( $uploadsFilesTo ) {
+            $serviceSetters .= "->setFilesLocation('$uploadsFilesTo')";
+        }
         $providerTemplate = str_replace(
             [
                 '{{modelName}}',
                 '{{modelNamePluralLowerCase}}',
                 '{{modelNameSingularLowerCase}}',
-                '{{repoParams}}'
+                '{{repoParams}}',
+                '{{serviceSetters}}'
             ],
             [
                 $name,
                 strtolower(Str::plural($name)),
                 strtolower($name),
-                $isPivot ? 'TODO::class' : $name.'::class'
+                $isPivot ? 'TODO::class' : $name.'::class',
+                $serviceSetters
             ],
             $this->repgeneratorStubService->getStub('Provider')
         );
