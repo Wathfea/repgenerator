@@ -78,6 +78,14 @@ class RepgeneratorController extends Controller
         $fileUpload = [];
 
         foreach ($request->get('columns') as $data) {
+            if ($data['uploads_files_path'] != '') {
+                $fileUpload = [
+                    'path' => $data['uploads_files_path'],
+                    'field' => $data['name']
+                ];
+                continue;
+            }
+
             $columns[] = new RepgeneratorColumnAdapter(
                 $data['name'],
                 $data['type'],
@@ -114,13 +122,6 @@ class RepgeneratorController extends Controller
                     'on' => $data['foreign'],
                     'onUpdate' => $data['cascade'] ? 'cascade' : null,
                     'onDelete' => $data['cascade'] ? 'cascade' : null,
-                ];
-            }
-
-            if ($data['uploads_files_path'] != '') {
-                $fileUpload = [
-                    'path' => $data['uploads_files_path'],
-                    'field' => $data['name']
                 ];
             }
         }
