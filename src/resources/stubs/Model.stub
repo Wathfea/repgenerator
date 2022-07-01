@@ -6,6 +6,7 @@ use App\Domain\{{modelName}}\Factories\{{modelName}}Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Kblais\QueryFilter\Filterable;
 use App\Abstraction\Models\BaseModel;
+{{use}}
 
 class {{modelName}} extends BaseModel
 {
@@ -23,4 +24,6 @@ class {{modelName}} extends BaseModel
     {
         return {{modelName}}Factory::new();
     }
+
+    {{relation}}
 }

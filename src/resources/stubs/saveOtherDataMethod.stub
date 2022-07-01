@@ -1,0 +1,9 @@
+    /**
+     * @param Model $model
+     * @param array $data
+     * @return bool
+     */
+    public function saveOtherData(Model $model, array $data): bool
+    {
+        return $this->uploadFiles($model, $data, '{{field}}', 'files');
+    }

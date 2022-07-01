@@ -42,10 +42,15 @@ export default {
             await store{{modelNameSingular}}({ ...{{modelNameSingularLowerCase}} })
         }
 
+        const handleFileUpload = async (event) => {
+            {{modelNameSingularLowerCase}}.image = event.target.files[0]
+        }
+
         return {
             {{modelNameSingularLowerCase}},
             errors,
-            save{{modelNameSingular}}
+            save{{modelNameSingular}},
+            handleFileUpload
         }
     }
 }

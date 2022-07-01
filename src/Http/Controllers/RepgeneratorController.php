@@ -4,15 +4,15 @@ namespace Pentacom\Repgenerator\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Doctrine\DBAL\Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
-use Pentacom\Repgenerator\Http\Requests\GenerationRequest;
 use Pentacom\Repgenerator\Domain\Migration\Blueprint\Table;
 use Pentacom\Repgenerator\Domain\Migration\MigrationGeneratorService;
-use Illuminate\Http\JsonResponse;
+use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorService;
+use Pentacom\Repgenerator\Http\Requests\GenerationRequest;
 
 /**
  * Class RepgeneratorController
@@ -23,11 +23,13 @@ class RepgeneratorController extends Controller
     const CRUD_MENU_NAME = 'CrudMenu';
 
     /**
-     * @param MigrationGeneratorService $migrationGeneratorService
-     * @param RepgeneratorService $repgeneratorService
+     * @param  MigrationGeneratorService  $migrationGeneratorService
+     * @param  RepgeneratorService  $repgeneratorService
      */
-    public function __construct(private MigrationGeneratorService $migrationGeneratorService, private RepgeneratorService $repgeneratorService)
-    {
+    public function __construct(
+        private MigrationGeneratorService $migrationGeneratorService,
+        private RepgeneratorService $repgeneratorService
+    ) {
     }
 
     /**
@@ -35,12 +37,45 @@ class RepgeneratorController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    public function generate(GenerationRequest $request): JsonResponse {
-        $messages = [];
+    public function generate(GenerationRequest $request): JsonResponse
+    {
+        //Setup fields for generation and migration
+        list($columns, $foreigns, $fileUpload) = $this->fieldsSetup($request);
+        $indexes = []; //Itt kell átadni majd ha composite akarunk készíteni külön sorban nem chainelve.
+
+        //Migration generation setup
+        /** @var Table $table */
+        $table = app(Table::class);
+        $this->migrationGeneratorService->setup(config('pentacom.migration_target_path'), Carbon::now());
+
+
+        //Detect if CrudMenus exists or we need to create it
+        $messages[] = $this->shouldCreateCrudMenuTable($table);
+        sleep(1);
+
+        //Generate migration for the main model
+        $messages[] = $this->generateMainMigrationAndDomain($table, $request, $columns, $indexes, $foreigns, $messages,
+            $fileUpload);
+        sleep(1);
+
+        //If fileUploadPath is not empty we need to create the migration and the Domain for the relationship also
+        $messages[] = $this->generateFileRelationMigration($table, $request);
+
+        $messages = collect($messages)->flatten()->toArray();
+        return response()->json(array_filter($messages, fn($value) => !is_null($value) && $value !== ''));
+    }
+
+    /**
+     * @param  GenerationRequest  $request
+     * @return array
+     */
+    private function fieldsSetup(GenerationRequest $request): array
+    {
         $columns = [];
         $foreigns = [];
+        $fileUpload = [];
 
-        foreach ( $request->get('columns') as $data ) {
+        foreach ($request->get('columns') as $data) {
             $columns[] = new RepgeneratorColumnAdapter(
                 $data['name'],
                 $data['type'],
@@ -54,7 +89,8 @@ class RepgeneratorController extends Controller
                 $data['unsigned'],
                 empty($data['values']) ? null : explode(',', $data['values']),
                 $data['default'],
-                $data['index'], //Ezzel chainelt index jön létre, nem alkalmas composite felvételre később ezt ha bekerül a composite külön kell kezelni majd
+                $data['index'],
+                //Ezzel chainelt index jön létre, nem alkalmas composite felvételre később ezt ha bekerül a composite külön kell kezelni majd
                 $data['show_on_table'],
                 $data['reference'],
                 $data['foreign'],
@@ -63,13 +99,13 @@ class RepgeneratorController extends Controller
             );
 
             $columnIndex = [];
-            if($data['index'] != null) {
+            if ($data['index'] != null) {
                 foreach ($data['index'] as $cIndex) {
                     $columnIndex['type'] = $cIndex;
                 }
             }
 
-            if($data['foreign']) {
+            if ($data['foreign']) {
                 $foreigns[] = [
                     'column' => $data['name'],
                     'reference' => $data['reference'],
@@ -78,53 +114,15 @@ class RepgeneratorController extends Controller
                     'onDelete' => $data['cascade'] ? 'cascade' : null,
                 ];
             }
-        }
 
-        /* Migration Creation */
-        $table = app(Table::class);
-        $this->migrationGeneratorService->setup(config('pentacom.migration_target_path'), Carbon::now());
-
-        $indexes = []; //Itt kell átadni majd ha composite akarunk készíteni külön sorban nem chainelve.
-
-        //Detect if CrudMenus exists or we need to create it
-        $messages = $this->shouldCreateCrudMenuTable($table);
-
-        $table->setName($request->get('name'));
-        $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, $indexes, $foreigns, $request->get('name'));
-        $this->repgeneratorService->generate(
-            $this->getTransformedName($request->get('name')),
-            $request->get('model', false),
-            $request->get('pivot', false),
-            $request->get('read_only', false),
-            $request->get('uploads_files_path', false),
-            $migrationName,
-            $columns,
-            $foreigns,
-            function($msg) use (&$messages) {
-                $messages[] = $msg;
-            });
-
-        return response()->json(array_filter($messages, fn($value) => !is_null($value) && $value !== ''));
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function getTables(): JsonResponse
-    {
-        $tables = DB::connection()->getDoctrineSchemaManager()->listTableNames();
-        foreach ( $tables as $index => $tableName ) {
-            $columnNames = array_keys(DB::connection()->getDoctrineSchemaManager()->listTableColumns($tableName));
-            $columnData = [];
-            foreach ( $columnNames as $columnName ) {
-                $columnData[$columnName] = DB::connection()->getDoctrineColumn($tableName,$columnName)->getType()->getName();
+            if ($data['uploads_files_path'] != '') {
+                $fileUpload = [
+                    'path' => $data['uploads_files_path'],
+                    'field' => $data['name']
+                ];
             }
-            $tables[$index] = [
-                'name' => $tableName,
-                'columns' => $columnData,
-            ];
         }
-        return response()->json($tables);
+        return array($columns, $foreigns, $fileUpload);
     }
 
     /**
@@ -158,24 +156,175 @@ class RepgeneratorController extends Controller
                 true,
                 false,
                 false,
-                null,
-                $migrationName,
                 $columns,
                 [],
                 function ($msg) use (&$messages) {
                     $messages[] = null;
-                });
+                },
+                false,
+                null,
+                $migrationName
+            );
         }
 
         return $messages;
     }
 
     /**
+     * @param  Table  $table
+     * @param  GenerationRequest  $request
+     * @param  mixed  $columns
+     * @param  array  $indexes
+     * @param  mixed  $foreigns
+     * @param  array  $messages
+     * @param  array  $fileUpload
+     * @return array
+     */
+    private function generateMainMigrationAndDomain(
+        Table $table,
+        GenerationRequest $request,
+        mixed $columns,
+        array $indexes,
+        mixed $foreigns,
+        array $messages,
+        array $fileUpload
+    ): array {
+        $table->setName($request->get('name'));
+
+        $migrationName = $this->migrationGeneratorService->generateMigrationFiles(
+            $table,
+            $columns,
+            $indexes,
+            $foreigns,
+            $request->get('name')
+        );
+
+        if(!empty($fileUpload)) {
+            $originalTable = $table->getName();
+            $originalTableSingular = Str::singular($originalTable);
+
+            $foreigns[] = [
+                'relation_type' => 'HasMany',
+                'related_model' => $request->get('name').'File',
+                'relation_name' => 'files',
+                'column' => $originalTableSingular.'_id',
+                'reference' => [
+                    'name' => $originalTable
+                ],
+                'on' => 'id',
+                'onUpdate' => null,
+                'onDelete' => null
+            ];
+        }
+
+        $this->repgeneratorService->generate(
+            $this->getTransformedName($request->get('name')),
+            $request->get('model', false),
+            $request->get('pivot', false),
+            $request->get('read_only', false),
+            $columns,
+            $foreigns,
+            function ($msg) use (&$messages) {
+                $messages[] = $msg;
+            },
+            false,
+            $fileUpload,
+            $migrationName,
+        );
+        return $messages;
+    }
+
+    /**
      * @param  string  $name
-     * @return array|string|string[]
+     * @return string|array
      */
     private function getTransformedName(string $name): string|array
     {
         return str_replace(' ', '', Str::singular($name));
+    }
+
+    /**
+     * @param  Table  $table
+     * @param  GenerationRequest  $request
+     * @return array
+     */
+    private function generateFileRelationMigration(
+        Table $table,
+        GenerationRequest $request
+    ): array {
+        $originalTable = $table->getName();
+        $originalTableSingular = Str::singular($originalTable);
+        $table->setName($request->get('name').'_files');
+        $columns = [];
+
+        $migrationColumns = [
+            'id' => 'id',
+            $originalTableSingular.'_id' => 'unsignedBigInteger',
+            'name' => 'string',
+            'created_at' => 'timestamp',
+            'updated_at' => 'timestamp',
+        ];
+
+        foreach ($migrationColumns as $name => $type) {
+            $columns[] = new RepgeneratorColumnAdapter($name, $type);
+        }
+
+        $foreigns[] = [
+            'relation_type' => 'BelongsTo',
+            'related_model' => $request->get('name'),
+            'column' => $originalTableSingular.'_id',
+            'reference' => [
+                'name' => $originalTable
+            ],
+            'on' => 'id',
+            'onUpdate' => null,
+            'onDelete' => null
+        ];
+
+        $migrationName = $this->migrationGeneratorService->generateMigrationFiles(
+            $table,
+            $columns,
+            [],
+            $foreigns,
+            $request->get('name').'Files'
+        );
+
+        $this->repgeneratorService->generate(
+            $this->getTransformedName($request->get('name').'Files'),
+            true,
+            false,
+            false,
+            $columns,
+            $foreigns,
+            function ($msg) use (&$messages) {
+                $messages[] = $msg;
+            },
+            false,
+            null,
+            $migrationName,
+        );
+
+        return $messages;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getTables(): JsonResponse
+    {
+        $tables = DB::connection()->getDoctrineSchemaManager()->listTableNames();
+        foreach ($tables as $index => $tableName) {
+            $columnNames = array_keys(DB::connection()->getDoctrineSchemaManager()->listTableColumns($tableName));
+            $columnData = [];
+            foreach ($columnNames as $columnName) {
+                $columnData[$columnName] = DB::connection()->getDoctrineColumn($tableName,
+                    $columnName)->getType()->getName();
+            }
+            $tables[$index] = [
+                'name' => $tableName,
+                'columns' => $columnData,
+            ];
+        }
+        return response()->json($tables);
     }
 }

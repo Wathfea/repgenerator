@@ -22,7 +22,7 @@ class {{modelName}}ServiceProvider extends ServiceProvider
      *
      * @var string|null
      */
-     protected $namespace = 'App\\Domain\\{{modelName}}\\Controllers\\Api\\v1';
+     protected string $namespace = 'App\\Domain\\{{modelName}}\\Controllers\\Api\\v1';
 
     /**
      * @return void
@@ -35,12 +35,12 @@ class {{modelName}}ServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton({{modelName}}RepositoryService::class, function () {
-            return (new {{modelName}}RepositoryService({{repoParams}}));
+            return (new {{modelName}}RepositoryService({{repoParams}}))
+                {{serviceSetters}};
         });
 
         $this->app->singleton({{modelName}}Service::class, function () {
-            return (new {{modelName}}Service(app({{modelName}}RepositoryService::class)))
-                {{serviceSetters}};
+            return (new {{modelName}}Service(app({{modelName}}RepositoryService::class)));
         });
 
         $this->app->singleton({{modelName}}ApiController::class, function () {
