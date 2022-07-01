@@ -58,8 +58,10 @@ class RepgeneratorController extends Controller
             $fileUpload);
         sleep(1);
 
-        //If fileUploadPath is not empty we need to create the migration and the Domain for the relationship also
-        $messages[] = $this->generateFileRelationMigration($table, $request);
+        //If $fileUpload is not empty we need to create the migration and the Domain for the relationship also
+        if(!empty($fileUpload)) {
+            $messages[] = $this->generateFileRelationMigration($table, $request);
+        }
 
         $messages = collect($messages)->flatten()->toArray();
         return response()->json(array_filter($messages, fn($value) => !is_null($value) && $value !== ''));
