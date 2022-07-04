@@ -83,7 +83,6 @@ class RepgeneratorController extends Controller
                     'path' => $data['uploads_files_path'],
                     'field' => $data['name']
                 ];
-                continue;
             }
 
             $columns[] = new RepgeneratorColumnAdapter(
