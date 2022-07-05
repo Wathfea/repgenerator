@@ -28,7 +28,7 @@ class RepgeneratorFrontendService
          * @var  RepgeneratorColumnAdapter $data
          */
         foreach ($columns as $data) {
-            if ($data->showOnTable) {
+            if ($data->showOnTable && $data->fileUploadLocation === null) {
                 $nameParts = explode('_', $data->name);
                 foreach ($nameParts as $index => $namePart) {
                     $nameParts[$index] = ucfirst(strtolower($namePart));

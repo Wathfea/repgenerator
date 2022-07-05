@@ -22,7 +22,7 @@ class {{modelName}}ServiceProvider extends ServiceProvider
      *
      * @var string|null
      */
-     protected string $namespace = 'App\\Domain\\{{modelName}}\\Controllers\\Api\\v1';
+     protected $namespace = 'App\\Domain\\{{modelName}}\\Controllers\\Api\\v1';
 
     /**
      * @return void
