@@ -38,7 +38,7 @@ trait UploadsFiles {
      */
     public function getDocumentDirectory(Model $model): string
     {
-        return $this->getFilesLocation() . '/' . $model->getAttribute('id');
+        return 'imgs/'.$this->getFilesLocation() . '/' . $model->getAttribute('id');
     }
 
     /**

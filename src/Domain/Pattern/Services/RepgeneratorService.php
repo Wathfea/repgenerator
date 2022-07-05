@@ -104,7 +104,7 @@ class RepgeneratorService
             if($generatePivot) {
                 $this->modelPivot($name);
             } else {
-                $this->model($name, $foreigns);
+                $this->model($name, $columns, $foreigns);
             }
             $callback('Model is ready!');
         }
@@ -171,9 +171,10 @@ class RepgeneratorService
 
     /**
      * @param  string  $name
+     * @param  array  $columns
      * @param  array  $foreigns
      */
-    private function model(string $name, array $foreigns)
+    private function model(string $name, array $columns, array $foreigns)
     {
         $use = '';
         $relationTemplate = '';
@@ -212,16 +213,24 @@ class RepgeneratorService
 
         }
 
+        $fillableStr = '';
+        foreach ($columns as $column) {
+            if($column->fileUploadLocation) continue;
+            $fillableStr .= "'".$column->name."',";
+        }
+
         $modelTemplate = str_replace(
             [
                 '{{modelName}}',
                 '{{use}}',
                 '{{relation}}',
+                '{{fillableFields}}'
             ],
             [
                 $name,
                 $use,
-                $relationTemplate
+                $relationTemplate,
+                $fillableStr
             ],
             $this->repgeneratorStubService->getStub('Model')
         );

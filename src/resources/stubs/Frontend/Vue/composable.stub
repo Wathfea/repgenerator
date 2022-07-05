@@ -50,7 +50,13 @@ export default function use{{modelNamePlural}}() {
         try {
             let formData = new FormData()
             Object.keys(data).forEach(key => {
-                formData.append(key, data[key])
+                if(Array.isArray(data[key])) {
+                    for(let i in data[key]) {
+                        formData.append(key+'[]', data[key][i])
+                    }
+                } else {
+                    formData.append(key, data[key])
+                }
             });
             await axios.post('{{baseUrl}}/api/v1/{{modelNamePluralLowerCase}}', formData,
               {

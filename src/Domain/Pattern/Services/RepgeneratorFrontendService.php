@@ -28,7 +28,7 @@ class RepgeneratorFrontendService
          * @var  RepgeneratorColumnAdapter $data
          */
         foreach ($columns as $data) {
-            if ($data->showOnTable) {
+            if ($data->showOnTable && $data->fileUploadLocation === null) {
                 $nameParts = explode('_', $data->name);
                 foreach ($nameParts as $index => $namePart) {
                     $nameParts[$index] = ucfirst(strtolower($namePart));
@@ -133,6 +133,7 @@ class RepgeneratorFrontendService
     {
         $createFormStr = [];
         $columnListStr = [];
+        $imageFieldName = '';
 
         /**
          * @var  $column
@@ -226,7 +227,12 @@ class RepgeneratorFrontendService
                     );
                 }
                 //Create column list
-                $columnListStr[] = $data->name.": '',";
+                if($data->fileUploadLocation) {
+                    $imageFieldName = $data->name;
+                    $columnListStr[] = $data->name.": [],";
+                } else {
+                    $columnListStr[] = $data->name.": '',";
+                }
             }
         }
 
@@ -237,7 +243,8 @@ class RepgeneratorFrontendService
                 '{{modelNameSingularLowerCase}}',
                 '{{modelNamePluralLowerCase}}',
                 '{{form}}',
-                '{{columnList}}'
+                '{{columnList}}',
+                '{{imageFieldName}}'
             ],
             [
                 $name,
@@ -246,6 +253,7 @@ class RepgeneratorFrontendService
                 Str::plural(strtolower($name)),
                 $this->implodeLines($createFormStr, 2),
                 $this->implodeLines($columnListStr, 2),
+                $imageFieldName
             ],
             $this->repgeneratorStubService->getStub('Frontend/Vue/create')
         );

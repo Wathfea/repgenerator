@@ -88,6 +88,8 @@ class MigrationGeneratorService
         $tableBlueprint = new TableBlueprint();
 
         foreach ($columns as $column) {
+            //We not add the field to the migration if it is a file upload
+            if($column->fileUploadLocation) continue;
             $method = $this->columnGenerator->generate($table, $column->toArray());
             $tableBlueprint->setMethod($method);
         }
