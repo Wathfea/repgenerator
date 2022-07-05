@@ -48,7 +48,22 @@ export default function use{{modelNamePlural}}() {
     const store{{modelNameSingular}} = async (data) => {
         errors.value = ''
         try {
-            await axios.post('{{baseUrl}}/api/v1/{{modelNamePluralLowerCase}}', data)
+            let formData = new FormData()
+            Object.keys(data).forEach(key => {
+                if(Array.isArray(data[key])) {
+                    for(let i in data[key]) {
+                        formData.append(key+'[]', data[key][i])
+                    }
+                } else {
+                    formData.append(key, data[key])
+                }
+            });
+            await axios.post('{{baseUrl}}/api/v1/{{modelNamePluralLowerCase}}', formData,
+              {
+                  headers: {
+                      'Content-Type': 'multipart/form-data'
+                  }
+              })
             await router.push({ name: '{{modelNamePluralLowerCase}}.index' })
         } catch (e) {
             if (e.response.status === 422) {

@@ -38,6 +38,7 @@ class RepgeneratorStaticFilesService
             "Abstraction/Controllers/CRUDControllerInterface.php",
             "Abstraction/Controllers/ApiCRUDControllerReadOnlyInterface.php",
             "Abstraction/Controllers/ApiCRUDControllerReadWriteInterface.php",
+            "Abstraction/Traits/UploadsFiles.php",
         ];
 
         $generatedFiles = [];

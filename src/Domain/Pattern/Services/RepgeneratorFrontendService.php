@@ -28,7 +28,7 @@ class RepgeneratorFrontendService
          * @var  RepgeneratorColumnAdapter $data
          */
         foreach ($columns as $data) {
-            if ($data->showOnTable) {
+            if ($data->showOnTable && $data->fileUploadLocation === null) {
                 $nameParts = explode('_', $data->name);
                 foreach ($nameParts as $index => $namePart) {
                     $nameParts[$index] = ucfirst(strtolower($namePart));
@@ -133,6 +133,8 @@ class RepgeneratorFrontendService
     {
         $createFormStr = [];
         $columnListStr = [];
+        $imageFieldName = '';
+
         /**
          * @var  $column
          * @var  RepgeneratorColumnAdapter $data
@@ -145,17 +147,22 @@ class RepgeneratorFrontendService
                 }
                 $field = implode(' ', $nameParts);
 
-                $template = match ($data->type) {
-                    'id', 'integer', 'string', 'bigIncrements', 'bigInteger', 'binary', 'char', 'dateTimeTz', 'dateTime', 'date', 'decimal',
-                    'double', 'float', 'geometryCollection', 'geometry', 'increments', 'ipAddress', 'mediumIncrements', 'mediumInteger', 'nullableTimestamps',
-                    'rememberToken', 'set', 'smallIncrements', 'smallInteger', 'softDeletesTz', 'softDeletes', 'timeTz', 'time',
-                    'timestampTz', 'timestamp', 'timestampsTz', 'timestamps', 'tinyIncrements', 'tinyInteger', 'unsignedBigInteger', 'unsignedDecimal',
-                    'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger', 'unsignedTinyInteger', 'uuidMorphs', 'uuid', 'year' => 'inputText',
-                    'text', 'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumText', 'multiLineString',
-                    'multiPoint', 'multiPolygon', 'point', 'polygon','tinyText' => 'inputTextarea',
-                    'enum' => 'inputOption',
-                    'boolean' => 'inputCheckbox',
-                };
+                if ( $data->fileUploadLocation ) {
+                    $template = 'inputFile';
+                } else {
+                    $template = match ($data->type) {
+                        'id', 'integer', 'string', 'bigIncrements', 'bigInteger', 'binary', 'char', 'dateTimeTz', 'dateTime', 'date', 'decimal',
+                        'double', 'float', 'geometryCollection', 'geometry', 'increments', 'ipAddress', 'mediumIncrements', 'mediumInteger', 'nullableTimestamps',
+                        'rememberToken', 'set', 'smallIncrements', 'smallInteger', 'softDeletesTz', 'softDeletes', 'timeTz', 'time',
+                        'timestampTz', 'timestamp', 'timestampsTz', 'timestamps', 'tinyIncrements', 'tinyInteger', 'unsignedBigInteger', 'unsignedDecimal',
+                        'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger', 'unsignedTinyInteger', 'uuidMorphs', 'uuid', 'year' => 'inputText',
+                        'text', 'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumText', 'multiLineString',
+                        'multiPoint', 'multiPolygon', 'point', 'polygon','tinyText' => 'inputTextarea',
+                        'enum' => 'inputOption',
+                        'boolean' => 'inputCheckbox',
+                    };
+                }
+
 
                 if($template == 'inputOption') {
                     $selectOptions = [];
@@ -189,7 +196,22 @@ class RepgeneratorFrontendService
                         ],
                         $this->repgeneratorStubService->getStub('Frontend/Vue/fields/inputSelect')
                     );
-                } else {
+                } elseif ($template == 'inputFile') {
+                    $createFormStr[] = str_replace(
+                        [
+                            '{{field}}',
+                            '{{fieldLower}}',
+                            '{{modelNameSingularLowerCase}}',
+                        ],
+                        [
+                            $field,
+                            $data->name,
+                            strtolower($name)
+                        ],
+                        $this->repgeneratorStubService->getStub('Frontend/Vue/fields/inputFile')
+                    );
+                }
+                else {
                     $createFormStr[] = str_replace(
                         [
                             '{{field}}',
@@ -205,7 +227,12 @@ class RepgeneratorFrontendService
                     );
                 }
                 //Create column list
-                $columnListStr[] = $data->name.": '',";
+                if($data->fileUploadLocation) {
+                    $imageFieldName = $data->name;
+                    $columnListStr[] = $data->name.": [],";
+                } else {
+                    $columnListStr[] = $data->name.": '',";
+                }
             }
         }
 
@@ -216,7 +243,8 @@ class RepgeneratorFrontendService
                 '{{modelNameSingularLowerCase}}',
                 '{{modelNamePluralLowerCase}}',
                 '{{form}}',
-                '{{columnList}}'
+                '{{columnList}}',
+                '{{imageFieldName}}'
             ],
             [
                 $name,
@@ -225,6 +253,7 @@ class RepgeneratorFrontendService
                 Str::plural(strtolower($name)),
                 $this->implodeLines($createFormStr, 2),
                 $this->implodeLines($columnListStr, 2),
+                $imageFieldName
             ],
             $this->repgeneratorStubService->getStub('Frontend/Vue/create')
         );

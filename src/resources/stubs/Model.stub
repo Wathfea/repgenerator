@@ -6,21 +6,24 @@ use App\Domain\{{modelName}}\Factories\{{modelName}}Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Kblais\QueryFilter\Filterable;
 use App\Abstraction\Models\BaseModel;
+{{use}}
 
 class {{modelName}} extends BaseModel
 {
     use HasFactory, Filterable;
 
     /**
-     * The attributes that aren't mass assignable.
+     * The attributes that are mass assignable.
      *
-     * @var string[]|bool
+     * @var array<int, string>
      */
-    protected $guarded = [];
+    protected $fillable = [{{fillableFields}}];
 
 
     protected static function newFactory(): {{modelName}}Factory
     {
         return {{modelName}}Factory::new();
     }
+
+    {{relation}}
 }

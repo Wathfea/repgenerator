@@ -10,22 +10,24 @@ class RepgeneratorColumnAdapter
 {
 
     /**
-     * @param string $name
-     * @param string $type
-     * @param bool $aic
-     * @param bool $nullable
-     * @param bool $cascade
-     * @param int|null $length
-     * @param string|null $comment
-     * @param int|null $precision
-     * @param int|null $scale
-     * @param bool $unsigned
-     * @param array|null $values
-     * @param string|null $default
-     * @param array|null $index
-     * @param bool|null $showOnTable
-     * @param string|null $references
-     * @param string|null $foreign
+     * @param  string  $name
+     * @param  string  $type
+     * @param  bool  $aic
+     * @param  bool  $nullable
+     * @param  bool  $cascade
+     * @param  int|null  $length
+     * @param  string|null  $comment
+     * @param  int|null  $precision
+     * @param  int|null  $scale
+     * @param  bool  $unsigned
+     * @param  array|null  $values
+     * @param  string|null  $default
+     * @param  array|null  $index
+     * @param  bool|null  $showOnTable
+     * @param  array|null  $references
+     * @param  string|null  $foreign
+     * @param  string|null  $fileUploadLocation
+     * @param  bool|null  $isMultiFileUpload
      */
     public function __construct(
         public string $name,
@@ -44,6 +46,8 @@ class RepgeneratorColumnAdapter
         public ?bool $showOnTable = false,
         public ?array $references = null,
         public ?string $foreign = null,
+        public ?string $fileUploadLocation = null,
+        public ?bool $isMultiFileUpload = false,
     ) {
 
     }

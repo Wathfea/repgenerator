@@ -73,33 +73,38 @@ class RepgeneratorService
      * @param  bool  $generateModel
      * @param  bool  $generatePivot
      * @param  false  $readOnly
-     * @param  string|null  $migrationName
      * @param  RepgeneratorColumnAdapter[]  $columns
      * @param  array  $foreigns
      * @param $callback
      * @param  false  $fromConsole
+     * @param  array|null  $uploadsFiles
+     * @param  string|null  $migrationName
      */
     public function generate(
         string $name,
         bool $generateModel,
         bool $generatePivot,
         bool $readOnly,
-        string $migrationName = null,
         array $columns,
         array $foreigns,
         $callback,
-        bool $fromConsole = false
+        bool $fromConsole = false,
+        array $uploadsFiles = null,
+        string $migrationName = null,
     ) {
         $this->createDirectories();
         $callback('Directories generated!');
 
         $this->generateStaticFiles($callback);
 
+        //Make sure name is singular
+        $name = Str::singular($name);
+
         if ($generateModel) {
             if($generatePivot) {
                 $this->modelPivot($name);
             } else {
-                $this->model($name);
+                $this->model($name, $columns, $foreigns);
             }
             $callback('Model is ready!');
         }
@@ -111,13 +116,13 @@ class RepgeneratorService
         $this->updateRequest($name);
         $callback('Controller requests are ready!');
 
-        $this->repositoryService($name, $generatePivot);
+        $this->repositoryService($name, $generatePivot, $uploadsFiles);
         $callback('Repository layer is ready!');
 
         $this->service($name, $generatePivot);
         $callback('Controller service is ready!');
 
-        $this->provider($name);
+        $this->provider($name, false, $uploadsFiles);
         $callback('Provider is ready!');
 
         $this->resource($name, $columns);
@@ -164,18 +169,68 @@ class RepgeneratorService
     }
 
 
-
     /**
      * @param  string  $name
+     * @param  array  $columns
+     * @param  array  $foreigns
      */
-    private function model(string $name)
+    private function model(string $name, array $columns, array $foreigns)
     {
+        $use = '';
+        $relationTemplate = '';
+
+        if(!empty($foreigns)) {
+            foreach ($foreigns as $foreign) {
+                $relationType = array_key_exists('relation_type', $foreign) ? $foreign['relation_type'] : 'BelongsTo';
+                $relatedModel = array_key_exists('related_model', $foreign) ? $foreign['related_model'] : Str::studly(Str::singular($foreign['reference']['name']));
+                $relationName = array_key_exists('relation_name', $foreign) ? $foreign['relation_name'] : Str::singular($foreign['reference']['name']);
+
+                $modelUse = 'use App\Domain\/'.$relatedModel.'\Models\/'.$relatedModel.';';
+                $modelUse = str_replace('/', '', $modelUse);
+
+                $relationUse = 'use Illuminate\Database\Eloquent\Relations\/'.$relationType.';';
+                $relationUse = str_replace('/', '', $relationUse);
+
+                $use = $modelUse."\n";
+                $use .= $relationUse."\n";
+
+                $relationTemplate = str_replace(
+                    [
+                        '{{relationType}}',
+                        '{{relationName}}',
+                        '{{relationMethodCall}}',
+                        '{{relatedModel}}'
+                    ],
+                    [
+                        $relationType,
+                        $relationName,
+                        Str::camel($relationType),
+                        $relatedModel
+                    ],
+                    $this->repgeneratorStubService->getStub('ModelRelation')
+                );
+            }
+
+        }
+
+        $fillableStr = '';
+        foreach ($columns as $column) {
+            if($column->fileUploadLocation) continue;
+            $fillableStr .= "'".$column->name."',";
+        }
+
         $modelTemplate = str_replace(
             [
-                '{{modelName}}'
+                '{{modelName}}',
+                '{{use}}',
+                '{{relation}}',
+                '{{fillableFields}}'
             ],
             [
-                $name
+                $name,
+                $use,
+                $relationTemplate,
+                $fillableStr
             ],
             $this->repgeneratorStubService->getStub('Model')
         );
@@ -313,23 +368,44 @@ class RepgeneratorService
     }
 
     /**
-     * @param string $name
-     * @param bool $generatePivot
+     * @param  string  $name
+     * @param  bool  $generatePivot
+     * @param  array|null  $uploadsFiles
      */
-    private function repositoryService(string $name, bool $generatePivot)
+    private function repositoryService(string $name, bool $generatePivot, array $uploadsFiles = null)
     {
+        $use = '';
+        $traits = '';
+        $saveOtherDataMethod = '';
+
+        if (!empty($uploadsFiles)) {
+            $use .= "use App\Abstraction\Traits\UploadsFiles;\n";
+            $use .= "use Illuminate\Database\Eloquent\Model;\n";
+            $traits .= "use UploadsFiles;\n";
+
+            $saveOtherDataMethod = str_replace(['{{field}}'], [strtolower($uploadsFiles['field'])],
+                $this->repgeneratorStubService->getStub('saveOtherDataMethod')
+            );
+        }
+
         $eloquentTemplate = str_replace(
             [
                 '{{modelName}}',
                 '{{modelNamePluralLowerCase}}',
                 '{{modelNameSingularLowerCase}}',
                 '{{modelType}}',
+                '{{use}}',
+                '{{traits}}',
+                '{{saveOtherDataMethod}}',
             ],
             [
                 $name,
                 strtolower(Str::plural($name)),
                 strtolower($name),
-                $generatePivot ? 'Pivot' : 'Model'
+                $generatePivot ? 'Pivot' : 'Model',
+                $use,
+                $traits,
+                $saveOtherDataMethod
             ],
             $this->repgeneratorStubService->getStub('RepositoryService')
         );
@@ -350,8 +426,8 @@ class RepgeneratorService
     }
 
     /**
-     * @param  string  $name
-     * @param  bool  $generatePivot
+     * @param string $name
+     * @param bool $generatePivot
      */
     private function service(string $name, bool $generatePivot = false)
     {
@@ -366,7 +442,7 @@ class RepgeneratorService
                 $name,
                 strtolower(Str::plural($name)),
                 strtolower($name),
-                $generatePivot ? 'Pivot' : 'Model'
+                $generatePivot ? 'Pivot' : 'Model',
             ],
             $this->repgeneratorStubService->getStub('Service')
         );
@@ -386,23 +462,31 @@ class RepgeneratorService
     }
 
     /**
-     * @param  string  $name
-     * @param  bool  $isPivot
+     * @param string $name
+     * @param bool $isPivot
+     * @param array|null $uploadsFiles
      */
-    private function provider(string $name, bool $isPivot = false)
+    private function provider(string $name, bool $isPivot = false, array $uploadsFiles = null)
     {
+        $serviceSetters = "";
+        if ( !empty($uploadsFiles) ) {
+            $path = $uploadsFiles['path'];
+            $serviceSetters .= "->setFilesLocation('$path')";
+        }
         $providerTemplate = str_replace(
             [
                 '{{modelName}}',
                 '{{modelNamePluralLowerCase}}',
                 '{{modelNameSingularLowerCase}}',
-                '{{repoParams}}'
+                '{{repoParams}}',
+                '{{serviceSetters}}'
             ],
             [
                 $name,
                 strtolower(Str::plural($name)),
                 strtolower($name),
-                $isPivot ? 'TODO::class' : $name.'::class'
+                $isPivot ? 'TODO::class' : $name.'::class',
+                $serviceSetters
             ],
             $this->repgeneratorStubService->getStub('Provider')
         );
@@ -580,6 +664,10 @@ class RepgeneratorService
         }
 
         if (!file_exists($path = app_path("Abstraction/Enums"))) {
+            mkdir($path, 0777, true);
+        }
+
+        if (!file_exists($path = app_path('Abstraction/Traits'))) {
             mkdir($path, 0777, true);
         }
     }

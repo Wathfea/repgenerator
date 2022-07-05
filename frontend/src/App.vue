@@ -2,6 +2,7 @@
 import Wizzard from "./components/Wizzard.vue";
 import Dashboard from "./components/Dashboard.vue";
 import {ref} from "vue";
+const develop = ref(false);
 const choosing = ref(true);
 const usingWizzard = ref(false);
 const usingDashboard = ref(false);
@@ -28,7 +29,7 @@ import imgUrl from './assets/banner.jpg'
                     <img :src="imgUrl" class="banner" alt="Repository Generator Factory" >
                 </div>
                 <div class="col-span-6">
-                    <button @click="chooseDashboard" class="disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none block w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-400 hover:bg-gray-500">
+                    <button v-if="develop" @click="chooseDashboard" class="disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none block w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-400 hover:bg-gray-500">
                         Dashboard
                     </button>
 
