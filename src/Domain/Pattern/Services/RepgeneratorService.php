@@ -133,7 +133,7 @@ class RepgeneratorService
 
         $this->filters($name, $columns, $foreigns, $callback);
 
-        $this->frontend($name, $columns, $callback, $uploadsFiles);
+        $this->frontend($name, $columns, $callback);
 
         if ( $fromConsole ) {
             $this->cmd->newLine();
@@ -620,9 +620,8 @@ class RepgeneratorService
      * @param  string  $name
      * @param  array  $columns
      * @param $callback
-     * @param  array|null  $uploadsFiles
      */
-    private function frontend(string $name, array $columns, $callback, array $uploadsFiles = null) {
+    private function frontend(string $name, array $columns, $callback) {
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateIndex($name, $columns);
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable($name);
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateCreate($name, $columns);

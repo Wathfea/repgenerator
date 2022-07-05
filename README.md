@@ -18,8 +18,11 @@ php artisan pattern:init http://yoursite.com
 
 ## Usage
 
-Navigate in your browser to http://yoursite.com/wizzard and follow the wizzard
+Navigate in your browser to http://yoursite.com/wizzard and follow the wizzard steps.
 
+If you want to create a file upload then provide a file upload path in the text box. Give a name to the field and set the type to string. Leave all other settings as default. The files will be stored under storage/app/imgs folder
+
+Insert the generated index.vue component in your system 
 ### Changelog
 
 Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.

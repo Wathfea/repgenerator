@@ -43,7 +43,7 @@ export default {
         }
 
         const handleFileUpload = async (event) => {
-            {{modelNameSingularLowerCase}}.image = event.target.files[0]
+            {{modelNameSingularLowerCase}}.{{imageFieldName}}.push(event.target.files[0])
         }
 
         return {

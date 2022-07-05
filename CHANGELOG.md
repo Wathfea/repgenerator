@@ -3,14 +3,9 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
-- Make sure name is transformed 
-  - Rules: 
-    - singular
-    - remove space
-    - not registered already
-    - for migration: 
-      - replace space to _
-      - lower case
+- File update
+- Multiple file upload
+- Resource generation with uploaded files
 - Factory and seeder generation for CRUD
 - Composite index generation
 - How it works section
@@ -21,10 +16,22 @@ All notable changes to `repgenerator` will be documented in this file
 ## [Unreleased]
 
 
+## [1.3.5] - 2022-07-05
+## Added
+- File upload
 - CRUD create
 - CRUD edit
 - CRUD delete
 - CRUD search
+### Fixed
+- Make sure name is transformed
+    - Rules:
+        - singular
+        - remove space
+        - not registered already
+        - for migration:
+            - replace space to _
+            - lower case
 
 ## [1.3.4] - 2022-06-30
 ### Fixed
