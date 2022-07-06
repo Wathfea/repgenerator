@@ -55,6 +55,10 @@ export default function use{{modelNamePlural}}() {
                         formData.append(key+'[]', data[key][i])
                     }
                 } else {
+                    // Temporary fix for sending booleans
+                    if ( typeof data[key] === 'boolean' ) {
+                        data[key] = data[key] ? 1 : 0;
+                    }
                     formData.append(key, data[key])
                 }
             });
