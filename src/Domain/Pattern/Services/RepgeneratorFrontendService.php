@@ -236,6 +236,8 @@ class RepgeneratorFrontendService
             }
         }
 
+        $templateWithFileUpload = $imageFieldName === '' ? 'create' : 'createWithFileUpload';
+
         $createTemplate = str_replace(
             [
                 '{{modelNameSingular}}',
@@ -255,7 +257,7 @@ class RepgeneratorFrontendService
                 $this->implodeLines($columnListStr, 2),
                 $imageFieldName
             ],
-            $this->repgeneratorStubService->getStub('Frontend/Vue/create')
+            $this->repgeneratorStubService->getStub('Frontend/Vue/'.$templateWithFileUpload)
         );
 
         if (!file_exists($path = resource_path('js'))) {

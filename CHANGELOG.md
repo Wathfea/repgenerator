@@ -3,6 +3,16 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
+- Jelenleg ha meg van jelölve egy file mező, akkor annak teljesen külön réteget generálunk, viszont a frontend hibásan jön létre, ezt csekkolni kéne.
+
+
+- resource hivatkozott name nem jó a resource.stub-ban ha van relation. 
+  - Hibás: `'hba_application' => Hba_applicationResource::make($this->whenLoaded('hba_application')),`
+  - Helyes: `'hbaApplication' => HbaApplicationResource::make($this->whenLoaded('hba_application')),` 
+
+
+- A modelben csak egy relationt generál le nem az összeset
+- Boolean mezők beküldése nem működik false értéken
 - File update
 - Multiple file upload
 - Resource generation with uploaded files
@@ -11,6 +21,8 @@ All notable changes to `repgenerator` will be documented in this file
 - How it works section
 - CRUD UI in other Frontend frameworks
 - CSV import
+- Nice to have date típusok ilye formában történő beszúrása a resourceba: 'event_date' => Carbon::parse($this->event_date)->locale('hu')->isoFormat('LL dddd'),
+  dateTime pedig 'event_date' => Carbon::parse($this->event_date)->locale('hu')->isoFormat('LLL dddd'),
 
 
 ## [Unreleased]

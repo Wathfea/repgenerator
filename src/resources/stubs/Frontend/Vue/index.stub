@@ -83,9 +83,9 @@
 </template>
 
 <script setup>
-import use{{modelNamePlural}} from './{{modelNameSingularLowerCase}}'
-import Create{{modelNameSingular}} from './create'
-import Edit{{modelNameSingular}} from './edit'
+import use{{modelNamePlural}} from './{{modelNameSingularLowerCase}}.js'
+import Create{{modelNameSingular}} from './create.vue'
+import Edit{{modelNameSingular}} from './edit.vue'
 import { reactive, ref } from 'vue';
 
 const columns = {{modelColumns}}
