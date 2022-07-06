@@ -27,7 +27,7 @@
 
 
 <script>
-import use{{modelNamePlural}} from './{{modelNameSingularLowerCase}}'
+import use{{modelNamePlural}} from './{{modelNameSingularLowerCase}}.js'
 import { onMounted } from 'vue';
 
 export default {
