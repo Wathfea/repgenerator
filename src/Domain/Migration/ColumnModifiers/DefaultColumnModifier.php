@@ -84,7 +84,7 @@ class DefaultColumnModifier
     {
         switch ($column['default']) {
             case 'CURRENT_TIMESTAMP':
-                    $method->chain('useCurrent');
+                $method->chain('useCurrent');
                 break;
             default:
                 $method->chain('default', $column['default']);
@@ -99,7 +99,7 @@ class DefaultColumnModifier
      */
     private function chainDefaultForString(Method $method, array $column): Method
     {
-        $quotes  = '\'';
+        $quotes = '\'';
         $default = $column['default'];
         // To replace from ' to \\\'
         $method->chain('default', str_replace($quotes, '\\\\'.$quotes, $default));

@@ -11,11 +11,12 @@ final class CharacterCounterStore
      */
     public static int $charsCount = 0;
 
-    public static function addFileCharacterCount($file) {
+    public static function addFileCharacterCount($file)
+    {
         $count = 0;
 
         $fh = fopen($file, 'r');
-        while(!feof($fh)){
+        while (!feof($fh)) {
             $fr = fread($fh, 8192);
             $count += strlen($fr);
         }

@@ -18,7 +18,7 @@ class ForeignGenerator
     {
         $method = new Method('foreign', $foreign['column']);
 
-        if($foreign['reference'] !== null && $foreign['on'] !== null) {
+        if ($foreign['reference'] !== null && $foreign['on'] !== null) {
             $method->chain('references', $foreign['on']);
             $method->chain('on', $foreign['reference']['name']);
         }

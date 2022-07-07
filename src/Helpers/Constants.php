@@ -14,5 +14,5 @@ final class Constants
     /**
      *
      */
-    public const TAB        = '    '; // 4 spaces tab
+    public const TAB = '    '; // 4 spaces tab
 }

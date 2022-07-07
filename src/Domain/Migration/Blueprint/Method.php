@@ -20,22 +20,6 @@ class Method
     private $chains;
 
     /**
-     * @return null|string
-     */
-    public function getSecondParameter(): null|string
-    {
-        return $this->secondParameter;
-    }
-
-    /**
-     * @param  string  $secondParameter
-     */
-    public function setSecondParameter(string $secondParameter): void
-    {
-        $this->secondParameter = $secondParameter;
-    }
-
-    /**
      * Method constructor.
      *
      * @param  string  $name  Method name.
@@ -43,25 +27,9 @@ class Method
      */
     public function __construct(string $name, ...$values)
     {
-        $this->name   = $name;
+        $this->name = $name;
         $this->values = $values;
         $this->chains = [];
-    }
-
-    /**
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    /**
-     * @return array
-     */
-    public function getValues(): array
-    {
-        return $this->values;
     }
 
     /**
@@ -75,22 +43,6 @@ class Method
     {
         $this->chains[] = new Method($name, ...$values);
         return $this;
-    }
-
-    /**
-     * Checks if chain name exists.
-     *
-     * @param  string  $name  Method name.
-     * @return bool
-     */
-    public function hasChain(string $name): bool
-    {
-        foreach ($this->chains as $chain) {
-            if ($chain->getName() === $name) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -111,5 +63,53 @@ class Method
     public function getChains(): array
     {
         return $this->chains;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getSecondParameter(): null|string
+    {
+        return $this->secondParameter;
+    }
+
+    /**
+     * @param  string  $secondParameter
+     */
+    public function setSecondParameter(string $secondParameter): void
+    {
+        $this->secondParameter = $secondParameter;
+    }
+
+    /**
+     * @return array
+     */
+    public function getValues(): array
+    {
+        return $this->values;
+    }
+
+    /**
+     * Checks if chain name exists.
+     *
+     * @param  string  $name  Method name.
+     * @return bool
+     */
+    public function hasChain(string $name): bool
+    {
+        foreach ($this->chains as $chain) {
+            if ($chain->getName() === $name) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
     }
 }

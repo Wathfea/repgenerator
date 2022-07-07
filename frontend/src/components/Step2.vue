@@ -1,26 +1,27 @@
 <script setup>
 import Step2Column from "./Step2Column.vue";
-import {onMounted, defineEmits, reactive, ref} from 'vue'
+import {defineEmits, onMounted} from 'vue'
+
 const emit = defineEmits(['removeColumn', 'addColumn'])
 const props = defineProps({
-    columns : {
-        required : false,
-        type : Array,
-        default : () => {
+    columns: {
+        required: false,
+        type: Array,
+        default: () => {
             return []
         }
     },
-    models : {
-        required : false,
-        type : Array,
-        default : () => {
+    models: {
+        required: false,
+        type: Array,
+        default: () => {
             return []
         }
     },
-    disableAdd : {
-        required : false,
+    disableAdd: {
+        required: false,
         type: Boolean,
-        default : false
+        default: false
     }
 })
 
@@ -47,7 +48,8 @@ const onAddColumn = () => {
         <div class="mt-6">
             <Step2Column v-for="column in columns" :data="column" :models="models" @removeColumn="onRemoveColumn"/>
         </div>
-        <button v-if="!disableAdd" @click="onAddColumn" type="button" class="inline-flex w-full justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700">
+        <button v-if="!disableAdd" class="inline-flex w-full justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700" type="button"
+                @click="onAddColumn">
             Add column (ctrl+A)
         </button>
     </div>

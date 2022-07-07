@@ -20,7 +20,8 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
     /**
      * @return Model
      */
-    public function getModel(): Model {
+    public function getModel(): Model
+    {
         return new $this->model;
     }
 }

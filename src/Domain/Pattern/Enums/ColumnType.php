@@ -2,7 +2,8 @@
 
 namespace Pentacom\Repgenerator\Domain\Pattern\Enums;
 
-enum ColumnType:string {
+enum ColumnType: string
+{
     case COLUMN_TYPE_ID = 'id';
     case COLUMN_TYPE_INT = 'integer';
     case COLUMN_TYPE_STRING = 'string';
@@ -21,7 +22,7 @@ enum ColumnType:string {
     case COLUMN_TYPE_FLOAT = 'float';
     case COLUMN_TYPE_FOREIGN_ID = 'foreignId';
     case COLUMN_TYPE_FOREIGN_ID_FOR = 'foreignIdFor';
-    case COLUMN_TYPE_FOREIGN_ID_UUID ='foreignUuid';
+    case COLUMN_TYPE_FOREIGN_ID_UUID = 'foreignUuid';
     case COLUMN_TYPE_GEOMETRY_COLLECTION = 'geometryCollection';
     case COLUMN_TYPE_GEOMETRY = 'geometry';
     case COLUMN_TYPE_INCR = 'increments';
@@ -42,7 +43,7 @@ enum ColumnType:string {
     case COLUMN_TYPE_NULLABLE_MORPHS = 'nullableMorphs';
     case COLUMN_TYPE_NULLABLE_UUID_MORPHS = 'nullableUuidMorphs';
     case COLUMN_TYPE_POINT = 'point';
-    case COLUMN_TYPE_POLY ='polygon';
+    case COLUMN_TYPE_POLY = 'polygon';
     case COLUMN_TYPE_REMEMBER_TOKEN = 'rememberToken';
     case COLUMN_TYPE_SET = 'set';
     case COLUMN_TYPE_SMALL_INCREASE = 'smallIncrements';

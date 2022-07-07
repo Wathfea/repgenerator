@@ -13,15 +13,16 @@ use Pentacom\Repgenerator\Domain\Pattern\Helpers\CharacterCounterStore;
  */
 class RepgeneratorFilterService
 {
-    public function __construct(protected RepgeneratorStubService $repgeneratorStubService) {
+    public function __construct(protected RepgeneratorStubService $repgeneratorStubService)
+    {
 
     }
 
 
     /**
-     * @param string $name
-     * @param array $columns
-     * @param array $foreigns
+     * @param  string  $name
+     * @param  array  $columns
+     * @param  array  $foreigns
      * @return array
      */
     #[ArrayShape(['name' => "string", 'location' => "string"])]
@@ -29,13 +30,13 @@ class RepgeneratorFilterService
     {
         $columnFunctions = '';
         /** @var RepgeneratorColumnAdapter $column */
-        foreach ( $columns as $column ) {
+        foreach ($columns as $column) {
             foreach ($foreigns as $foreign) {
-                if($column->name == $foreign['column']) {
+                if ($column->name == $foreign['column']) {
                     $supportedForeignColumns = [
                         'id' => 'int'
                     ];
-                    foreach ( $supportedForeignColumns as $supportedForeignColumnName => $supportedForeignColumnType ) {
+                    foreach ($supportedForeignColumns as $supportedForeignColumnName => $supportedForeignColumnType) {
                         $stub = $this->repgeneratorStubService->getFilterStub('Relationship');
                         $replacements = [
                             '{{foreign}}' => Str::singular($foreign['column']),

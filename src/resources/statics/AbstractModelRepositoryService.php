@@ -18,7 +18,19 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
     protected array $uniqueIdentifiers = [];
 
     /**
-     * @param array $uniqueIdentifiers
+     * @param  int  $id
+     * @return bool
+     */
+    public function destroy(int $id): bool
+    {
+        $model = $this->getById($id);
+        if ($model) {
+            $this->destroyOtherData($model);
+            return $model->delete();
+        }
+        return false;
+    }    /**
+     * @param  array  $uniqueIdentifiers
      * @return RepositoryServiceInterface
      */
     public function setUniqueIdentifiers(array $uniqueIdentifiers): RepositoryServiceInterface
@@ -28,8 +40,15 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
     }
 
     /**
-     * @param Model $model
-     * @param array $data
+     * @param  Model  $model
+     * @return bool
+     */
+    public function destroyOtherData(Model $model): bool
+    {
+        return false;
+    }    /**
+     * @param  Model  $model
+     * @param  array  $data
      * @return bool
      */
     public function saveOtherData(Model $model, array $data): bool
@@ -37,14 +56,7 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         return false;
     }
 
-    /**
-     * @param Model $model
-     * @return bool
-     */
-    public function destroyOtherData(Model $model): bool
-    {
-        return false;
-    }
+
 
     /**
      * @return string
@@ -52,12 +64,12 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
     public function getModelName(): string
     {
         $modelClass = explode('\\', $this->model);
-        return strtolower($modelClass[count($modelClass)-1]);
+        return strtolower($modelClass[count($modelClass) - 1]);
     }
 
     /**
-     * @param array $data
-     * @param array $uniqueIdentifiers
+     * @param  array  $data
+     * @param  array  $uniqueIdentifiers
      * @return Model|bool
      */
     public function save(array $data, array $uniqueIdentifiers = ['id']): Model|bool
@@ -87,49 +99,41 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
 
 
     /**
-     * @param int $id
-     * @param array $data
+     * @param  int  $id
+     * @param  array  $data
      * @return bool
      */
-    public function update(int $id, array $data): bool {
+    public function update(int $id, array $data): bool
+    {
         $model = $this->getById($id);
-        if ( $model ) {
+        if ($model) {
             $otherDataUpdated = $this->saveOtherData($model, $data);
             return $model->update($data) || $otherDataUpdated;
         }
         return false;
     }
 
-    /**
-     * @param int $id
-     * @return bool
-     */
-    public function destroy(int $id): bool {
-        $model = $this->getById($id);
-        if ( $model ) {
-            $this->destroyOtherData($model);
-            return $model->delete();
-        }
-        return false;
-    }
+
 
     /**
-     * @param int $id
-     * @param array $load
+     * @param  int  $id
+     * @param  array  $load
      * @return Model|null
      */
-    public function getById(int $id, array $load = []): Model | null {
+    public function getById(int $id, array $load = []): Model|null
+    {
         return app($this->model)::with($load)->find($id);
     }
 
     /**
-     * @param array $load
+     * @param  array  $load
      * @return Builder
      */
-    public function getBaseBuilder(array $load = []): Builder {
+    public function getBaseBuilder(array $load = []): Builder
+    {
         /** @var Builder $qb */
         $qb = app($this->model)::query();
-        if ( $load ) {
+        if ($load) {
             $qb->with($load);
         }
         return $qb;
@@ -137,28 +141,33 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
 
 
     /**
-     * @param array $load
-     * @param int|null $perPage
+     * @param  array  $load
+     * @param  int|null  $perPage
      * @return Collection|\Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function getAll(array $load = [], int $perPage = null): Collection | LengthAwarePaginator {
+    public function getAll(array $load = [], int $perPage = null): Collection|LengthAwarePaginator
+    {
         $qb = $this->getBaseBuilder($load);
-        if ( $perPage ) {
+        if ($perPage) {
             return $qb->paginate($perPage);
         }
         return $qb->get();
     }
 
     /**
-     * @param \App\Domain\Abstract\Filter\BaseQueryFilter $filter
-     * @param array $load
-     * @param int|null $perPage
+     * @param  \App\Domain\Abstract\Filter\BaseQueryFilter  $filter
+     * @param  array  $load
+     * @param  int|null  $perPage
      * @return Collection|LengthAwarePaginator
      */
-    public function getByFilter(BaseQueryFilter $filter, array $load = [], int $perPage = null): Collection | LengthAwarePaginator {
+    public function getByFilter(
+        BaseQueryFilter $filter,
+        array $load = [],
+        int $perPage = null
+    ): Collection|LengthAwarePaginator {
         $qb = $this->getBaseBuilder($load);
         $qb = $qb->filter($filter);
-        if ( $perPage ) {
+        if ($perPage) {
             return $qb->paginate($perPage);
         }
         return $qb->get();
@@ -166,53 +175,57 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
 
 
     /**
-     * @param array $exceptIds
+     * @param  array  $exceptIds
      * @return Model|null
      */
-    public function getRandom(array $exceptIds = []): Model|null {
+    public function getRandom(array $exceptIds = []): Model|null
+    {
         $qb = $this->getBaseBuilder();
-        if ( !empty($exceptIds)) {
+        if (!empty($exceptIds)) {
             $qb->whereNotIn('id', $exceptIds);
         }
         return $qb->inRandomOrder()->first();
     }
 
     /**
-     * @param array $exceptIds
+     * @param  array  $exceptIds
      * @return Model
      */
-    public function getRandomOrBuild(array $exceptIds = []): Model {
+    public function getRandomOrBuild(array $exceptIds = []): Model
+    {
         $random = $this->getRandom($exceptIds);
-        if ( !$random ) {
+        if (!$random) {
             return $this->factoryCreate();
         }
         return $random;
     }
 
     /**
-     * @param int $count
-     * @param array $attributes
+     * @param  int  $count
+     * @param  array  $attributes
      * @return Model|Collection
      */
-    public function factoryMake(int $count = 1, array $attributes = []): Model | Collection {
+    public function factoryMake(int $count = 1, array $attributes = []): Model|Collection
+    {
         /** @var HasFactory $model */
         $model = $this->model;
         $factory = $model::factory();
-        if ( $count > 1 ) {
+        if ($count > 1) {
             $factory = $factory->count($count);
         }
         return $factory->make($attributes);
     }
 
     /**
-     * @param int $count
-     * @param array $attributes
+     * @param  int  $count
+     * @param  array  $attributes
      * @return Model|Collection
      */
-    public function factoryCreate(int $count = 1, array $attributes = []): Model | Collection {
+    public function factoryCreate(int $count = 1, array $attributes = []): Model|Collection
+    {
         $modelOrModels = $this->factoryMake($count, $attributes);
-        if ( $modelOrModels instanceof Collection ) {
-            foreach ( $modelOrModels as $model ) {
+        if ($modelOrModels instanceof Collection) {
+            foreach ($modelOrModels as $model) {
                 $model->save();
             }
         } else {

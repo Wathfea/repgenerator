@@ -12,8 +12,8 @@ class RepgeneratorStaticFileAdapter
 {
 
     /**
-     * @param string $name
-     * @param string $path
+     * @param  string  $name
+     * @param  string  $path
      */
     public function __construct(
         public string $name,

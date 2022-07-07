@@ -2,6 +2,7 @@
 
 namespace Pentacom\Repgenerator\Domain\Pattern\Providers;
 
+use Illuminate\Support\ServiceProvider;
 use Pentacom\Repgenerator\Console\MigrationGenerator;
 use Pentacom\Repgenerator\Console\PatternGenerator;
 use Pentacom\Repgenerator\Console\PatternGeneratorInit;
@@ -10,7 +11,6 @@ use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorFrontendService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorStaticFilesService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorStubService;
-use Illuminate\Support\ServiceProvider;
 
 /**
  * Class RepgeneratorServiceProvider
@@ -24,7 +24,7 @@ class RepgeneratorServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../config/config.php' => config_path('repgenerator.php'),
+                __DIR__.'/../config/config.php' => config_path('repgenerator.php'),
             ], 'config');
 
             // Registering package commands.
@@ -34,27 +34,27 @@ class RepgeneratorServiceProvider extends ServiceProvider
         }
 
 
-        $this->app->singleton(RepgeneratorStubService::class, function() {
-            return (new RepgeneratorStubService(__DIR__. '/../../../resources/stubs/'));
+        $this->app->singleton(RepgeneratorStubService::class, function () {
+            return (new RepgeneratorStubService(__DIR__.'/../../../resources/stubs/'));
         });
 
-        $this->app->singleton(RepgeneratorStaticFilesService::class, function() {
-            return (new RepgeneratorStaticFilesService(__DIR__. '/../../../resources/statics/'));
+        $this->app->singleton(RepgeneratorStaticFilesService::class, function () {
+            return (new RepgeneratorStaticFilesService(__DIR__.'/../../../resources/statics/'));
         });
 
-        $this->app->singleton(RepgeneratorFilterService::class, function() {
+        $this->app->singleton(RepgeneratorFilterService::class, function () {
             return (new RepgeneratorFilterService(
                 app(RepgeneratorStubService::class)
             ));
         });
 
-        $this->app->singleton(RepgeneratorFrontendService::class, function() {
+        $this->app->singleton(RepgeneratorFrontendService::class, function () {
             return (new RepgeneratorFrontendService(
                 app(RepgeneratorStubService::class)
             ));
         });
 
-        $this->app->singleton(RepgeneratorService::class, function() {
+        $this->app->singleton(RepgeneratorService::class, function () {
             return (new RepgeneratorService(
                 app(RepgeneratorStubService::class),
                 app(RepgeneratorStaticFilesService::class),
@@ -63,7 +63,7 @@ class RepgeneratorServiceProvider extends ServiceProvider
             ));
         });
 
-        if ( config('app.env') === 'local' ) {
+        if (config('app.env') === 'local') {
             $this->loadRoutesFrom(__DIR__.'/../../../routes/web.php');
         }
     }
@@ -74,6 +74,6 @@ class RepgeneratorServiceProvider extends ServiceProvider
     public function register()
     {
         // Automatically apply the package configuration
-        $this->mergeConfigFrom(__DIR__ . '/../../../../config/config.php', 'repgenerator');
+        $this->mergeConfigFrom(__DIR__.'/../../../../config/config.php', 'repgenerator');
     }
 }

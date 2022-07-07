@@ -27,7 +27,13 @@ class MigrationWriter
      * @param  ToStringInterface  $down  migration down method
      * @param  string  $name
      */
-    public function writeTo(string $path, string $stubPath, ToStringInterface $up, ToStringInterface $down, string $name): void {
+    public function writeTo(
+        string $path,
+        string $stubPath,
+        ToStringInterface $up,
+        ToStringInterface $down,
+        string $name
+    ): void {
         $stub = $this->migrationStub->getStub($stubPath);
 
 

@@ -28,14 +28,6 @@ class RepgeneratorService
     protected array $generatedFiles = [];
 
     /**
-     * @param  mixed  $cmd
-     */
-    public function setCmd(string $cmd): void
-    {
-        $this->cmd = $cmd;
-    }
-
-    /**
      * @param  RepgeneratorStubService  $repgeneratorStubService
      * @param  RepgeneratorStaticFilesService  $repgeneratorStaticFilesService
      * @param  RepgeneratorFilterService  $repgeneratorFilterService
@@ -48,33 +40,6 @@ class RepgeneratorService
         private RepgeneratorFrontendService $repgeneratorFrontendService
     ) {
 
-    }
-
-
-    /**
-     * @param $callback
-     */
-    private function generateStaticFiles($callback)
-    {
-        $staticFiles = $this->repgeneratorStaticFilesService->copyStaticFiles();
-        foreach ($staticFiles as $staticFile) {
-            $this->generatedFiles[] = $staticFile;
-            CharacterCounterStore::addFileCharacterCount($staticFile->path);
-            $callback($staticFile->name.' is ready!');
-        }
-        $callback('Static files generated!');
-    }
-
-    /**
-     * @param  string  $name
-     * @param  array  $columns
-     * @param  array  $foreigns
-     * @param $callback
-     */
-    private function filters(string $name, array $columns, array $foreigns, $callback)
-    {
-        $this->generatedFiles[] = $this->repgeneratorFilterService->generate($name, $columns, $foreigns);
-        $callback('Filter is ready!');
     }
 
     /**
@@ -180,6 +145,88 @@ class RepgeneratorService
         }
     }
 
+    /**
+     * Create static file holder directories
+     */
+    private function createDirectories()
+    {
+        if (!file_exists($path = app_path("Abstraction/Controllers"))) {
+            mkdir($path, 0777, true);
+        }
+
+        if (!file_exists($path = app_path("Domain"))) {
+            mkdir($path, 0777, true);
+        }
+
+        if (!file_exists($path = app_path("Abstraction"))) {
+            mkdir($path, 0777, true);
+        }
+
+        if (!file_exists($path = app_path("Abstraction/Filter"))) {
+            mkdir($path, 0777, true);
+        }
+
+        if (!file_exists($path = app_path("Abstraction/Models"))) {
+            mkdir($path, 0777, true);
+        }
+
+        if (!file_exists($path = app_path("Abstraction/Repository"))) {
+            mkdir($path, 0777, true);
+        }
+
+        if (!file_exists($path = app_path("Abstraction/Controllers"))) {
+            mkdir($path, 0777, true);
+        }
+
+        if (!file_exists($path = app_path("Abstraction/Enums"))) {
+            mkdir($path, 0777, true);
+        }
+
+        if (!file_exists($path = app_path('Abstraction/Traits'))) {
+            mkdir($path, 0777, true);
+        }
+    }
+
+    /**
+     * @param $callback
+     */
+    private function generateStaticFiles($callback)
+    {
+        $staticFiles = $this->repgeneratorStaticFilesService->copyStaticFiles();
+        foreach ($staticFiles as $staticFile) {
+            $this->generatedFiles[] = $staticFile;
+            CharacterCounterStore::addFileCharacterCount($staticFile->path);
+            $callback($staticFile->name.' is ready!');
+        }
+        $callback('Static files generated!');
+    }
+
+    /**
+     * @param  string  $name
+     */
+    private function modelPivot(string $name)
+    {
+        $modelTemplate = str_replace(
+            [
+                '{{modelName}}'
+            ],
+            [$name],
+            $this->repgeneratorStubService->getStub('ModelPivot')
+        );
+
+        if (!file_exists($path = app_path("Domain/{$name}/Models/"))) {
+            mkdir($path, 0777, true);
+        }
+
+        file_put_contents($path = app_path("Domain/{$name}/Models/{$name}.php"), $modelTemplate);
+
+        CharacterCounterStore::addFileCharacterCount($path);
+
+        $this->generatedFiles[] = [
+            'name' => "{$name}.php",
+            'location' => $path
+        ];
+    }
 
     /**
      * @param  string  $name
@@ -205,8 +252,12 @@ class RepgeneratorService
                 $relationUse = 'use Illuminate\Database\Eloquent\Relations\/'.$relationType.';';
                 $relationUse = str_replace('/', '', $relationUse);
 
-                if(!in_array($modelUse, $use)) $use[] = $modelUse;
-                if(!in_array($relationUse, $use)) $use[] = $relationUse;
+                if (!in_array($modelUse, $use)) {
+                    $use[] = $modelUse;
+                }
+                if (!in_array($relationUse, $use)) {
+                    $use[] = $relationUse;
+                }
 
                 $relationTemplate[] = str_replace(
                     [
@@ -266,33 +317,6 @@ class RepgeneratorService
     }
 
     /**
-     * @param  string  $name
-     */
-    private function modelPivot(string $name)
-    {
-        $modelTemplate = str_replace(
-            [
-                '{{modelName}}'
-            ],
-            [$name],
-            $this->repgeneratorStubService->getStub('ModelPivot')
-        );
-
-        if (!file_exists($path = app_path("Domain/{$name}/Models/"))) {
-            mkdir($path, 0777, true);
-        }
-
-        file_put_contents($path = app_path("Domain/{$name}/Models/{$name}.php"), $modelTemplate);
-
-        CharacterCounterStore::addFileCharacterCount($path);
-
-        $this->generatedFiles[] = [
-            'name' => "{$name}.php",
-            'location' => $path
-        ];
-    }
-
-    /**
      * @param  string  $version
      * @param  string  $name
      * @param  bool  $readOnly
@@ -334,42 +358,6 @@ class RepgeneratorService
     }
 
     /**
-     * @param  array  $columns
-     * @return array
-     */
-    private function rulesByColumns(array $columns): array
-    {
-        $rules = [];
-        foreach ($columns as $column) {
-            $rule = '';
-            if($column->showOnTable) {
-                $length = '';
-                if($column->length) {
-                    $length = '|max:'.$column->length;
-                }
-
-                $rule .= match ($column->type) {
-                    'binary', 'char', 'geometryCollection', 'geometry', 'ipAddress', 'rememberToken', 'set',   'softDeletes', 'uuidMorphs', 'uuid', 'text', 'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumText', 'multiLineString', 'multiPoint', 'multiPolygon', 'point', 'polygon','tinyText', 'string' => 'string'.$length,
-                    'enum' => 'enum',
-                    'boolean' => 'boolean',
-                    'id', 'integer', 'bigIncrements', 'bigInteger', 'double', 'float', 'decimal', 'increments', 'mediumIncrements', 'mediumInteger', 'smallIncrements', 'smallInteger', 'tinyIncrements', 'tinyInteger', 'unsignedBigInteger', 'unsignedDecimal',
-                    'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger', 'unsignedTinyInteger' => 'integer',
-                    'time', 'timestamp', 'timestamps', 'dateTime', 'date', 'year', 'nullableTimestamps' => 'date',
-                    'softDeletesTz', 'dateTimeTz', 'timeTz', 'timestampTz', 'timestampsTz' => 'timezone'
-                };
-                $rule .='|';
-                if(!$column->nullable) {
-                    $rule .='required';
-                } else {
-                    $rule .='nullable';
-                }
-                $rules[] = "'$column->name' => '$rule',";
-            }
-        }
-
-        return $rules;
-    }
-    /**
      * @param  string  $name
      * @param  array  $columns
      */
@@ -399,6 +387,43 @@ class RepgeneratorService
             'name' => "{$name}Request.php",
             'location' => $path
         ];
+    }
+
+    /**
+     * @param  array  $columns
+     * @return array
+     */
+    private function rulesByColumns(array $columns): array
+    {
+        $rules = [];
+        foreach ($columns as $column) {
+            $rule = '';
+            if ($column->showOnTable) {
+                $length = '';
+                if ($column->length) {
+                    $length = '|max:'.$column->length;
+                }
+
+                $rule .= match ($column->type) {
+                    'binary', 'char', 'geometryCollection', 'geometry', 'ipAddress', 'rememberToken', 'set', 'softDeletes', 'uuidMorphs', 'uuid', 'text', 'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumText', 'multiLineString', 'multiPoint', 'multiPolygon', 'point', 'polygon', 'tinyText', 'string' => 'string'.$length,
+                    'enum' => 'enum',
+                    'boolean' => 'boolean',
+                    'id', 'integer', 'bigIncrements', 'bigInteger', 'double', 'float', 'decimal', 'increments', 'mediumIncrements', 'mediumInteger', 'smallIncrements', 'smallInteger', 'tinyIncrements', 'tinyInteger', 'unsignedBigInteger', 'unsignedDecimal',
+                    'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger', 'unsignedTinyInteger' => 'integer',
+                    'time', 'timestamp', 'timestamps', 'dateTime', 'date', 'year', 'nullableTimestamps' => 'date',
+                    'softDeletesTz', 'dateTimeTz', 'timeTz', 'timestampTz', 'timestampsTz' => 'timezone'
+                };
+                $rule .= '|';
+                if (!$column->nullable) {
+                    $rule .= 'required';
+                } else {
+                    $rule .= 'nullable';
+                }
+                $rules[] = "'$column->name' => '$rule',";
+            }
+        }
+
+        return $rules;
     }
 
     /**
@@ -637,8 +662,7 @@ class RepgeneratorService
                         $name."File",
                         'collection'
                     ], $this->repgeneratorStubService->getStub('resourceElementRelation'));
-            }
-            else {
+            } else {
                 $resourceElementTemplate = str_replace(['{{field}}'], [$column->name],
                     $this->repgeneratorStubService->getStub('resourceElement'));
             }
@@ -676,6 +700,41 @@ class RepgeneratorService
     /**
      * @param  string  $name
      * @param  array  $columns
+     * @param  array  $foreigns
+     * @param $callback
+     */
+    private function filters(string $name, array $columns, array $foreigns, $callback)
+    {
+        $this->generatedFiles[] = $this->repgeneratorFilterService->generate($name, $columns, $foreigns);
+        $callback('Filter is ready!');
+    }
+
+    /**
+     * @param  string  $name
+     * @param  array  $columns
+     * @param $callback
+     */
+    private function frontend(string $name, array $columns, $callback)
+    {
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateIndex($name, $columns);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable($name);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateCreate($name, $columns);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateEdit($name, $columns);
+
+        $callback('Frontend components are ready!');
+    }
+
+    /**
+     * @param  mixed  $cmd
+     */
+    public function setCmd(string $cmd): void
+    {
+        $this->cmd = $cmd;
+    }
+
+    /**
+     * @param  string  $name
+     * @param  array  $columns
      */
     private function factory(string $name, array $columns)
     {
@@ -701,62 +760,5 @@ class RepgeneratorService
             $this->repgeneratorStubService->getStub('Factory')
         );
 
-    }
-
-    /**
-     * @param  string  $name
-     * @param  array  $columns
-     * @param $callback
-     */
-    private function frontend(string $name, array $columns, $callback)
-    {
-        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateIndex($name, $columns);
-        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable($name);
-        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateCreate($name, $columns);
-        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateEdit($name, $columns);
-
-        $callback('Frontend components are ready!');
-    }
-
-    /**
-     * Create static file holder directories
-     */
-    private function createDirectories()
-    {
-        if (!file_exists($path = app_path("Abstraction/Controllers"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Domain"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Filter"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Models"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Repository"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Controllers"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Enums"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path('Abstraction/Traits'))) {
-            mkdir($path, 0777, true);
-        }
     }
 }

@@ -59,7 +59,7 @@ class RepgeneratorController extends Controller
         sleep(1);
 
         //If $fileUpload is not empty we need to create the migration and the Domain for the relationship also
-        if(!empty($fileUpload)) {
+        if (!empty($fileUpload)) {
             $messages[] = $this->generateFileRelationMigration($table, $request);
         }
 
@@ -202,7 +202,7 @@ class RepgeneratorController extends Controller
             $request->get('name')
         );
 
-        if(!empty($fileUpload)) {
+        if (!empty($fileUpload)) {
             $originalTable = $table->getName();
             $originalTableSingular = Str::singular($originalTable);
 

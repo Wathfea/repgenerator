@@ -19,7 +19,7 @@ class Table
      */
     public function getName(): string
     {
-        return Str::lower(str_replace(' ', '_',Str::plural($this->name)));
+        return Str::lower(str_replace(' ', '_', Str::plural($this->name)));
     }
 
     /**

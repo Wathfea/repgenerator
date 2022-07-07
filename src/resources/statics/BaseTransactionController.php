@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 /**
  * Class BaseTransactionController.
@@ -19,7 +20,7 @@ class BaseTransactionController extends Controller
      * @param  string  $method
      * @param  array  $parameters
      * @return Response|View|AnonymousResourceCollection
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function callAction($method, $parameters): Response|View|AnonymousResourceCollection
     {
