@@ -123,8 +123,8 @@ class RepgeneratorService
         $this->apiController('v1', $name, $readOnly);
         $callback('API Controller is ready!');
 
-        $this->request($name);
-        $this->updateRequest($name);
+        $this->request($name, $columns);
+        $this->updateRequest($name, $columns);
         $callback('Controller requests are ready!');
 
         $this->repositoryService($name, $generatePivot, $uploadsFiles);
@@ -334,13 +334,56 @@ class RepgeneratorService
     }
 
     /**
-     * @param  string  $name
+     * @param  array  $columns
+     * @return array
      */
-    private function request(string $name)
+    private function rulesByColumns(array $columns): array
+    {
+        $rules = [];
+        foreach ($columns as $column) {
+            $rule = '';
+            if($column->showOnTable) {
+                $length = '';
+                if($column->length) {
+                    $length = '|max:'.$column->length;
+                }
+
+                $rule .= match ($column->type) {
+                    'binary', 'char', 'geometryCollection', 'geometry', 'ipAddress', 'rememberToken', 'set',   'softDeletes', 'uuidMorphs', 'uuid', 'text', 'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumText', 'multiLineString', 'multiPoint', 'multiPolygon', 'point', 'polygon','tinyText', 'string' => 'string'.$length,
+                    'enum' => 'enum',
+                    'boolean' => 'boolean',
+                    'id', 'integer', 'bigIncrements', 'bigInteger', 'double', 'float', 'decimal', 'increments', 'mediumIncrements', 'mediumInteger', 'smallIncrements', 'smallInteger', 'tinyIncrements', 'tinyInteger', 'unsignedBigInteger', 'unsignedDecimal',
+                    'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger', 'unsignedTinyInteger' => 'integer',
+                    'time', 'timestamp', 'timestamps', 'dateTime', 'date', 'year', 'nullableTimestamps' => 'date',
+                    'softDeletesTz', 'dateTimeTz', 'timeTz', 'timestampTz', 'timestampsTz' => 'timezone'
+                };
+                $rule .='|';
+                if(!$column->nullable) {
+                    $rule .='required';
+                } else {
+                    $rule .='nullable';
+                }
+                $rules[] = "'$column->name' => '$rule',";
+            }
+        }
+
+        return $rules;
+    }
+    /**
+     * @param  string  $name
+     * @param  array  $columns
+     */
+    private function request(string $name, array $columns)
     {
         $requestTemplate = str_replace(
-            ['{{modelName}}'],
-            [$name],
+            [
+                '{{modelName}}',
+                '{{rules}}'
+            ],
+            [
+                $name,
+                $this->implodeLines($this->rulesByColumns($columns), 2)
+            ],
             $this->repgeneratorStubService->getStub('Request')
         );
 
@@ -360,12 +403,19 @@ class RepgeneratorService
 
     /**
      * @param  string  $name
+     * @param  array  $columns
      */
-    private function updateRequest(string $name)
+    private function updateRequest(string $name, array $columns)
     {
         $updateRequestTemplate = str_replace(
-            ['{{modelName}}'],
-            [$name],
+            [
+                '{{modelName}}',
+                '{{rules}}'
+            ],
+            [
+                $name,
+                $this->implodeLines($this->rulesByColumns($columns), 2)
+            ],
             $this->repgeneratorStubService->getStub('UpdateRequest')
         );
 

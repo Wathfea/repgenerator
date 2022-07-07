@@ -13,8 +13,7 @@ All notable changes to `repgenerator` will be documented in this file
 - CSV import
 - Nice to have date típusok ilye formában történő beszúrása a resourceba: 'event_date' => Carbon::parse($this->event_date)->locale('hu')->isoFormat('LL dddd'),
   dateTime pedig 'event_date' => Carbon::parse($this->event_date)->locale('hu')->isoFormat('LLL dddd'),
-- translation a mezőkhöz, 
-- Store and update request feltöltése a mezők alapján.
+- translation a mezőkhöz,
 
 
 ## [Unreleased]
@@ -25,7 +24,8 @@ All notable changes to `repgenerator` will be documented in this file
 - Resource generation with uploaded files
 
 - A modelben csak egy relationt generál le nem az összeset
-- 
+- Store and update request feltöltése a mezők alapján.
+
 ## [1.3.5] - 2022-07-05
 ## Added
 - File upload
