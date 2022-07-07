@@ -5,10 +5,10 @@ namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 use App\Domain\CrudMenu\Providers\CrudMenuServiceProvider;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
-use Pentacom\Repgenerator\Traits\Stringable;
-use Pentacom\Repgenerator\Helpers\Constants;
-USE Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
+use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
 use Pentacom\Repgenerator\Domain\Pattern\Helpers\CharacterCounterStore;
+use Pentacom\Repgenerator\Helpers\Constants;
+use Pentacom\Repgenerator\Traits\Stringable;
 
 /**
  * Class RepgeneratorService
@@ -17,7 +17,14 @@ class RepgeneratorService
 {
     use Stringable;
 
+    /**
+     * @var string
+     */
     protected string $cmd;
+
+    /**
+     * @var array
+     */
     protected array $generatedFiles = [];
 
     /**
@@ -47,23 +54,25 @@ class RepgeneratorService
     /**
      * @param $callback
      */
-    private function generateStaticFiles($callback) {
+    private function generateStaticFiles($callback)
+    {
         $staticFiles = $this->repgeneratorStaticFilesService->copyStaticFiles();
-        foreach ( $staticFiles as $staticFile ) {
+        foreach ($staticFiles as $staticFile) {
             $this->generatedFiles[] = $staticFile;
             CharacterCounterStore::addFileCharacterCount($staticFile->path);
-            $callback($staticFile->name . ' is ready!');
+            $callback($staticFile->name.' is ready!');
         }
         $callback('Static files generated!');
     }
 
     /**
-     * @param string $name
-     * @param array $columns
-     * @param array $foreigns
+     * @param  string  $name
+     * @param  array  $columns
+     * @param  array  $foreigns
      * @param $callback
      */
-    private function filters(string $name, array $columns, array $foreigns, $callback) {
+    private function filters(string $name, array $columns, array $foreigns, $callback)
+    {
         $this->generatedFiles[] = $this->repgeneratorFilterService->generate($name, $columns, $foreigns);
         $callback('Filter is ready!');
     }
@@ -72,6 +81,7 @@ class RepgeneratorService
      * @param  string  $name
      * @param  bool  $generateModel
      * @param  bool  $generatePivot
+     * @param  bool  $generateFronted
      * @param  false  $readOnly
      * @param  RepgeneratorColumnAdapter[]  $columns
      * @param  array  $foreigns
@@ -84,6 +94,7 @@ class RepgeneratorService
         string $name,
         bool $generateModel,
         bool $generatePivot,
+        bool $generateFrontend,
         bool $readOnly,
         array $columns,
         array $foreigns,
@@ -101,7 +112,7 @@ class RepgeneratorService
         $name = Str::singular($name);
 
         if ($generateModel) {
-            if($generatePivot) {
+            if ($generatePivot) {
                 $this->modelPivot($name);
             } else {
                 $this->model($name, $columns, $foreigns);
@@ -133,9 +144,9 @@ class RepgeneratorService
 
         $this->filters($name, $columns, $foreigns, $callback);
 
-        $this->frontend($name, $columns, $callback);
+        !$generateFrontend ?: $this->frontend($name, $columns, $callback);
 
-        if ( $fromConsole ) {
+        if ($fromConsole) {
             $this->cmd->newLine();
             $callback('Generated files:');
             $this->cmd->table(
@@ -152,18 +163,19 @@ class RepgeneratorService
         $callback($code);
 
 
-        $callback("Code generation has saved you from typing at least " . CharacterCounterStore::$charsCount . " characters");
+        $callback("Code generation has saved you from typing at least ".CharacterCounterStore::$charsCount." characters");
         $minutes = floor((CharacterCounterStore::$charsCount / 5) / 25);
         $hours = floor($minutes / 60);
 
         $callback("If we count an average 5 char word and an average 25 WPM we saved you around {$minutes} minutes -> {$hours} hours");
 
-        if($migrationName) {
+        if ($migrationName) {
             app()->register(CrudMenuServiceProvider::class);
             Artisan::call('migrate',
                 [
                     '--path' => '/database/migrations/'.$migrationName,
-                    '--force' => true]);
+                    '--force' => true
+                ]);
             $callback($migrationName.' migration migrated to database!');
         }
     }
@@ -176,14 +188,16 @@ class RepgeneratorService
      */
     private function model(string $name, array $columns, array $foreigns)
     {
-        $use = '';
-        $relationTemplate = '';
+        $use = [];
+        $relationTemplate = [];
 
-        if(!empty($foreigns)) {
+        if (!empty($foreigns)) {
             foreach ($foreigns as $foreign) {
                 $relationType = array_key_exists('relation_type', $foreign) ? $foreign['relation_type'] : 'BelongsTo';
-                $relatedModel = array_key_exists('related_model', $foreign) ? $foreign['related_model'] : Str::studly(Str::singular($foreign['reference']['name']));
-                $relationName = array_key_exists('relation_name', $foreign) ? $foreign['relation_name'] : Str::singular($foreign['reference']['name']);
+                $relatedModel = array_key_exists('related_model',
+                    $foreign) ? $foreign['related_model'] : Str::studly(Str::singular($foreign['reference']['name']));
+                $relationName = array_key_exists('relation_name',
+                    $foreign) ? $foreign['relation_name'] : Str::lcfirst(Str::studly(Str::singular($foreign['reference']['name'])));
 
                 $modelUse = 'use App\Domain\/'.$relatedModel.'\Models\/'.$relatedModel.';';
                 $modelUse = str_replace('/', '', $modelUse);
@@ -191,10 +205,10 @@ class RepgeneratorService
                 $relationUse = 'use Illuminate\Database\Eloquent\Relations\/'.$relationType.';';
                 $relationUse = str_replace('/', '', $relationUse);
 
-                $use = $modelUse."\n";
-                $use .= $relationUse."\n";
+                if(!in_array($modelUse, $use)) $use[] = $modelUse;
+                if(!in_array($relationUse, $use)) $use[] = $relationUse;
 
-                $relationTemplate = str_replace(
+                $relationTemplate[] = str_replace(
                     [
                         '{{relationType}}',
                         '{{relationName}}',
@@ -213,10 +227,12 @@ class RepgeneratorService
 
         }
 
-        $fillableStr = '';
+        $fillableStr = [];
         foreach ($columns as $column) {
-            if($column->fileUploadLocation) continue;
-            $fillableStr .= "'".$column->name."',";
+            if ($column->fileUploadLocation) {
+                continue;
+            }
+            $fillableStr[] = "'".$column->name."',";
         }
 
         $modelTemplate = str_replace(
@@ -228,9 +244,9 @@ class RepgeneratorService
             ],
             [
                 $name,
-                $use,
-                $relationTemplate,
-                $fillableStr
+                $this->implodeLines($use, 0),
+                $this->implodeLines($relationTemplate, 2),
+                $this->implodeLines($fillableStr, 2)
             ],
             $this->repgeneratorStubService->getStub('Model')
         );
@@ -283,7 +299,7 @@ class RepgeneratorService
      */
     private function apiController(string $version, string $name, bool $readOnly = false)
     {
-        if($readOnly) {
+        if ($readOnly) {
             $stub = $this->repgeneratorStubService->getStub('ApiControllerReadOnly');
         } else {
             $stub = $this->repgeneratorStubService->getStub('ApiControllerReadWrite');
@@ -426,8 +442,8 @@ class RepgeneratorService
     }
 
     /**
-     * @param string $name
-     * @param bool $generatePivot
+     * @param  string  $name
+     * @param  bool  $generatePivot
      */
     private function service(string $name, bool $generatePivot = false)
     {
@@ -462,14 +478,14 @@ class RepgeneratorService
     }
 
     /**
-     * @param string $name
-     * @param bool $isPivot
-     * @param array|null $uploadsFiles
+     * @param  string  $name
+     * @param  bool  $isPivot
+     * @param  array|null  $uploadsFiles
      */
     private function provider(string $name, bool $isPivot = false, array $uploadsFiles = null)
     {
         $serviceSetters = "";
-        if ( !empty($uploadsFiles) ) {
+        if (!empty($uploadsFiles)) {
             $path = $uploadsFiles['path'];
             $serviceSetters .= "->setFilesLocation('$path')";
         }
@@ -511,12 +527,12 @@ class RepgeneratorService
      */
     private function resource(string $name, array $columns)
     {
-        $routeName =  strtolower(Str::plural($name));
+        $routeName = strtolower(Str::plural($name));
 
         $actions = ['index', 'store', 'update', 'show', 'destroy'];
 
         $lines[] = "'actions' => [";
-        foreach ( $actions as $route ) {
+        foreach ($actions as $route) {
             $templete = match ($route) {
                 'index', 'store' => $this->repgeneratorStubService->getStub('actionRoute'),
                 'update', 'show', 'destroy' => $this->repgeneratorStubService->getStub('actionRouteWithParam'),
@@ -535,25 +551,46 @@ class RepgeneratorService
         }
         $lines[] = "],";
 
-        $use = "";
-        foreach ( $columns as $column ) {
-            if ( $column->references ) {
-                $referenceSingular = Str::singular($column->references['name']);
+        $use = [];
+        foreach ($columns as $column) {
+            if ($column->references) {
+                $referenceSingular = Str::lcfirst(Str::studly(Str::singular($column->references['name'])));
                 $referenceName = ucfirst($referenceSingular);
-                $use .= "use App\Domain\\" . $referenceName . "\\Resources\\" .  $referenceName . "Resource;\n";
+                $use[] = "use App\Domain\\".$referenceName."\\Resources\\".$referenceName."Resource;\n";
+
                 $resourceElementTemplate = str_replace(
                     [
                         '{{field}}',
-                        '{{referenceName}}',
                         '{{referenceSingular}}',
+                        '{{referenceName}}',
+                        '{{resourceMethod}}'
                     ],
                     [
                         $column->name,
+                        $referenceSingular,
                         $referenceName,
-                        $referenceSingular
+                        'make'
                     ], $this->repgeneratorStubService->getStub('resourceElementRelation'));
-            } else {
-                $resourceElementTemplate = str_replace(['{{field}}'], [$column->name], $this->repgeneratorStubService->getStub('resourceElement'));
+            } elseif ($column->fileUploadLocation) {
+                $use[] = "use App\Domain\\".$name."File\\Resources\\".$name."FileResource;\n";
+
+                $resourceElementTemplate = str_replace(
+                    [
+                        '{{field}}',
+                        '{{referenceSingular}}',
+                        '{{referenceName}}',
+                        '{{resourceMethod}}'
+                    ],
+                    [
+                        $column->name,
+                        'files',
+                        $name."File",
+                        'collection'
+                    ], $this->repgeneratorStubService->getStub('resourceElementRelation'));
+            }
+            else {
+                $resourceElementTemplate = str_replace(['{{field}}'], [$column->name],
+                    $this->repgeneratorStubService->getStub('resourceElement'));
             }
             $lines[] = Constants::TAB.Constants::TAB.$resourceElementTemplate;
         }
@@ -567,7 +604,7 @@ class RepgeneratorService
             [
                 $name,
                 $this->implodeLines($lines, 2),
-                $use
+                $this->implodeLines($use, 2)
             ],
             $this->repgeneratorStubService->getStub('Resource')
         );
@@ -598,8 +635,8 @@ class RepgeneratorService
          * @var  $column
          * @var  RepgeneratorColumnAdapter $data
          */
-        foreach ( $columns as $data ) {
-            $columnFactoriesString .= $data->name . ' => $this->faker->';
+        foreach ($columns as $data) {
+            $columnFactoriesString .= $data->name.' => $this->faker->';
         }
 
         $factoryTemplate = str_replace(
@@ -621,7 +658,8 @@ class RepgeneratorService
      * @param  array  $columns
      * @param $callback
      */
-    private function frontend(string $name, array $columns, $callback) {
+    private function frontend(string $name, array $columns, $callback)
+    {
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateIndex($name, $columns);
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable($name);
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateCreate($name, $columns);

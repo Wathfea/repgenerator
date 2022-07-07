@@ -10,7 +10,6 @@ use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorFrontendService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorStaticFilesService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorStubService;
-use Pentacom\Repgenerator\Http\Controllers\RepgeneratorController;
 use Illuminate\Support\ServiceProvider;
 
 /**

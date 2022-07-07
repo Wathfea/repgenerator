@@ -3,19 +3,9 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
-- Jelenleg ha meg van jelölve egy file mező, akkor annak teljesen külön réteget generálunk, viszont a frontend hibásan jön létre, ezt csekkolni kéne.
-
-
-- resource hivatkozott name nem jó a resource.stub-ban ha van relation. 
-  - Hibás: `'hba_application' => Hba_applicationResource::make($this->whenLoaded('hba_application')),`
-  - Helyes: `'hbaApplication' => HbaApplicationResource::make($this->whenLoaded('hba_application')),` 
-
-
-- A modelben csak egy relationt generál le nem az összeset
 - Boolean mezők beküldése nem működik false értéken
-- File update
+- File update hiányzik
 - Multiple file upload
-- Resource generation with uploaded files
 - Factory and seeder generation for CRUD
 - Composite index generation
 - How it works section
@@ -23,11 +13,19 @@ All notable changes to `repgenerator` will be documented in this file
 - CSV import
 - Nice to have date típusok ilye formában történő beszúrása a resourceba: 'event_date' => Carbon::parse($this->event_date)->locale('hu')->isoFormat('LL dddd'),
   dateTime pedig 'event_date' => Carbon::parse($this->event_date)->locale('hu')->isoFormat('LLL dddd'),
+- translation a mezőkhöz, 
+- Store and update request feltöltése a mezők alapján.
 
 
 ## [Unreleased]
+- Jelenleg ha meg van jelölve egy file mező, akkor annak teljesen külön réteget generálunk, viszont a frontend hibásan jön létre, ezt csekkolni kéne.
+- resource hivatkozott name nem jó a resource.stub-ban ha van relation.
+    - Hibás: `'hba_application' => Hba_applicationResource::make($this->whenLoaded('hba_application')),`
+    - Helyes: `'hbaApplication' => HbaApplicationResource::make($this->whenLoaded('hba_application')),`
+- Resource generation with uploaded files
 
-
+- A modelben csak egy relationt generál le nem az összeset
+- 
 ## [1.3.5] - 2022-07-05
 ## Added
 - File upload
