@@ -117,7 +117,7 @@ const getDefaultColumns = () => {
             'comment': '',
             'unsigned': false,
             'index': [],
-            'show_on_table' : true,
+            'show_on_table' : false,
             'uploads_files_path' : '',
         },
         {
@@ -137,7 +137,7 @@ const getDefaultColumns = () => {
             'comment': '',
             'unsigned': false,
             'index': [],
-            'show_on_table' : true,
+            'show_on_table' : false,
             'uploads_files_path' : '',
         },
         {

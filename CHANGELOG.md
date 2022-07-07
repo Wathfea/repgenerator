@@ -3,18 +3,33 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
-- File update
+- File update hiányzik
 - Multiple file upload
-- Resource generation with uploaded files
 - Factory and seeder generation for CRUD
 - Composite index generation
 - How it works section
 - CRUD UI in other Frontend frameworks
 - CSV import
+- Nice to have date típusok ilye formában történő beszúrása a resourceba: 'event_date' => Carbon::parse($this->event_date)->locale('hu')->isoFormat('LL dddd'),
+  dateTime pedig 'event_date' => Carbon::parse($this->event_date)->locale('hu')->isoFormat('LLL dddd'),
+- translation a mezőkhöz,
 
 
 ## [Unreleased]
 
+
+## [1.3.6] - 2022-07-07
+## Added
+- Added key shortcut (ctrl+A) on wizzard for add new column
+- Resource generation for file relation
+- Store and Update request generation with validation
+
+### Fixed
+- Boolean fields save from CRUD
+- We are no longer generating frontend for file relations
+- In Resource there was a nameing error for the field and relation name, now it is fixed
+- In Model there was a relation generation error now it is fixed
+- Fixed typo in edit.vue
 
 ## [1.3.5] - 2022-07-05
 ## Added

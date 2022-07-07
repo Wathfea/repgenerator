@@ -18,7 +18,7 @@
                             {{form}}
                         </div>
                         <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
-                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Save</button>
+                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Create</button>
                         </div>
                     </div>
                 </form>
@@ -30,28 +30,29 @@
 
 <script>
 import use{{modelNamePlural}} from './{{modelNameSingularLowerCase}}.js'
-import { onMounted } from 'vue';
+import { reactive } from 'vue'
 
 export default {
-    props: {
-        id: {
-            required: true,
-            type: Number
-        }
-    },
-    setup(props) {
-        const { errors, {{modelNameSingularLowerCase}}, update{{modelNameSingular}}, get{{modelNameSingular}} } = use{{modelNamePlural}}()
+    setup() {
+        const {{modelNameSingularLowerCase}} = reactive({
+            {{columnList}}
+        })
 
-        onMounted(() => get{{modelNameSingular}}(props.id))
+        const { errors, store{{modelNameSingular}} } = use{{modelNamePlural}}()
 
         const save{{modelNameSingular}} = async () => {
-            await update{{modelNameSingular}}(props.id)
+            await store{{modelNameSingular}}({ ...{{modelNameSingularLowerCase}} })
+        }
+
+        const handleFileUpload = async (event) => {
+            {{modelNameSingularLowerCase}}.{{imageFieldName}}.push(event.target.files[0])
         }
 
         return {
-            errors,
             {{modelNameSingularLowerCase}},
-            save{{modelNameSingular}}
+            errors,
+            save{{modelNameSingular}},
+            handleFileUpload
         }
     }
 }

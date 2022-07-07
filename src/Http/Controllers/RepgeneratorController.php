@@ -158,6 +158,7 @@ class RepgeneratorController extends Controller
                 true,
                 false,
                 false,
+                false,
                 $columns,
                 [],
                 function ($msg) use (&$messages) {
@@ -223,6 +224,7 @@ class RepgeneratorController extends Controller
             $this->getTransformedName($request->get('name')),
             $request->get('model', false),
             $request->get('pivot', false),
+            true,
             $request->get('read_only', false),
             $columns,
             $foreigns,
@@ -294,6 +296,7 @@ class RepgeneratorController extends Controller
         $this->repgeneratorService->generate(
             $this->getTransformedName($request->get('name').'Files'),
             true,
+            false,
             false,
             false,
             $columns,

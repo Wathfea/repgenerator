@@ -11,75 +11,13 @@ class RepgeneratorFrontendService
 {
     use Stringable;
 
-    public function __construct(protected RepgeneratorStubService $repgeneratorStubService) {
+    public function __construct(protected RepgeneratorStubService $repgeneratorStubService)
+    {
 
     }
 
     /**
      * @param  string  $name
-     * @param  array  $columns
-     * @return array
-     */
-    public function generateIndex(string $name, array $columns): array
-    {
-        $columnsToShowOnTable = [];
-        /**
-         * @var  $column
-         * @var  RepgeneratorColumnAdapter $data
-         */
-        foreach ($columns as $data) {
-            if ($data->showOnTable && $data->fileUploadLocation === null) {
-                $nameParts = explode('_', $data->name);
-                foreach ($nameParts as $index => $namePart) {
-                    $nameParts[$index] = ucfirst(strtolower($namePart));
-                }
-                $columnsToShowOnTable[implode(' ', $nameParts)] = $data->name;
-            }
-        }
-        $indexTemplate = str_replace(
-            [
-                '{{modelNameSingular}}',
-                '{{modelNamePlural}}',
-                '{{modelNameSingularLowerCase}}',
-                '{{modelNamePluralLowerCase}}',
-                '{{baseUrl}}',
-                '{{modelColumns}}'
-            ],
-            [
-                $name,
-                Str::plural($name),
-                strtolower($name),
-                Str::plural(strtolower($name)),
-                url(''),
-                json_encode($columnsToShowOnTable)
-            ],
-            $this->repgeneratorStubService->getStub('Frontend/Vue/index')
-        );
-
-        if (!file_exists($path = resource_path('js'))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = resource_path('js/'.$name))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = resource_path('js/'.$name.'/vue'))) {
-            mkdir($path, 0777, true);
-        }
-
-        file_put_contents($path = resource_path("js/{$name}/vue/index.vue"), $indexTemplate);
-
-        CharacterCounterStore::addFileCharacterCount($path);
-
-        return [
-            'name' => "index.vue",
-            'location' => $path
-        ];
-    }
-
-    /**
-     * @param string $name
      * @return array
      */
     public function generateComposable(string $name): array
@@ -147,7 +85,7 @@ class RepgeneratorFrontendService
                 }
                 $field = implode(' ', $nameParts);
 
-                if ( $data->fileUploadLocation ) {
+                if ($data->fileUploadLocation) {
                     $template = 'inputFile';
                 } else {
                     $template = match ($data->type) {
@@ -157,17 +95,19 @@ class RepgeneratorFrontendService
                         'timestampTz', 'timestamp', 'timestampsTz', 'timestamps', 'tinyIncrements', 'tinyInteger', 'unsignedBigInteger', 'unsignedDecimal',
                         'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger', 'unsignedTinyInteger', 'uuidMorphs', 'uuid', 'year' => 'inputText',
                         'text', 'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumText', 'multiLineString',
-                        'multiPoint', 'multiPolygon', 'point', 'polygon','tinyText' => 'inputTextarea',
+                        'multiPoint', 'multiPolygon', 'point', 'polygon', 'tinyText' => 'inputTextarea',
                         'enum' => 'inputOption',
                         'boolean' => 'inputCheckbox',
                     };
                 }
 
 
-                if($template == 'inputOption') {
+                if ($template == 'inputOption') {
                     $selectOptions = [];
                     foreach ($data->values as $option) {
-                        if($option == '' || $option == null) continue;
+                        if ($option == '' || $option == null) {
+                            continue;
+                        }
                         $selectOptions[] = str_replace(
                             [
                                 '{{optionValue}}',
@@ -210,8 +150,7 @@ class RepgeneratorFrontendService
                         ],
                         $this->repgeneratorStubService->getStub('Frontend/Vue/fields/inputFile')
                     );
-                }
-                else {
+                } else {
                     $createFormStr[] = str_replace(
                         [
                             '{{field}}',
@@ -227,14 +166,18 @@ class RepgeneratorFrontendService
                     );
                 }
                 //Create column list
-                if($data->fileUploadLocation) {
+                if ($data->fileUploadLocation) {
                     $imageFieldName = $data->name;
                     $columnListStr[] = $data->name.": [],";
+                } elseif ($data->type === 'boolean') {
+                    $columnListStr[] = $data->name.": $data->default,";
                 } else {
                     $columnListStr[] = $data->name.": '',";
                 }
             }
         }
+
+        $templateWithFileUpload = $imageFieldName === '' ? 'create' : 'createWithFileUpload';
 
         $createTemplate = str_replace(
             [
@@ -255,7 +198,7 @@ class RepgeneratorFrontendService
                 $this->implodeLines($columnListStr, 2),
                 $imageFieldName
             ],
-            $this->repgeneratorStubService->getStub('Frontend/Vue/create')
+            $this->repgeneratorStubService->getStub('Frontend/Vue/'.$templateWithFileUpload)
         );
 
         if (!file_exists($path = resource_path('js'))) {
@@ -308,15 +251,17 @@ class RepgeneratorFrontendService
                     'timestampTz', 'timestamp', 'timestampsTz', 'timestamps', 'tinyIncrements', 'tinyInteger', 'unsignedBigInteger', 'unsignedDecimal',
                     'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger', 'unsignedTinyInteger', 'uuidMorphs', 'uuid', 'year' => 'inputText',
                     'text', 'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumText', 'multiLineString',
-                    'multiPoint', 'multiPolygon', 'point', 'polygon','tinyText' => 'inputTextarea',
+                    'multiPoint', 'multiPolygon', 'point', 'polygon', 'tinyText' => 'inputTextarea',
                     'enum' => 'inputOption',
                     'boolean' => 'inputCheckbox',
                 };
 
-                if($template == 'inputOption') {
+                if ($template == 'inputOption') {
                     $selectOptions = [];
                     foreach ($data->values as $option) {
-                        if($option == '' || $option == null) continue;
+                        if ($option == '' || $option == null) {
+                            continue;
+                        }
                         $selectOptions[] = str_replace(
                             [
                                 '{{optionValue}}',
@@ -403,6 +348,69 @@ class RepgeneratorFrontendService
 
         return [
             'name' => 'edit.vue',
+            'location' => $path
+        ];
+    }
+
+    /**
+     * @param  string  $name
+     * @param  array  $columns
+     * @return array
+     */
+    public function generateIndex(string $name, array $columns): array
+    {
+        $columnsToShowOnTable = [];
+        /**
+         * @var  $column
+         * @var  RepgeneratorColumnAdapter $data
+         */
+        foreach ($columns as $data) {
+            if ($data->showOnTable && $data->fileUploadLocation === null) {
+                $nameParts = explode('_', $data->name);
+                foreach ($nameParts as $index => $namePart) {
+                    $nameParts[$index] = ucfirst(strtolower($namePart));
+                }
+                $columnsToShowOnTable[implode(' ', $nameParts)] = $data->name;
+            }
+        }
+        $indexTemplate = str_replace(
+            [
+                '{{modelNameSingular}}',
+                '{{modelNamePlural}}',
+                '{{modelNameSingularLowerCase}}',
+                '{{modelNamePluralLowerCase}}',
+                '{{baseUrl}}',
+                '{{modelColumns}}'
+            ],
+            [
+                $name,
+                Str::plural($name),
+                strtolower($name),
+                Str::plural(strtolower($name)),
+                url(''),
+                json_encode($columnsToShowOnTable)
+            ],
+            $this->repgeneratorStubService->getStub('Frontend/Vue/index')
+        );
+
+        if (!file_exists($path = resource_path('js'))) {
+            mkdir($path, 0777, true);
+        }
+
+        if (!file_exists($path = resource_path('js/'.$name))) {
+            mkdir($path, 0777, true);
+        }
+
+        if (!file_exists($path = resource_path('js/'.$name.'/vue'))) {
+            mkdir($path, 0777, true);
+        }
+
+        file_put_contents($path = resource_path("js/{$name}/vue/index.vue"), $indexTemplate);
+
+        CharacterCounterStore::addFileCharacterCount($path);
+
+        return [
+            'name' => "index.vue",
             'location' => $path
         ];
     }
