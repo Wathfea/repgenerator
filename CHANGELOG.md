@@ -3,7 +3,6 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
-- Boolean mezők beküldése nem működik false értéken
 - File update hiányzik
 - Multiple file upload
 - Factory and seeder generation for CRUD
@@ -17,14 +16,20 @@ All notable changes to `repgenerator` will be documented in this file
 
 
 ## [Unreleased]
-- Jelenleg ha meg van jelölve egy file mező, akkor annak teljesen külön réteget generálunk, viszont a frontend hibásan jön létre, ezt csekkolni kéne.
-- resource hivatkozott name nem jó a resource.stub-ban ha van relation.
-    - Hibás: `'hba_application' => Hba_applicationResource::make($this->whenLoaded('hba_application')),`
-    - Helyes: `'hbaApplication' => HbaApplicationResource::make($this->whenLoaded('hba_application')),`
-- Resource generation with uploaded files
 
-- A modelben csak egy relationt generál le nem az összeset
-- Store and update request feltöltése a mezők alapján.
+
+## [1.3.6] - 2022-07-07
+## Added
+- Added key shortcut (ctrl+A) on wizzard for add new column
+- Resource generation for file relation
+- Store and Update request generation with validation
+
+### Fixed
+- Boolean fields save from CRUD
+- We are no longer generating frontend for file relations
+- In Resource there was a nameing error for the field and relation name, now it is fixed
+- In Model there was a relation generation error now it is fixed
+- Fixed typo in edit.vue
 
 ## [1.3.5] - 2022-07-05
 ## Added
