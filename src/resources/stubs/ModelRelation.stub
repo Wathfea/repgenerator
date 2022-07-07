@@ -1,4 +1,6 @@
 /**
+ * @Relation
+ *
 * @return {{relationType}}
 */
 public function {{relationName}}(): {{relationType}} {
