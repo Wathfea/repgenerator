@@ -35,7 +35,8 @@ class RepgeneratorFrontendService
                 Str::plural($name),
                 $lowerName = strtolower($name),
                 Str::plural(strtolower($name)),
-                url('')
+                ''
+                //url('')
             ],
             $this->repgeneratorStubService->getStub('Frontend/Vue/composable')
         );

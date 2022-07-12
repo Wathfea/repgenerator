@@ -6,6 +6,8 @@ All notable changes to `repgenerator` will be documented in this file
 
 - File update hiányzik
 - Multiple file upload
+- Relation párok beírása
+- Pivot generálás átnézése
 - Factory and seeder generation for CRUD
 - Composite index generation
 - How it works section
@@ -15,6 +17,7 @@ All notable changes to `repgenerator` will be documented in this file
   event_date)->locale('hu')->isoFormat('LL dddd'), dateTime pedig 'event_date' => Carbon::parse($this->event_date)->
   locale('hu')->isoFormat('LLL dddd'),
 - translation a mezőkhöz,
+- crud folyamatok után notification és reload
 
 ## [Unreleased]
 

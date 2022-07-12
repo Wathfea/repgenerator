@@ -16,16 +16,16 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
 {
     /**
      * AbstractEloquentRepository constructor.
-     * @param  Pivot  $pivot
-     * @param  Model  $parent
+     * @param  string  $pivot
+     * @param  string  $parent
      * @param  string  $parentIdColumName
      * @param  string  $relationIdColumnName
      * @param  string  $relation
      */
     #[Pure]
     public function __construct(
-        private Pivot $pivot,
-        private Model $parent,
+        private string $pivot,
+        private string $parent,
         private string $parentIdColumName,
         private string $relationIdColumnName,
         private string $relation
@@ -81,9 +81,9 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
     /**
      * @param  int  $parentModelId
      * @param  int  $relationModelId
-     * @return Model|null
+     * @return Pivot|null
      */
-    public function getSpecific(int $parentModelId, int $relationModelId): Model|null
+    public function getSpecific(int $parentModelId, int $relationModelId): Pivot|null
     {
         return $this->pivot->newQuery()->where($this->parentIdColumName, $parentModelId)
             ->where($this->relationIdColumnName, $relationModelId)
