@@ -38,7 +38,7 @@ class MigrationGeneratorService
      * @param array $indexes
      * @param array $foreigns
      * @param string $modelName
-     * @return string $url
+     * @return string
      */
     public function generateMigrationFiles(
         Table $table,
