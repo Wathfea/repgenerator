@@ -33,19 +33,19 @@ class MigrationGeneratorService
     }
 
     /**
-     * @param  Table  $table
-     * @param  array  $columns
-     * @param  array  $indexes
-     * @param  array  $foreigns
-     * @param  string  $modelName
-     * @return string
+     * @param Table $table
+     * @param array $columns
+     * @param array $indexes
+     * @param array $foreigns
+     * @param string $modelName
+     * @return string $url
      */
     public function generateMigrationFiles(
         Table $table,
         array $columns,
         array $indexes,
         array $foreigns,
-        string $modelName
+        string $modelName,
     ): string {
         $up = $this->up($table, $columns, $indexes, $foreigns);
         $down = $this->down($table, $foreigns);
@@ -56,7 +56,8 @@ class MigrationGeneratorService
             $this->settings->getStubPath(),
             $up,
             $down,
-            $modelName
+            $modelName,
+            $table->getName(),
         );
 
         return $this->makePathLessFilename(

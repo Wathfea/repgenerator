@@ -26,13 +26,15 @@ class MigrationWriter
      * @param  ToStringInterface  $up  migration up method
      * @param  ToStringInterface  $down  migration down method
      * @param  string  $name
+     * @param  string  $url
      */
     public function writeTo(
         string $path,
         string $stubPath,
         ToStringInterface $up,
         ToStringInterface $down,
-        string $name
+        string $name,
+        string $url
     ): void {
         $stub = $this->migrationStub->getStub($stubPath);
 
@@ -44,7 +46,7 @@ class MigrationWriter
             'use App\Domain\CrudMenu\Repositories\CrudMenuRepositoryService;'
         ]);
 
-        File::put($path, $this->migrationStub->populateStub($stub, $use, $up->toString(), $down->toString(), $name));
+        File::put($path, $this->migrationStub->populateStub($stub, $use, $up->toString(), $down->toString(), $name, $url));
 
     }
 }

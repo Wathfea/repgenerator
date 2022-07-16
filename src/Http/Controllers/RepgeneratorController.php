@@ -142,6 +142,7 @@ class RepgeneratorController extends Controller
             $migrationColumns = [
                 'id' => 'id',
                 'name' => 'string',
+                'url' => 'string',
                 'created_at' => 'timestamp',
                 'updated_at' => 'timestamp',
             ];
