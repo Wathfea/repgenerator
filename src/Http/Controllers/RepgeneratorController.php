@@ -143,6 +143,7 @@ class RepgeneratorController extends Controller
                 'id' => 'id',
                 'name' => 'string',
                 'url' => 'string',
+                'icon' => 'string',
                 'created_at' => 'timestamp',
                 'updated_at' => 'timestamp',
             ];
@@ -152,7 +153,7 @@ class RepgeneratorController extends Controller
             }
 
             $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], [],
-                self::CRUD_MENU_NAME);
+                self::CRUD_MENU_NAME, 'menu');
 
             $this->repgeneratorService->generate(
                 self::CRUD_MENU_NAME,
@@ -200,7 +201,8 @@ class RepgeneratorController extends Controller
             $columns,
             $indexes,
             $foreigns,
-            $request->get('name')
+            $request->get('name'),
+            $request->get('icon')
         );
 
         if (!empty($fileUpload)) {

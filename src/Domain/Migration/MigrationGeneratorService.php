@@ -38,6 +38,7 @@ class MigrationGeneratorService
      * @param array $indexes
      * @param array $foreigns
      * @param string $modelName
+     * @param string $iconName
      * @return string
      */
     public function generateMigrationFiles(
@@ -46,6 +47,7 @@ class MigrationGeneratorService
         array $indexes,
         array $foreigns,
         string $modelName,
+        string $iconName,
     ): string {
         $up = $this->up($table, $columns, $indexes, $foreigns);
         $down = $this->down($table, $foreigns);
@@ -58,6 +60,7 @@ class MigrationGeneratorService
             $down,
             $modelName,
             $table->getName(),
+            $iconName
         );
 
         return $this->makePathLessFilename(

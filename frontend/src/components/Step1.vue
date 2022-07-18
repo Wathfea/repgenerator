@@ -1,15 +1,21 @@
 <script setup>
 import {defineEmits, ref} from 'vue'
 
-const emit = defineEmits(['nameChanged'])
+const emit = defineEmits(['nameChanged', 'iconChanged'])
 const props = defineProps({
     modelName: {
+        type: String,
+        required: false,
+        default: null
+    },
+    icon: {
         type: String,
         required: false,
         default: null
     }
 })
 let name = ref(props.modelName);
+let icon = ref(props.icon);
 </script>
 
 <template>
@@ -20,8 +26,13 @@ let name = ref(props.modelName);
                     Model Name (Singular - Ex. Dog )
                 </label>
                 <div class="mt-1">
-                    <input id="model-name" v-model="name" class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md" required type="text"
-                           @change="emit('nameChanged',name)">
+                    <input id="model-name" v-model="name" class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md" required type="text" @change="emit('nameChanged',name)">
+                </div>
+                <label class="block text-sm font-medium text-gray-700 mt-1" for="model-name">
+                    Hero icon <a target="_blank" href="https://heroicons.com/">https://heroicons.com/</a>
+                </label>
+                <div class="mt-1">
+                    <input id="icon-name" v-model="icon" class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md" required type="text" @change="emit('iconChanged',icon)">
                 </div>
             </div>
         </div>

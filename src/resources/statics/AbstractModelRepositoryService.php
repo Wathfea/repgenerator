@@ -155,7 +155,7 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
     }
 
     /**
-     * @param  \App\Domain\Abstract\Filter\BaseQueryFilter  $filter
+     * @param BaseQueryFilter $filter
      * @param  array  $load
      * @param  int|null  $perPage
      * @return Collection|LengthAwarePaginator
