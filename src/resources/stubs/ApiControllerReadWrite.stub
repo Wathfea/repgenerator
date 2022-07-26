@@ -8,6 +8,7 @@ use App\Abstraction\Controllers\ApiCRUDControllerReadWriteInterface;
 use App\Abstraction\Controllers\ApiCRUDControllerReadOnlyInterface;
 use App\Domain\{{modelName}}\Services\{{modelName}}Service;
 use App\Abstraction\Repository\HasRepositoryService;
+{{use}}
 
 /**
  * Class {{modelName}}ApiController.
@@ -22,4 +23,6 @@ class {{modelName}}ApiController extends AbstractApiReadWriteCRUDController impl
     public function __construct(private {{modelName}}Service $service)
     {
     }
+
+    {{files}}
 }

@@ -7,6 +7,7 @@ use App\Abstraction\Controllers\CRUDControllerInterface;
 use App\Abstraction\Controllers\ApiCRUDControllerReadOnlyInterface;
 use App\Domain\{{modelName}}\Services\{{modelName}}Service;
 use App\Abstraction\Repository\HasRepositoryService;
+{{use}}
 
 /**
  * Class {{modelName}}ApiController.
@@ -21,4 +22,6 @@ class {{modelName}}ApiController extends AbstractApiReadOnlyCRUDController imple
     public function __construct(private {{modelName}}Service $service)
     {
     }
+
+    {{files}}
 }

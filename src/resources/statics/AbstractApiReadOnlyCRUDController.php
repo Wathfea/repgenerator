@@ -93,12 +93,13 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController 
     /**
      * @param  Request  $request
      * @param  int  $id
+     * @param  array  $relationships
      * @return JsonResponse
      */
-    public function show(Request $request, int $id): JsonResponse
+    public function show(Request $request, int $id, array $relationships = []): JsonResponse
     {
         /** @var JsonResource $resource */
         $resource = $this->getResourceClass();
-        return $resource::make($this->getService()->getRepositoryService()->getById($id))->toResponse($request);
+        return $resource::make($this->getService()->getRepositoryService()->getById($id, $relationships))->toResponse($request);
     }
 }

@@ -3,7 +3,7 @@
     <legend class="sr-only">Notifications</legend>
     <div class="relative flex items-start">
       <div class="flex items-center h-5">
-        <input v-model="{{modelNameSingularLowerCase}}.{{fieldLower}}" id="{{fieldLower}}" aria-describedby="{{fieldLower}}-description" name="{{fieldLower}}" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" />
+        <input v-model="{{modelNameSingularLowerCase}}.{{fieldLower}}" id="{{fieldLower}}" aria-describedby="{{fieldLower}}-description" name="{{fieldLower}}" type="checkbox" class="w-4 h-4 text-gray-800 rounded focus:ring-gray-800 ring-offset-gray-800 focus:ring-2 focus:bg-gray-800 border-gray-600" />
       </div>
       <div class="ml-3 text-sm">
         <label for="{{fieldLower}}" class="font-medium text-gray-700">{{field}}</label>

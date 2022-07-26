@@ -6,6 +6,7 @@ All notable changes to `repgenerator` will be documented in this file
 
 - File update hiányzik
 - Multiple file upload
+- URL a resourcba ha file upload van engedélyezve
 - Relation párok beírása
 - Pivot generálás átnézése
 - Factory and seeder generation for CRUD
@@ -20,6 +21,12 @@ All notable changes to `repgenerator` will be documented in this file
 - crud folyamatok után notification és reload
 
 ## [Unreleased]
+
+## [1.3.7] - 2022-07-26
+- Added api controller index and show override on files relation
+- added icon generation
+- Refactored crud classes
+
 
 ## [1.3.6] - 2022-07-07
 

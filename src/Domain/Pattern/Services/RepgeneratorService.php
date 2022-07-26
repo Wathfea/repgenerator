@@ -320,24 +320,40 @@ class RepgeneratorService
      * @param  string  $version
      * @param  string  $name
      * @param  bool  $readOnly
+     * @param  array|null  $uploadsFiles
      */
-    private function apiController(string $version, string $name, bool $readOnly = false)
+    private function apiController(string $version, string $name, bool $readOnly = false, array $uploadsFiles = null)
     {
+        $use = '';
+        $filesRelation = '';
+
         if ($readOnly) {
             $stub = $this->repgeneratorStubService->getStub('ApiControllerReadOnly');
         } else {
             $stub = $this->repgeneratorStubService->getStub('ApiControllerReadWrite');
         }
+
+        if (!empty($uploadsFiles)) {
+            $use .= "use Illuminate\Http\JsonResponse;\n";
+            $use .= "use Illuminate\Http\Request;\n";
+
+            $filesRelation = $this->repgeneratorStubService->getStub('withFilesRelation');
+        }
+
         $apiControllerTemplate = str_replace(
             [
                 '{{modelName}}',
                 '{{modelNamePluralLowerCase}}',
                 '{{modelNameSingularLowerCase}}',
+                '{{use}}',
+                '{{files}}',
             ],
             [
                 $name,
                 strtolower(Str::plural($name)),
                 strtolower($name),
+                $use,
+                $filesRelation,
             ],
             $stub
         );
