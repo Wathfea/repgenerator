@@ -21,11 +21,15 @@ All notable changes to `repgenerator` will be documented in this file
 - crud folyamatok után notification és reload
 
 ## [Unreleased]
+## Added
+- Api controller index and show override on files relation
+- Icon generation
+- Refactored crud frontend
+- Loading screen
+- File upload handling and file upload at edit page
 
-## [1.3.7] - 2022-07-26
-- Added api controller index and show override on files relation
-- added icon generation
-- Refactored crud classes
+## Fixed
+- Fixd migration time generation
 
 
 ## [1.3.6] - 2022-07-07

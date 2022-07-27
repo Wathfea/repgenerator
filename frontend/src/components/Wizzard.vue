@@ -6,6 +6,8 @@ import Step from "./Step.vue";
 import {ref} from "vue";
 import axios from 'axios'
 import Options from "./Options.vue";
+import factoryImgUrl from '../assets/factory.gif'
+
 
 // Wizzard
 const stepNumber = ref(1);
@@ -207,7 +209,10 @@ axios.get(import.meta.env.VITE_API_URL + '/repgenerator/tables').then((response)
 </script>
 
 <template>
-    <form @submit="onNextStep">
+    <div class="grid place-items-center h-screen" v-if="generating">
+        <img :src="factoryImgUrl" alt="Repository Generator Factory" class="factory">
+    </div>
+    <form @submit="onNextStep" v-else>
         <nav aria-label="Progress">
             <ol class="border border-gray-300 rounded-md divide-y divide-gray-300 md:flex md:divide-y-0" role="list">
                 <Step v-for="(step,index) in steps" :complete="index+1 < stepNumber" :current="stepNumber === index+1"
@@ -215,7 +220,7 @@ axios.get(import.meta.env.VITE_API_URL + '/repgenerator/tables').then((response)
             </ol>
         </nav>
         <div v-if="stepNumber === 1 || isOverview()">
-            <Step1 :modelName="modelName" :icon="icon" @nameChanged="onNameChanged" @iconChanged="onIconChanged"/>
+            <Step1 :icon="icon" :modelName="modelName" @iconChanged="onIconChanged" @nameChanged="onNameChanged"/>
             <Options :options="step1Options"/>
         </div>
         <Step2 v-if="stepNumber === 2 || isOverview()" :columns="columns" :disableAdd="isOverview()" :models="models"
@@ -224,20 +229,24 @@ axios.get(import.meta.env.VITE_API_URL + '/repgenerator/tables').then((response)
 
         <div v-if="!isLastStep()" class="pt-5 grid grid-cols-12 gap-4">
             <div class="col-span-6">
-                <button :disabled="isPreviousDisabled()" class="disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none block w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-400 hover:bg-gray-500" type="submit"
+                <button :disabled="isPreviousDisabled()"
+                        class="disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none block w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-400 hover:bg-gray-500"
+                        type="submit"
                         @click="onPreviousStep">
                     Back
                 </button>
             </div>
             <div class="col-span-6">
-                <button class="block w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-                        type="submit">
+                <button
+                    class="block w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                    type="submit">
                     {{ isOverview() ? 'Finish' : 'Next' }}
                 </button>
             </div>
         </div>
         <div v-else class="mt-6">
-            <button :disabled="generating" class="block w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+            <button :disabled="generating"
+                    class="block w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                     type="submit">
                 Restart
             </button>

@@ -1,0 +1,63 @@
+<template>
+    <div>
+        <div class="mt-2 mb-6 text-sm text-red-600" v-if="errors !== ''">
+            {{ errors }}
+        </div>
+
+        <div class="md:grid md:grid-cols-3 md:gap-6">
+            <div class="md:col-span-1">
+                <div class="px-4 sm:px-0">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">Create {{modelNameSingular}}</h3>
+                    <p class="mt-1 text-sm text-gray-600">This information will be displayed publicly so be careful what you share.</p>
+                </div>
+            </div>
+            <div class="mt-5 md:mt-0 md:col-span-2">
+                <form @submit.prevent="save{{modelNameSingular}}">
+                    <div class="shadow sm:rounded-md sm:overflow-hidden">
+                        <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
+                            {{form}}
+                        </div>
+                        <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                            <button type="submit" class="inline-flex items-center justify-center rounded-md border border-transparent bg-gray-800 px-4 py-2 text-sm font-medium text-white shadow-sm hover:ring-2 hover:ring-grey-800 hover:ring-offset-2 focus:outline-none focus:ring-2 focus:ring-grey-800 focus:ring-offset-2 sm:w-auto">Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+<script>
+import use{{modelNamePlural}} from './{{modelNameSingularLowerCase}}.js'
+import { onMounted } from 'vue';
+
+export default {
+    props: {
+        id: {
+            required: true,
+            type: Number
+        }
+    },
+    setup(props) {
+        const { errors, {{modelNameSingularLowerCase}}, update{{modelNameSingular}}, get{{modelNameSingular}} } = use{{modelNamePlural}}()
+
+        onMounted(() => get{{modelNameSingular}}(props.id))
+
+        const save{{modelNameSingular}} = async () => {
+            await update{{modelNameSingular}}(props.id)
+        }
+
+        const handleFileUpload = async (event) => {
+            {{modelNameSingularLowerCase}}.value.{{imageFieldName}}.push(event.target.files[0])
+        }
+
+        return {
+            errors,
+            {{modelNameSingularLowerCase}},
+            save{{modelNameSingular}},
+            handleFileUpload
+        }
+    }
+}
+</script>

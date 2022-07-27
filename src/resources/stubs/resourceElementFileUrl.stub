@@ -1,0 +1,1 @@
+'url' => asset($this->getDocumentStoragePath($this->resource, $this->resource)),

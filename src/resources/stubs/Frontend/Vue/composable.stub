@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+import {notify} from "@kyvg/vue3-notification";
 
 export default function use{{modelNamePlural}}() {
     const {{modelNameSingularLowerCase}} = ref([])
@@ -31,6 +32,8 @@ export default function use{{modelNamePlural}}() {
     const get{{modelNameSingular}} = async (id) => {
         let response = await axios.get(`{{baseUrl}}/api/v1/{{modelNamePluralLowerCase}}/${id}`)
         {{modelNameSingularLowerCase}}.value = response.data.data
+
+        {{getMethodImageLine}}
     }
 
     const getSearch = async (searchInput, perPage) => {
@@ -62,13 +65,22 @@ export default function use{{modelNamePlural}}() {
                     formData.append(key, data[key])
                 }
             });
+
             await axios.post('{{baseUrl}}/api/v1/{{modelNamePluralLowerCase}}', formData,
               {
                   headers: {
                       'Content-Type': 'multipart/form-data'
                   }
-              })
-            await router.push({ name: '{{modelNamePluralLowerCase}}.index' })
+              }).then(() => {
+                    notify({
+                        text: "Save success!",
+                        type: "success"
+                    });
+
+                    setTimeout(() => {
+                        location.reload()
+                    }, 1500);
+                })
         } catch (e) {
             if (e.response.status === 422) {
                 for (const key in e.response.data.errors) {
@@ -76,14 +88,41 @@ export default function use{{modelNamePlural}}() {
                 }
             }
         }
-
     }
 
     const update{{modelNameSingular}} = async (id) => {
         errors.value = ''
         try {
-            await axios.patch(`{{baseUrl}}/api/v1/{{modelNamePluralLowerCase}}/${id}`, {{modelNameSingularLowerCase}}.value)
-            await router.push({ name: '{{modelNamePluralLowerCase}}.index' })
+            let formData = new FormData()
+            Object.keys(data).forEach(key => {
+                if(Array.isArray(data[key])) {
+                    for(let i in data[key]) {
+                        formData.append(key+'[]', data[key][i])
+                    }
+                } else {
+                    // Temporary fix for sending booleans
+                    if ( typeof data[key] === 'boolean' ) {
+                        data[key] = data[key] ? 1 : 0;
+                    }
+                    formData.append(key, data[key])
+                }
+            });
+
+            await axios.patch(`{{baseUrl}}/api/v1/{{modelNamePluralLowerCase}}/${id}`, formData,
+              {
+                  headers: {
+                      'Content-Type': 'multipart/form-data'
+                  }
+              }).then(() => {
+                    notify({
+                        text: "Edit success!",
+                        type: "success"
+                    });
+
+                    setTimeout(() => {
+                        location.reload()
+                    }, 1500);
+                })
         } catch (e) {
             if (e.response.status === 422) {
                 for (const key in e.response.data.errors) {

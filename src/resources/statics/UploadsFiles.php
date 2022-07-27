@@ -48,14 +48,6 @@ trait UploadsFiles
         }
     }
 
-    /**
-     * @param  Model  $model
-     * @return string
-     */
-    public function getDocumentDirectory(Model $model): string
-    {
-        return 'imgs/'.$this->getFilesLocation().'/'.$model->getAttribute('id');
-    }
 
     /**
      * @return string
@@ -83,6 +75,34 @@ trait UploadsFiles
     public function getDocumentPath(Model $model, Model $file): string
     {
         return $this->getDocumentDirectory($model).'/'.$file->getAttribute('name');
+    }
+
+    /**
+     * @param  Model  $model
+     * @return string
+     */
+    public function getDocumentDirectory(Model $model): string
+    {
+        return 'public/imgs/'.$this->getFilesLocation().'/'.$model->getAttribute('id');
+    }
+
+    /**
+     * @param  Model  $model
+     * @param  Model  $file
+     * @return string
+     */
+    public function getDocumentStoragePath(Model $model, Model $file): string
+    {
+        return $this->getDocumentStorageDirectory($model).'/'.$file->getAttribute('name');
+    }
+
+    /**
+     * @param  Model  $model
+     * @return string
+     */
+    public function getDocumentStorageDirectory(Model $model): string
+    {
+        return 'storage/imgs/'.$this->getFilesLocation().'/'.$model->getAttribute('id');
     }
 
     /**

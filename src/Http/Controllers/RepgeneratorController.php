@@ -46,17 +46,17 @@ class RepgeneratorController extends Controller
         //Migration generation setup
         /** @var Table $table */
         $table = app(Table::class);
-        $this->migrationGeneratorService->setup(config('pentacom.migration_target_path'), Carbon::now());
+        $this->migrationGeneratorService->setup(config('pentacom.migration_target_path'));
 
 
         //Detect if CrudMenus exists or we need to create it
         $messages[] = $this->shouldCreateCrudMenuTable($table);
-        sleep(2);
+        sleep(1);
 
         //Generate migration for the main model
         $messages[] = $this->generateMainMigrationAndDomain($table, $request, $columns, $indexes, $foreigns, $messages,
             $fileUpload);
-        sleep(2);
+        sleep(1);
 
         //If $fileUpload is not empty we need to create the migration and the Domain for the relationship also
         if (!empty($fileUpload)) {
@@ -152,6 +152,7 @@ class RepgeneratorController extends Controller
                 $columns[] = new RepgeneratorColumnAdapter($name, $type);
             }
 
+            $this->migrationGeneratorService->setDate(Carbon::now());
             $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], [],
                 self::CRUD_MENU_NAME, 'menu');
 
@@ -168,7 +169,8 @@ class RepgeneratorController extends Controller
                 },
                 false,
                 null,
-                $migrationName
+                $migrationName,
+                false
             );
         }
 
@@ -196,6 +198,7 @@ class RepgeneratorController extends Controller
     ): array {
         $table->setName($request->get('name'));
 
+        $this->migrationGeneratorService->setDate(Carbon::now());
         $migrationName = $this->migrationGeneratorService->generateMigrationFiles(
             $table,
             $columns,
@@ -237,6 +240,7 @@ class RepgeneratorController extends Controller
             false,
             $fileUpload,
             $migrationName,
+            false
         );
         return $messages;
     }
@@ -268,6 +272,7 @@ class RepgeneratorController extends Controller
             'id' => 'id',
             $originalTableSingular.'_id' => 'unsignedBigInteger',
             'name' => 'string',
+            'folder' => 'string',
             'created_at' => 'timestamp',
             'updated_at' => 'timestamp',
         ];
@@ -288,12 +293,14 @@ class RepgeneratorController extends Controller
             'onDelete' => null
         ];
 
+        $this->migrationGeneratorService->setDate(Carbon::now());
         $migrationName = $this->migrationGeneratorService->generateMigrationFiles(
             $table,
             $columns,
             [],
             $foreigns,
-            $request->get('name').'Files'
+            $request->get('name').'Files',
+            'photograph'
         );
 
         $this->repgeneratorService->generate(
@@ -310,6 +317,7 @@ class RepgeneratorController extends Controller
             false,
             null,
             $migrationName,
+            true
         );
 
         return $messages;

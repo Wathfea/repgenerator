@@ -46,7 +46,7 @@ class RepgeneratorService
      * @param  string  $name
      * @param  bool  $generateModel
      * @param  bool  $generatePivot
-     * @param  bool  $generateFronted
+     * @param  bool  $generateFrontend
      * @param  false  $readOnly
      * @param  RepgeneratorColumnAdapter[]  $columns
      * @param  array  $foreigns
@@ -54,6 +54,7 @@ class RepgeneratorService
      * @param  false  $fromConsole
      * @param  array|null  $uploadsFiles
      * @param  string|null  $migrationName
+     * @param  bool  $isFileRelation
      */
     public function generate(
         string $name,
@@ -67,6 +68,7 @@ class RepgeneratorService
         bool $fromConsole = false,
         array $uploadsFiles = null,
         string $migrationName = null,
+        bool $isFileRelation = false,
     ) {
         $this->createDirectories();
         $callback('Directories generated!');
@@ -85,7 +87,7 @@ class RepgeneratorService
             $callback('Model is ready!');
         }
 
-        $this->apiController('v1', $name, $readOnly);
+        $this->apiController('v1', $name, $readOnly, $uploadsFiles);
         $callback('API Controller is ready!');
 
         $this->request($name, $columns);
@@ -101,7 +103,7 @@ class RepgeneratorService
         $this->provider($name, false, $uploadsFiles);
         $callback('Provider is ready!');
 
-        $this->resource($name, $columns);
+        $this->resource($name, $columns, $isFileRelation);
         $callback('Resource is ready!');
 
         //$this->factory($name, $columns);
@@ -615,13 +617,15 @@ class RepgeneratorService
     /**
      * @param  string  $name
      * @param  RepgeneratorColumnAdapter[]  $columns
+     * @param  bool  $isFileRelation
      */
-    private function resource(string $name, array $columns)
+    private function resource(string $name, array $columns, bool $isFileRelation = false)
     {
         $routeName = strtolower(Str::plural($name));
 
         $actions = ['index', 'store', 'update', 'show', 'destroy'];
 
+        $traits[] = "";
         $lines[] = "'actions' => [";
         foreach ($actions as $route) {
             $templete = match ($route) {
@@ -642,12 +646,12 @@ class RepgeneratorService
         }
         $lines[] = "],";
 
-        $use = [];
+        $uses = [];
         foreach ($columns as $column) {
             if ($column->references) {
                 $referenceSingular = Str::lcfirst(Str::studly(Str::singular($column->references['name'])));
                 $referenceName = ucfirst($referenceSingular);
-                $use[] = "use App\Domain\\".$referenceName."\\Resources\\".$referenceName."Resource;\n";
+                $uses[] = "use App\Domain\\".$referenceName."\\Resources\\".$referenceName."Resource;\n";
 
                 $resourceElementTemplate = str_replace(
                     [
@@ -663,7 +667,7 @@ class RepgeneratorService
                         'make'
                     ], $this->repgeneratorStubService->getStub('resourceElementRelation'));
             } elseif ($column->fileUploadLocation) {
-                $use[] = "use App\Domain\\".$name."File\\Resources\\".$name."FileResource;\n";
+                $uses[] = "use App\Domain\\".$name."File\\Resources\\".$name."FileResource;\n";
 
                 $resourceElementTemplate = str_replace(
                     [
@@ -685,16 +689,24 @@ class RepgeneratorService
             $lines[] = Constants::TAB.Constants::TAB.$resourceElementTemplate;
         }
 
+        if($isFileRelation) {
+            $uses[] = "use App\Abstraction\Traits\UploadsFiles;";
+            $traits[] = "use UploadsFiles;";
+            $lines[] = $this->repgeneratorStubService->getStub('resourceElementFileUrl');
+        }
+
         $resourceTemplate = str_replace(
             [
                 '{{modelName}}',
                 '{{modelResourceArray}}',
-                '{{use}}'
+                '{{uses}}',
+                '{{traits}}'
             ],
             [
                 $name,
                 $this->implodeLines($lines, 2),
-                $this->implodeLines($use, 2)
+                $this->implodeLines($uses, 2),
+                $this->implodeLines($traits, 2),
             ],
             $this->repgeneratorStubService->getStub('Resource')
         );
@@ -733,7 +745,7 @@ class RepgeneratorService
     private function frontend(string $name, array $columns, $callback)
     {
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateIndex($name, $columns);
-        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable($name);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable($name, $columns);
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateCreate($name, $columns);
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateEdit($name, $columns);
 

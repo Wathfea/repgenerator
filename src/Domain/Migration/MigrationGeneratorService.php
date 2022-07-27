@@ -217,17 +217,20 @@ class MigrationGeneratorService
 
     /**
      * @param  null  $path
-     * @param  null  $date
      * @param  null  $fileName
      */
-    public function setup($path = null, $date = null, $fileName = null)
+    public function setup($path = null, $fileName = null)
     {
         $this->settings = app(MigrationSettings::class);
         $this->settings->setPath($path ?? Config::get('repgenerator.migration_target_path'));
 
-        $this->settings->setDate(Carbon::parse($date ?? Carbon::now()));
         $this->settings->setTableFilename(Config::get('repgenerator.filename_pattern.table'));
         $this->settings->setForeignKeyFilename(Config::get('repgenerator.filename_pattern.foreign_key'));
         $this->settings->setStubPath(Config::get('repgenerator.migration_stub_path'));
+    }
+
+    public function setDate($date = null)
+    {
+        $this->settings->setDate(Carbon::parse($date ?? Carbon::now()));
     }
 }
