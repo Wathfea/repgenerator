@@ -41,6 +41,7 @@ const scrollToTop = () => {
 const resetWizzard = () => {
     stepNumber.value = 1;
     modelName.value = '';
+    icon.value = '';
     columns.value = getDefaultColumns();
     for (let index in step1Options) {
         step1Options[index].enabled = false;
@@ -52,6 +53,7 @@ const generate = () => {
     generating.value = true;
     let payload = {
         name: modelName.value,
+        icon: icon.value,
         columns: columns.value
     };
     for (let index in step1Options.value) {
@@ -93,8 +95,12 @@ const isLastStep = () => {
 
 // 1. Name
 const modelName = ref('');
+const icon = ref('');
 const onNameChanged = (name) => {
     modelName.value = name;
+}
+const onIconChanged = (setIcon) => {
+    icon.value = setIcon;
 }
 
 // 2. Columns
@@ -209,7 +215,7 @@ axios.get(import.meta.env.VITE_API_URL + '/repgenerator/tables').then((response)
             </ol>
         </nav>
         <div v-if="stepNumber === 1 || isOverview()">
-            <Step1 :modelName="modelName" @nameChanged="onNameChanged"/>
+            <Step1 :modelName="modelName" :icon="icon" @nameChanged="onNameChanged" @iconChanged="onIconChanged"/>
             <Options :options="step1Options"/>
         </div>
         <Step2 v-if="stepNumber === 2 || isOverview()" :columns="columns" :disableAdd="isOverview()" :models="models"

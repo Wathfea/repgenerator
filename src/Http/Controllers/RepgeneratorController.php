@@ -51,12 +51,12 @@ class RepgeneratorController extends Controller
 
         //Detect if CrudMenus exists or we need to create it
         $messages[] = $this->shouldCreateCrudMenuTable($table);
-        sleep(1);
+        sleep(2);
 
         //Generate migration for the main model
         $messages[] = $this->generateMainMigrationAndDomain($table, $request, $columns, $indexes, $foreigns, $messages,
             $fileUpload);
-        sleep(1);
+        sleep(2);
 
         //If $fileUpload is not empty we need to create the migration and the Domain for the relationship also
         if (!empty($fileUpload)) {
@@ -142,6 +142,8 @@ class RepgeneratorController extends Controller
             $migrationColumns = [
                 'id' => 'id',
                 'name' => 'string',
+                'url' => 'string',
+                'icon' => 'string',
                 'created_at' => 'timestamp',
                 'updated_at' => 'timestamp',
             ];
@@ -151,7 +153,7 @@ class RepgeneratorController extends Controller
             }
 
             $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], [],
-                self::CRUD_MENU_NAME);
+                self::CRUD_MENU_NAME, 'menu');
 
             $this->repgeneratorService->generate(
                 self::CRUD_MENU_NAME,
@@ -199,7 +201,8 @@ class RepgeneratorController extends Controller
             $columns,
             $indexes,
             $foreigns,
-            $request->get('name')
+            $request->get('name'),
+            $request->get('icon')
         );
 
         if (!empty($fileUpload)) {

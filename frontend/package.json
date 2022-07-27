@@ -2,7 +2,7 @@
     "name": "frontend2",
     "version": "0.0.0",
     "scripts": {
-        "dev": "vite",
+        "dev": "vite --port 3030",
         "build": "vite build --base=http://repgenerator.test/wizzard/ --emptyOutDir",
         "preview": "vite preview --port 4173"
     },

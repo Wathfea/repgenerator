@@ -23,11 +23,13 @@ class MigrationStub
     /**
      * Populates the place-holders in the migration stub.
      *
-     * @param  string  $stub  File content.
-     * @param  string  $use
-     * @param  string  $upContent  Content for migration `up`.
-     * @param  string  $downContent  Content for migration `down`.
-     * @param  string  $name
+     * @param string $stub File content.
+     * @param string $use
+     * @param string $upContent Content for migration `up`.
+     * @param string $downContent Content for migration `down`.
+     * @param string $name The name of the menu
+     * @param string $url The url at which the menu is found
+     * @param string $iconName
      * @return string Migration content.
      */
     public function populateStub(
@@ -35,7 +37,9 @@ class MigrationStub
         string $use,
         string $upContent,
         string $downContent,
-        string $name
+        string $name,
+        string $url,
+        string $iconName
     ): string {
         $content = $stub;
         $replace = [
@@ -43,6 +47,8 @@ class MigrationStub
             '{{ up }}' => $upContent,
             '{{ down }}' => $downContent,
             '{{ name }}' => $name,
+            '{{ url }}' => $url,
+            '{{ icon }}' => $iconName,
         ];
         return str_replace(array_keys($replace), $replace, $content);
     }
