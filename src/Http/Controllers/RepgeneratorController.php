@@ -60,7 +60,7 @@ class RepgeneratorController extends Controller
 
         //If $fileUpload is not empty we need to create the migration and the Domain for the relationship also
         if (!empty($fileUpload)) {
-            $messages[] = $this->generateFileRelationMigration($table, $request);
+            $messages[] = $this->generateFileRelationMigration($table, $request, $fileUpload);
         }
 
         $messages = collect($messages)->flatten()->toArray();
@@ -257,11 +257,13 @@ class RepgeneratorController extends Controller
     /**
      * @param  Table  $table
      * @param  GenerationRequest  $request
+     * @param  array  $fileUpload
      * @return array
      */
     private function generateFileRelationMigration(
         Table $table,
-        GenerationRequest $request
+        GenerationRequest $request,
+        array $fileUpload
     ): array {
         $originalTable = $table->getName();
         $originalTableSingular = Str::singular($originalTable);
@@ -272,7 +274,6 @@ class RepgeneratorController extends Controller
             'id' => 'id',
             $originalTableSingular.'_id' => 'unsignedBigInteger',
             'name' => 'string',
-            'folder' => 'string',
             'created_at' => 'timestamp',
             'updated_at' => 'timestamp',
         ];
@@ -315,7 +316,7 @@ class RepgeneratorController extends Controller
                 $messages[] = $msg;
             },
             false,
-            null,
+            $fileUpload,
             $migrationName,
             true
         );

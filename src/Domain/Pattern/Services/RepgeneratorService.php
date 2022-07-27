@@ -54,7 +54,7 @@ class RepgeneratorService
      * @param  false  $fromConsole
      * @param  array|null  $uploadsFiles
      * @param  string|null  $migrationName
-     * @param  bool  $isFileRelation
+     * @param  bool  $isGeneratedFileDomain
      */
     public function generate(
         string $name,
@@ -68,7 +68,7 @@ class RepgeneratorService
         bool $fromConsole = false,
         array $uploadsFiles = null,
         string $migrationName = null,
-        bool $isFileRelation = false,
+        bool $isGeneratedFileDomain = false,
     ) {
         $this->createDirectories();
         $callback('Directories generated!');
@@ -87,23 +87,23 @@ class RepgeneratorService
             $callback('Model is ready!');
         }
 
-        $this->apiController('v1', $name, $readOnly, $uploadsFiles);
+        $this->apiController('v1', $name, $readOnly, $uploadsFiles, $isGeneratedFileDomain);
         $callback('API Controller is ready!');
 
         $this->request($name, $columns);
         $this->updateRequest($name, $columns);
         $callback('Controller requests are ready!');
 
-        $this->repositoryService($name, $generatePivot, $uploadsFiles);
+        $this->repositoryService($name, $generatePivot, $uploadsFiles, $isGeneratedFileDomain);
         $callback('Repository layer is ready!');
 
         $this->service($name, $generatePivot);
         $callback('Controller service is ready!');
 
-        $this->provider($name, false, $uploadsFiles);
+        $this->provider($name, false, $uploadsFiles, $isGeneratedFileDomain);
         $callback('Provider is ready!');
 
-        $this->resource($name, $columns, $isFileRelation);
+        $this->resource($name, $columns, $isGeneratedFileDomain);
         $callback('Resource is ready!');
 
         //$this->factory($name, $columns);
@@ -323,8 +323,9 @@ class RepgeneratorService
      * @param  string  $name
      * @param  bool  $readOnly
      * @param  array|null  $uploadsFiles
+     * @param  bool  $isGeneratedFileDomain
      */
-    private function apiController(string $version, string $name, bool $readOnly = false, array $uploadsFiles = null)
+    private function apiController(string $version, string $name, bool $readOnly = false, array $uploadsFiles = null, bool $isGeneratedFileDomain = false)
     {
         $use = '';
         $filesRelation = '';
@@ -335,7 +336,7 @@ class RepgeneratorService
             $stub = $this->repgeneratorStubService->getStub('ApiControllerReadWrite');
         }
 
-        if (!empty($uploadsFiles)) {
+        if (!empty($uploadsFiles) && !$isGeneratedFileDomain) {
             $use .= "use Illuminate\Http\JsonResponse;\n";
             $use .= "use Illuminate\Http\Request;\n";
 
@@ -480,21 +481,35 @@ class RepgeneratorService
      * @param  string  $name
      * @param  bool  $generatePivot
      * @param  array|null  $uploadsFiles
+     * @param  bool  $isGeneratedFileDomain
      */
-    private function repositoryService(string $name, bool $generatePivot, array $uploadsFiles = null)
+    private function repositoryService(string $name, bool $generatePivot, array $uploadsFiles = null, bool $isGeneratedFileDomain = false)
     {
         $use = '';
         $traits = '';
         $saveOtherDataMethod = '';
 
-        if (!empty($uploadsFiles)) {
-            $use .= "use App\Abstraction\Traits\UploadsFiles;\n";
+        if (!empty($uploadsFiles) && !$isGeneratedFileDomain) {
             $use .= "use Illuminate\Database\Eloquent\Model;\n";
-            $traits .= "use UploadsFiles;\n";
+            $use .= "use App\\Domain\\".$name."File\\Repositories\\".$name."FileRepositoryService;\n";
 
-            $saveOtherDataMethod = str_replace(['{{field}}'], [strtolower($uploadsFiles['field'])],
+            $saveOtherDataMethod = str_replace(
+                [
+                    '{{field}}',
+                    '{{uploaderClass}}',
+                ],
+                [
+                    strtolower($uploadsFiles['field']),
+                    "{$name}FileRepositoryService::class"
+                ],
                 $this->repgeneratorStubService->getStub('saveOtherDataMethod')
             );
+        }
+
+        if($isGeneratedFileDomain) {
+            $use .= "use App\Abstraction\Traits\UploadsFiles;\n";
+            $traits .= "use UploadsFiles;\n";
+
         }
 
         $eloquentTemplate = str_replace(
@@ -574,12 +589,13 @@ class RepgeneratorService
      * @param  string  $name
      * @param  bool  $isPivot
      * @param  array|null  $uploadsFiles
+     * @param  bool  $isGeneratedFileDomain
      */
-    private function provider(string $name, bool $isPivot = false, array $uploadsFiles = null)
+    private function provider(string $name, bool $isPivot = false, array $uploadsFiles = null, bool $isGeneratedFileDomain = false)
     {
         $serviceSetters = "";
-        if (!empty($uploadsFiles)) {
-            $path = $uploadsFiles['path'];
+        if ($isGeneratedFileDomain) {
+            $path = strtolower($name).'/'.$uploadsFiles['path'];
             $serviceSetters .= "->setFilesLocation('$path')";
         }
         $providerTemplate = str_replace(
@@ -617,9 +633,9 @@ class RepgeneratorService
     /**
      * @param  string  $name
      * @param  RepgeneratorColumnAdapter[]  $columns
-     * @param  bool  $isFileRelation
+     * @param  bool  $isGeneratedFileDomain
      */
-    private function resource(string $name, array $columns, bool $isFileRelation = false)
+    private function resource(string $name, array $columns, bool $isGeneratedFileDomain = false)
     {
         $routeName = strtolower(Str::plural($name));
 
@@ -689,10 +705,14 @@ class RepgeneratorService
             $lines[] = Constants::TAB.Constants::TAB.$resourceElementTemplate;
         }
 
-        if($isFileRelation) {
-            $uses[] = "use App\Abstraction\Traits\UploadsFiles;";
-            $traits[] = "use UploadsFiles;";
-            $lines[] = $this->repgeneratorStubService->getStub('resourceElementFileUrl');
+        if($isGeneratedFileDomain) {
+            $uses[] = "use App\\Domain\\".$name."\\Repositories\\".$name."RepositoryService;\n";
+            $fileRepositoryClass = $name."RepositoryService::class";
+
+            $resourceElementFileUrlTemplate = str_replace(['{{fileRepositoryClass}}'], [$fileRepositoryClass],
+                $this->repgeneratorStubService->getStub('resourceElementFileUrl'));
+
+            $lines[] = $resourceElementFileUrlTemplate;
         }
 
         $resourceTemplate = str_replace(

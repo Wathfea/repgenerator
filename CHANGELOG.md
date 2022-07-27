@@ -6,7 +6,6 @@ All notable changes to `repgenerator` will be documented in this file
 
 - File update hiányzik
 - Multiple file upload
-- URL a resourcba ha file upload van engedélyezve
 - Relation párok beírása
 - Pivot generálás átnézése
 - Factory and seeder generation for CRUD
@@ -27,6 +26,8 @@ All notable changes to `repgenerator` will be documented in this file
 - Refactored crud frontend
 - Loading screen
 - File upload handling and file upload at edit page
+- File upload to prefixed folder
+- Url inserted to resource if file upload
 
 ## Fixed
 - Fixd migration time generation

@@ -83,7 +83,7 @@ trait UploadsFiles
      */
     public function getDocumentDirectory(Model $model): string
     {
-        return 'public/imgs/'.$this->getFilesLocation().'/'.$model->getAttribute('id');
+        return 'public/files/'.$this->getFilesLocation().'/'.$model->getAttribute('id');
     }
 
     /**
@@ -102,7 +102,7 @@ trait UploadsFiles
      */
     public function getDocumentStorageDirectory(Model $model): string
     {
-        return 'storage/imgs/'.$this->getFilesLocation().'/'.$model->getAttribute('id');
+        return 'storage/files/'.$this->getFilesLocation().'/'.$model->getAttribute('id');
     }
 
     /**

@@ -1,1 +1,1 @@
-'url' => asset($this->getDocumentStoragePath($this->resource, $this->resource)),
+'url' => asset(app({{fileRepositoryClass}})->getDocumentStoragePath($this->resource, $this->resource)),
