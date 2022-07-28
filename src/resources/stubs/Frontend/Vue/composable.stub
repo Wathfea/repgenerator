@@ -90,10 +90,12 @@ export default function use{{modelNamePlural}}() {
         }
     }
 
-    const update{{modelNameSingular}} = async (id) => {
+    const update{{modelNameSingular}} = async (data) => {
         errors.value = ''
         try {
             let formData = new FormData()
+            formData.append("_method", 'PATCH')
+
             Object.keys(data).forEach(key => {
                 if(Array.isArray(data[key])) {
                     for(let i in data[key]) {
@@ -108,7 +110,7 @@ export default function use{{modelNamePlural}}() {
                 }
             });
 
-            await axios.patch(`{{baseUrl}}/api/v1/{{modelNamePluralLowerCase}}/${id}`, formData,
+            await axios.post(`{{baseUrl}}/api/v1/{{modelNamePluralLowerCase}}/${data.id}`, formData,
               {
                   headers: {
                       'Content-Type': 'multipart/form-data'

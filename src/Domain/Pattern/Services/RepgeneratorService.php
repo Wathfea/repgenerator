@@ -103,7 +103,7 @@ class RepgeneratorService
         $this->provider($name, false, $uploadsFiles, $isGeneratedFileDomain);
         $callback('Provider is ready!');
 
-        $this->resource($name, $columns, $isGeneratedFileDomain);
+        $this->resource($name, $columns, $foreigns, $isGeneratedFileDomain);
         $callback('Resource is ready!');
 
         //$this->factory($name, $columns);
@@ -633,9 +633,10 @@ class RepgeneratorService
     /**
      * @param  string  $name
      * @param  RepgeneratorColumnAdapter[]  $columns
+     * @param  array  $foreigns
      * @param  bool  $isGeneratedFileDomain
      */
-    private function resource(string $name, array $columns, bool $isGeneratedFileDomain = false)
+    private function resource(string $name, array $columns, array $foreigns, bool $isGeneratedFileDomain = false)
     {
         $routeName = strtolower(Str::plural($name));
 
@@ -698,8 +699,31 @@ class RepgeneratorService
                         $name."File",
                         'collection'
                     ], $this->repgeneratorStubService->getStub('resourceElementRelation'));
+            } elseif($column->type === 'date' || $column->type === 'dateTime') {
+                if(!in_array("use Illuminate\Support\Carbon;\n", $uses)) {
+                    $uses[] = "use Illuminate\Support\Carbon;\n";
+                }
+
+                if(!in_array("use Illuminate\Support\Facades\App;\n", $uses)) {
+                    $uses[] = "use Illuminate\Support\Facades\App;\n";
+                }
+
+                $resourceElementTemplate = str_replace(
+                    [
+                        '{{field}}'
+                    ],
+                    [
+                        $column->name
+                    ],
+                    $this->repgeneratorStubService->getStub('resourceElement'.ucfirst($column->type)));
             } else {
-                $resourceElementTemplate = str_replace(['{{field}}'], [$column->name],
+                $resourceElementTemplate = str_replace(
+                    [
+                        '{{field}}'
+                    ],
+                    [
+                        $column->name
+                    ],
                     $this->repgeneratorStubService->getStub('resourceElement'));
             }
             $lines[] = Constants::TAB.Constants::TAB.$resourceElementTemplate;
@@ -709,7 +733,16 @@ class RepgeneratorService
             $uses[] = "use App\\Domain\\".$name."\\Repositories\\".$name."RepositoryService;\n";
             $fileRepositoryClass = $name."RepositoryService::class";
 
-            $resourceElementFileUrlTemplate = str_replace(['{{fileRepositoryClass}}'], [$fileRepositoryClass],
+            $relatedTableName = strtolower(Str::singular($foreigns[0]['reference']['name']));
+            $resourceElementFileUrlTemplate = str_replace(
+                [
+                    '{{fileRepositoryClass}}',
+                    '{{relation}}'
+                ],
+                [
+                    $fileRepositoryClass,
+                    $relatedTableName
+                ],
                 $this->repgeneratorStubService->getStub('resourceElementFileUrl'));
 
             $lines[] = $resourceElementFileUrlTemplate;

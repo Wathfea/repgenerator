@@ -1,0 +1,1 @@
+'{{field}}' => Carbon::parse($this->{{field}})->locale(App::currentLocale())->isoFormat('LLL dddd'),

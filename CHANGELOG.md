@@ -3,8 +3,6 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
-
-- File update hiányzik
 - Multiple file upload
 - Relation párok beírása
 - Pivot generálás átnézése
@@ -13,13 +11,12 @@ All notable changes to `repgenerator` will be documented in this file
 - How it works section
 - CRUD UI in other Frontend frameworks
 - CSV import
-- Nice to have date típusok ilye formában történő beszúrása a resourceba: 'event_date' => Carbon::parse($this->
-  event_date)->locale('hu')->isoFormat('LL dddd'), dateTime pedig 'event_date' => Carbon::parse($this->event_date)->
-  locale('hu')->isoFormat('LLL dddd'),
-- translation a mezőkhöz,
-- crud folyamatok után notification és reload
+- translation a mezőkhöz
 
 ## [Unreleased]
+
+## [1.3.7] - 2022-07-28
+
 ## Added
 - Api controller index and show override on files relation
 - Icon generation
@@ -28,6 +25,9 @@ All notable changes to `repgenerator` will be documented in this file
 - File upload handling and file upload at edit page
 - File upload to prefixed folder
 - Url inserted to resource if file upload
+- File update
+- Date and dateTime types are got special formatting in resource
+- Reload and notification after crud actions
 
 ## Fixed
 - Fixd migration time generation

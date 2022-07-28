@@ -2,6 +2,7 @@
 
 namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
 use Pentacom\Repgenerator\Domain\Pattern\Helpers\CharacterCounterStore;
@@ -373,7 +374,8 @@ class RepgeneratorFrontendService
             }
         }
 
-        $templateWithFileUpload = $data->fileUploadLocation === '' ? 'edit' : 'editWithFileUpload';
+        Log::info('FileUploadLocation', ['location' => $data->fileUploadLocation]);
+        $templateWithFileUpload = $data->fileUploadLocation === null ? 'edit' : 'editWithFileUpload';
 
         $createTemplate = str_replace(
             [

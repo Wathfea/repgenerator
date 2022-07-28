@@ -45,7 +45,7 @@ export default {
         onMounted(() => get{{modelNameSingular}}(props.id))
 
         const save{{modelNameSingular}} = async () => {
-            await update{{modelNameSingular}}(props.id)
+            await update{{modelNameSingular}}({...{{modelNameSingularLowerCase}}.value})
         }
 
         return {
