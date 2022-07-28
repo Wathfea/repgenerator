@@ -16,7 +16,7 @@ class DoubleColumnGenerator
     /**
      *
      */
-    private const DOUBLE_EMPTY_SCALE     = 0;
+    private const DOUBLE_EMPTY_SCALE = 0;
 
     /**
      * @param  string  $type

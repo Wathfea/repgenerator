@@ -21,7 +21,7 @@ class Property
      */
     public function __construct(string $name, $value)
     {
-        $this->name  = $name;
+        $this->name = $name;
         $this->value = $value;
     }
 

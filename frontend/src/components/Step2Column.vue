@@ -1,5 +1,6 @@
 <script setup>
-import { defineEmits } from 'vue'
+import {defineEmits} from 'vue'
+
 const emit = defineEmits(['removeColumn'])
 const columnTypes = [
     'id',
@@ -68,30 +69,30 @@ const columnTypes = [
     'year'
 ];
 const props = defineProps({
-    data : {
-        required : false,
-        type : Object,
-        default : () => {
+    data: {
+        required: false,
+        type: Object,
+        default: () => {
             return {}
         }
     },
-    columnTypes : {
-        required : false,
-        type : Array,
-        default : () => {
+    columnTypes: {
+        required: false,
+        type: Array,
+        default: () => {
             return []
         }
     },
-    models : {
-        required : false,
-        type : Array,
-        default : () => {
+    models: {
+        required: false,
+        type: Array,
+        default: () => {
             return []
         }
     }
 })
 const isScaleSettable = () => {
-    return ['decimal','double', 'float', 'unsignedDecimal'].indexOf(props.data.type) >= 0;
+    return ['decimal', 'double', 'float', 'unsignedDecimal'].indexOf(props.data.type) >= 0;
 }
 const isPrecisionSettable = () => {
     return ['dateTimeTz', 'dateTime', 'decimal', 'double', 'float', 'softDeletesTz', 'softDeletes', 'time', 'timeTz', 'timestamp', 'timestampTz', 'timestamps', 'timestampsTz', 'unsignedDecimal'].indexOf(props.data.type) >= 0;
@@ -102,7 +103,7 @@ const onRemoveColumn = () => {
 const onForeignChosen = (e) => {
     let setType = null;
     let foreignType = props.data.reference.columns[props.data.foreign];
-    switch(foreignType) {
+    switch (foreignType) {
         case 'bigint' :
             setType = 'unsignedBigInteger';
             break;
@@ -132,41 +133,49 @@ const onReferenceChanged = () => {
         <div class="grid grid-cols-12 gap-y-6 gap-x-4 sm:grid-cols-12">
             <div class="sm:col-span-2">
                 <div class="mt-1">
-                    <input placeholder="Field name" type="text" required="required" v-model="data.name"  class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    <input v-model="data.name" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Field name" required="required"
+                           type="text">
                 </div>
             </div>
             <div class="sm:col-span-2">
                 <div class="mt-1">
-                    <select v-model="data.type" required="required" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                    <select v-model="data.type" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                            required="required">
                         <option v-for="columnType in columnTypes" :value="columnType">{{ columnType }}</option>
                     </select>
                 </div>
             </div>
             <div class="sm:col-span-1">
                 <div class="mt-1">
-                    <input type="text" placeholder="Length" v-model="data.length" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    <input v-model="data.length" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Length"
+                           type="text">
                 </div>
             </div>
             <div class="sm:col-span-1">
                 <div class="mt-1">
-                    <input type="text" placeholder="Precision" v-model="data.precision" :disabled="!isPrecisionSettable()"  class="disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none hadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    <input v-model="data.precision" :disabled="!isPrecisionSettable()" class="disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none hadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                           placeholder="Precision"
+                           type="text">
                 </div>
             </div>
             <div class="sm:col-span-1">
                 <div class="mt-1">
-                    <input type="text" :disabled="!isScaleSettable()" placeholder="Scale" v-model="data.scale" class="disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none columnScale hadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    <input v-model="data.scale" :disabled="!isScaleSettable()" class="disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none columnScale hadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Scale"
+                           type="text">
                 </div>
             </div>
             <div class="sm:col-span-1">
                 <div class="mt-1">
-                    <input type="text" placeholder="Default" v-model="data.default" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    <input v-model="data.default" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Default"
+                           type="text">
                 </div>
             </div>
             <div class="sm:col-span-1">
                 <div class="mt-3">
                     <div class="relative flex items-start">
                         <div class="flex items-center h-5">
-                            <input v-model="data.nullable" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                            <input v-model="data.nullable" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                   type="checkbox">
                         </div>
                         <div class="ml-3 text-sm">
                             <label class="font-medium text-gray-700">NULL</label>
@@ -177,7 +186,9 @@ const onReferenceChanged = () => {
             <div class="sm:col-span-1">
                 <div class="mt-3">
                     <div class="relative flex items-start">
-                        <select v-model="data.index" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md" multiple>
+                        <select v-model="data.index"
+                                class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                multiple>
                             <option value="primary">PRIMARY</option>
                             <option value="unique">UNIQUE</option>
                             <option value="index">INDEX</option>
@@ -191,7 +202,8 @@ const onReferenceChanged = () => {
                 <div class="mt-3">
                     <div class="relative flex items-start">
                         <div class="flex items-center h-5">
-                            <input type="checkbox" v-model="data.auto_increment" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                            <input v-model="data.auto_increment" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                   type="checkbox">
                         </div>
                         <div class="ml-3 text-sm">
                             <label class="font-medium text-gray-700">AIC</label>
@@ -203,7 +215,8 @@ const onReferenceChanged = () => {
                 <div class="mt-3">
                     <div class="relative flex items-start">
                         <div class="flex items-center h-5">
-                            <input type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                            <input class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                   type="checkbox">
                         </div>
                         <div class="ml-3 text-sm">
                             <label class="font-medium text-gray-700">Unsigned</label>
@@ -219,13 +232,15 @@ const onReferenceChanged = () => {
                         <label class="text-gray-700 ml-2">References</label>
                     </div>
                     <div class="col-span-5">
-                        <select v-model="data.reference" @change="onReferenceChanged" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        <select v-model="data.reference" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                @change="onReferenceChanged">
                             <option></option>
                             <option v-for="model in models" :value="model">{{ model.name }}</option>
                         </select>
                     </div>
                     <div class="col-span-5">
-                        <select :disabled="!data.reference" v-model="data.foreign" @change="onForeignChosen" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        <select v-model="data.foreign" :disabled="!data.reference" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                @change="onForeignChosen">
                             <option></option>
                             <option v-for="(type,name) in data.reference.columns" :value="name">{{ name }}</option>
                         </select>
@@ -236,7 +251,8 @@ const onReferenceChanged = () => {
                 <div class="mt-3">
                     <div class="relative flex items-start">
                         <div class="flex items-center h-5">
-                            <input v-model="data.cascade" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                            <input v-model="data.cascade" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                   type="checkbox">
                         </div>
                         <div class="ml-3 text-sm">
                             <label class="font-medium text-gray-700">Cascade</label>
@@ -248,7 +264,8 @@ const onReferenceChanged = () => {
                 <div class="mt-3">
                     <div class="relative flex items-start">
                         <div class="flex items-center h-5">
-                            <input type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                            <input class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                   type="checkbox">
                         </div>
                         <div class="ml-3 text-sm">
                             <label class="font-medium text-gray-700">Searchable</label>
@@ -258,17 +275,27 @@ const onReferenceChanged = () => {
             </div>
             <div class="sm:col-span-2">
                 <div class="mt-1">
-                    <input type="text" placeholder="Values (coma separated)" v-model="data.values" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    <input v-model="data.values" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Values (coma separated)"
+                           type="text">
                 </div>
             </div>
             <div class="sm:col-span-2">
                 <div class="mt-1">
-                    <input type="text" placeholder="Comment" v-model="data.comment" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    <input v-model="data.comment" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Comment"
+                           type="text">
                 </div>
             </div>
             <div class="sm:col-span-1">
-                <button type="button" @click="onRemoveColumn" class="uppercase p-3 flex items-center bg-red-500 text-white max-w-max shadow-sm hover:shadow-lg rounded-full w-10 h-10">
-                    <svg width="32" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 32 32" style="transform: rotate(360deg);"><path d="M12 12h2v12h-2z" fill="currentColor"></path><path d="M18 12h2v12h-2z" fill="currentColor"></path><path d="M4 6v2h2v20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h2V6zm4 22V8h16v20z" fill="currentColor"></path><path d="M12 2h8v2h-8z" fill="currentColor"></path></svg>
+                <button class="uppercase p-3 flex items-center bg-red-500 text-white max-w-max shadow-sm hover:shadow-lg rounded-full w-10 h-10" type="button"
+                        @click="onRemoveColumn">
+                    <svg height="32" preserveAspectRatio="xMidYMid meet" style="transform: rotate(360deg);" viewBox="0 0 32 32"
+                         width="32">
+                        <path d="M12 12h2v12h-2z" fill="currentColor"></path>
+                        <path d="M18 12h2v12h-2z" fill="currentColor"></path>
+                        <path d="M4 6v2h2v20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h2V6zm4 22V8h16v20z"
+                              fill="currentColor"></path>
+                        <path d="M12 2h8v2h-8z" fill="currentColor"></path>
+                    </svg>
                 </button>
             </div>
         </div>
@@ -277,7 +304,8 @@ const onReferenceChanged = () => {
                 <div class="mt-3">
                     <div class="relative flex items-start">
                         <div class="flex items-center h-5">
-                            <input v-model="data.show_on_table" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                            <input v-model="data.show_on_table" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                   type="checkbox">
                         </div>
                         <div class="ml-3 text-sm">
                             <label class="font-medium text-gray-700">Add to CRUD</label>
@@ -289,7 +317,8 @@ const onReferenceChanged = () => {
                 <div class="mt-3">
                     <div class="relative flex items-start">
                         <div class="flex items-center h-5">
-                            <input type="text" placeholder="Upload file path" v-model="data.uploads_files_path" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                            <input v-model="data.uploads_files_path" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Upload file path"
+                                   type="text">
                         </div>
                     </div>
                 </div>

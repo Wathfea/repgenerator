@@ -1,0 +1,6 @@
+<div>
+    <label class="block text-sm font-medium text-gray-700" for="image">Image</label>
+    <div class="mt-1">
+        <img v-for="image in {{modelNameSingularLowerCase}}.files" :src="image.url" :alt="image.name" style="max-width: 200px;" class="img-responsive" />
+    </div>
+</div>

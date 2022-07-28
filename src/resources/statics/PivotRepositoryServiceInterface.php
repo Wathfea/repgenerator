@@ -12,6 +12,21 @@ interface PivotRepositoryServiceInterface extends RepositoryServiceInterface
 {
     /**
      * @param  int  $parentModelId
+     * @param  int  $relationshipModelId
+     * @param  array  $data
+     * @return bool
+     */
+    public function attach(int $parentModelId, int $relationshipModelId, array $data = []): bool;
+
+    /**
+     * @param  int  $parentModelId
+     * @param  int  $relationshipModelId
+     * @return bool
+     */
+    public function detach(int $parentModelId, int $relationshipModelId): bool;
+
+    /**
+     * @param  int  $parentModelId
      * @return Collection
      */
     public function get(int $parentModelId): Collection;
@@ -25,14 +40,6 @@ interface PivotRepositoryServiceInterface extends RepositoryServiceInterface
 
     /**
      * @param  int  $parentModelId
-     * @param  int  $relationModelId
-     * @param  array  $data
-     * @return bool
-     */
-    public function update(int $parentModelId, int $relationModelId, array $data = []): bool;
-
-    /**
-     * @param  int  $parentModelId
      * @param  array  $relations
      * @return bool
      */
@@ -40,16 +47,9 @@ interface PivotRepositoryServiceInterface extends RepositoryServiceInterface
 
     /**
      * @param  int  $parentModelId
-     * @param  int  $relationshipModelId
+     * @param  int  $relationModelId
      * @param  array  $data
      * @return bool
      */
-    public function attach(int $parentModelId, int $relationshipModelId, array $data = []): bool;
-
-    /**
-     * @param  int  $parentModelId
-     * @param  int  $relationshipModelId
-     * @return bool
-     */
-    public function detach(int $parentModelId, int $relationshipModelId): bool;
+    public function update(int $parentModelId, int $relationModelId, array $data = []): bool;
 }

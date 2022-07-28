@@ -2,6 +2,7 @@
 
 namespace App\Abstraction\Models;
 
+use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use ReflectionClass;
@@ -14,7 +15,7 @@ use ReflectionException;
  * @method static Builder|BaseModel newQuery()
  * @method static Builder|BaseModel query()
  * @method static Builder|BaseModel withAll()
- * @mixin \Eloquent
+ * @mixin Eloquent
  */
 class BaseModel extends Model
 {

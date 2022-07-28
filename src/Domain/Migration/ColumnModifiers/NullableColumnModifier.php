@@ -28,20 +28,7 @@ class NullableColumnModifier
         }
 
 
-
         return $method;
-    }
-
-    /**
-     * Check if column should add nullable, by check the $type.
-     * `softDeletes`, `rememberToken`, `timestamps` type are skipped.
-     *
-     * @param  string  $type
-     * @return bool
-     */
-    private function shouldAddNullableModifier(string $type): bool
-    {
-        return !in_array($type, ['softDeletes', 'rememberToken', 'timestamps']);
     }
 
     /**
@@ -58,5 +45,17 @@ class NullableColumnModifier
         }
 
         return true;
+    }
+
+    /**
+     * Check if column should add nullable, by check the $type.
+     * `softDeletes`, `rememberToken`, `timestamps` type are skipped.
+     *
+     * @param  string  $type
+     * @return bool
+     */
+    private function shouldAddNullableModifier(string $type): bool
+    {
+        return !in_array($type, ['softDeletes', 'rememberToken', 'timestamps']);
     }
 }

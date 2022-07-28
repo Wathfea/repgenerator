@@ -2,6 +2,8 @@
 import Wizzard from "./components/Wizzard.vue";
 import Dashboard from "./components/Dashboard.vue";
 import {ref} from "vue";
+import imgUrl from './assets/banner.jpg'
+
 const develop = ref(false);
 const choosing = ref(true);
 const usingWizzard = ref(false);
@@ -13,11 +15,7 @@ const chooseWizzard = () => {
 const chooseDashboard = () => {
     usingDashboard.value = true;
     choosing.value = false;
-}
-
-import imgUrl from './assets/banner.jpg'
-
-</script>
+}</script>
 <template>
     <div>
         <div v-if="choosing">
@@ -26,21 +24,24 @@ import imgUrl from './assets/banner.jpg'
             </header>
             <div class="grid grid-cols-12 gap-4 px-5">
                 <div class="col-span-6">
-                    <img :src="imgUrl" class="banner" alt="Repository Generator Factory" >
+                    <img :src="imgUrl" alt="Repository Generator Factory" class="banner">
                 </div>
                 <div class="col-span-6">
-                    <button v-if="develop" @click="chooseDashboard" class="disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none block w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-400 hover:bg-gray-500">
+                    <button v-if="develop" class="disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none block w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-400 hover:bg-gray-500"
+                            @click="chooseDashboard">
                         Dashboard
                     </button>
 
-                    <button @click="chooseWizzard" class="mt-3 block w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                    <button class="mt-3 block w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                            @click="chooseWizzard">
                         Wizzard
                     </button>
                 </div>
             </div>
         </div>
         <div v-else>
-            <Wizzard  v-if="usingWizzard" class="bg-white p-10 shadow max-w-screen-2xl mx-auto py-12 px-4 sm:px-6 lg:px-8"/>
+            <Wizzard v-if="usingWizzard"
+                     class="bg-white p-10 shadow max-w-screen-2xl mx-auto py-12 px-4 sm:px-6 lg:px-8"/>
             <Dashboard v-else-if="usingDashboard"/>
         </div>
     </div>

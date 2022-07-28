@@ -9,7 +9,8 @@ use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorStaticFileAdapter;
  */
 class RepgeneratorStaticFilesService
 {
-    public function __construct(protected string $staticFilesLocation) {
+    public function __construct(protected string $staticFilesLocation)
+    {
 
     }
 
@@ -42,17 +43,18 @@ class RepgeneratorStaticFilesService
         ];
 
         $generatedFiles = [];
-        foreach ( $files as $fileOriginal ) {
+        foreach ($files as $fileOriginal) {
             $fileParts = explode('/', $fileOriginal);
             $nameWithExtension = end($fileParts);
             $name = explode('.', $nameWithExtension)[0];
             $file = $this->getStatic($name);
 
-            if (!file_exists($path = app_path($fileOriginal))) {
+            //if (!file_exists($path = app_path($fileOriginal))) {
+                $path = app_path($fileOriginal);
                 file_put_contents($path, $file);
 
                 $generatedFiles[] = new RepgeneratorStaticFileAdapter($nameWithExtension, $path);
-            }
+            //}
         }
         return $generatedFiles;
     }
@@ -63,6 +65,6 @@ class RepgeneratorStaticFilesService
      */
     public function getStatic(string $name): bool|string
     {
-        return file_get_contents($this->staticFilesLocation . $name . ".php");
+        return file_get_contents($this->staticFilesLocation.$name.".php");
     }
 }

@@ -2,8 +2,8 @@
 
 namespace Pentacom\Repgenerator\Domain\Migration\Blueprint;
 
-use Pentacom\Repgenerator\Traits\Stringable;
 use Pentacom\Repgenerator\Helpers\Constants;
+use Pentacom\Repgenerator\Traits\Stringable;
 
 /**
  * Class SchemaBlueprint
@@ -29,9 +29,9 @@ class SchemaBlueprint implements ToStringInterface
      */
     public function __construct(string $table, string $schemaBuilder)
     {
-        $this->table         = $table;
+        $this->table = $table;
         $this->schemaBuilder = $schemaBuilder;
-        $this->blueprint     = null;
+        $this->blueprint = null;
     }
 
     /**

@@ -21,6 +21,37 @@ class MigrationSettings
     /** @var string */
     private string $foreignKeyFilename;
 
+    /**
+     * @return Carbon
+     */
+    public function getDate(): Carbon
+    {
+        return $this->date;
+    }
+
+    /**
+     * @param  Carbon  $date
+     */
+    public function setDate(Carbon $date): void
+    {
+        $this->date = $date;
+    }
+
+    /**
+     * @return string
+     */
+    public function getForeignKeyFilename(): string
+    {
+        return $this->foreignKeyFilename;
+    }
+
+    /**
+     * @param  string  $foreignKeyFilename
+     */
+    public function setForeignKeyFilename(string $foreignKeyFilename): void
+    {
+        $this->foreignKeyFilename = $foreignKeyFilename;
+    }
 
     /**
      * @return string
@@ -41,6 +72,14 @@ class MigrationSettings
     /**
      * @return string
      */
+    public function getStubPath(): string
+    {
+        return $this->stubPath;
+    }
+
+    /**
+     * @return string
+     */
     public function getTableFilename(): string
     {
         return $this->tableFilename;
@@ -52,46 +91,6 @@ class MigrationSettings
     public function setTableFilename(string $tableFilename): void
     {
         $this->tableFilename = $tableFilename;
-    }
-
-    /**
-     * @return string
-     */
-    public function getForeignKeyFilename(): string
-    {
-        return $this->foreignKeyFilename;
-    }
-
-    /**
-     * @param  string  $foreignKeyFilename
-     */
-    public function setForeignKeyFilename(string $foreignKeyFilename): void
-    {
-        $this->foreignKeyFilename = $foreignKeyFilename;
-    }
-
-    /**
-     * @return Carbon
-     */
-    public function getDate(): Carbon
-    {
-        return $this->date;
-    }
-
-    /**
-     * @param  Carbon  $date
-     */
-    public function setDate(Carbon $date): void
-    {
-        $this->date = $date;
-    }
-
-    /**
-     * @return string
-     */
-    public function getStubPath(): string
-    {
-        return $this->stubPath;
     }
 
     /**

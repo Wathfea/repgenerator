@@ -24,7 +24,6 @@ class UnsignedColumnModifier
         }
 
 
-
         return $method;
     }
 
@@ -37,7 +36,10 @@ class UnsignedColumnModifier
      */
     private function shouldAddUnsigned(string $type): bool
     {
-        return in_array($type, ['bigIncrements', 'bigInteger', 'id', 'increments', 'integer', 'smallIncrements', 'smallInteger', 'tinyIncrements', 'tinyInteger']);
+        return in_array($type, [
+            'bigIncrements', 'bigInteger', 'id', 'increments', 'integer', 'smallIncrements', 'smallInteger',
+            'tinyIncrements', 'tinyInteger'
+        ]);
     }
 
 }

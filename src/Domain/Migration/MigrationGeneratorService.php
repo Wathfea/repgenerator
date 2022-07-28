@@ -2,8 +2,8 @@
 
 namespace Pentacom\Repgenerator\Domain\Migration;
 
-use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Pentacom\Repgenerator\Domain\Migration\Blueprint\SchemaBlueprint;
 use Pentacom\Repgenerator\Domain\Migration\Blueprint\Table;
@@ -29,37 +29,27 @@ class MigrationGeneratorService
         private ColumnGenerator $columnGenerator,
         private IndexGenerator $indexGenerator,
         private ForeignGenerator $foreignGenerator
-    )
-    {
+    ) {
     }
 
     /**
-     * @param  null  $path
-     * @param  null  $date
-     * @param  null  $fileName
-     */
-    public function setup($path = null, $date = null, $fileName = null) {
-        $this->settings = app(MigrationSettings::class);
-        $this->settings->setPath( $path ?? Config::get('repgenerator.migration_target_path'));
-
-        $this->settings->setDate(Carbon::parse($date ?? Carbon::now()));
-        $this->settings->setTableFilename(Config::get('repgenerator.filename_pattern.table'));
-        $this->settings->setForeignKeyFilename(Config::get('repgenerator.filename_pattern.foreign_key'));
-        $this->settings->setStubPath(Config::get('repgenerator.migration_stub_path'));
-    }
-
-
-    /**
-     * @param  Table  $table
-     * @param  array  $columns
-     * @param  array  $indexes
-     * @param  array  $foreigns
-     * @param  string  $modelName
+     * @param Table $table
+     * @param array $columns
+     * @param array $indexes
+     * @param array $foreigns
+     * @param string $modelName
+     * @param string $iconName
      * @return string
      */
-    public function generateMigrationFiles(Table $table, array $columns, array $indexes, array $foreigns, string $modelName): string
-    {
-        $up   = $this->up($table, $columns, $indexes, $foreigns);
+    public function generateMigrationFiles(
+        Table $table,
+        array $columns,
+        array $indexes,
+        array $foreigns,
+        string $modelName,
+        string $iconName,
+    ): string {
+        $up = $this->up($table, $columns, $indexes, $foreigns);
         $down = $this->down($table, $foreigns);
 
 
@@ -68,7 +58,9 @@ class MigrationGeneratorService
             $this->settings->getStubPath(),
             $up,
             $down,
-            $modelName
+            $modelName,
+            $table->getName(),
+            $iconName
         );
 
         return $this->makePathLessFilename(
@@ -89,28 +81,32 @@ class MigrationGeneratorService
 
         foreach ($columns as $column) {
             //We not add the field to the migration if it is a file upload
-            if($column->fileUploadLocation) continue;
+            if ($column->fileUploadLocation) {
+                continue;
+            }
             $method = $this->columnGenerator->generate($table, $column->toArray());
             $tableBlueprint->setMethod($method);
         }
 
-        if(!empty($indexes)) {
+        if (!empty($indexes)) {
             foreach ($indexes as $index) {
 
                 $indexName = null;
-                if(count($index) > 1) {
+                if (count($index) > 1) {
                     //Composite index creation, we should check index name length
-                    $indexName = $table->getName().'_'.implode('_',$index['columns']).'_'.$index['type'];
-                    if(Str::length($indexName) > 32) {
+                    $indexName = $table->getName().'_'.implode('_', $index['columns']).'_'.$index['type'];
+                    if (Str::length($indexName) > 32) {
                         //Generate short index name
-                        $columns = array_map(function($val) { return Str::limit($val,2, ''); }, $index['columns']);
-                        $indexName = Str::limit($table->getName(),2, '').'_'.implode('_',$columns).'_'.$index['type'];
+                        $columns = array_map(function ($val) {
+                            return Str::limit($val, 2, '');
+                        }, $index['columns']);
+                        $indexName = Str::limit($table->getName(), 2, '').'_'.implode('_', $columns).'_'.$index['type'];
                     }
                 }
 
                 $method = $this->indexGenerator->generate($index);
 
-                if($indexName) {
+                if ($indexName) {
                     $method->setSecondParameter($indexName);
                 }
 
@@ -118,7 +114,7 @@ class MigrationGeneratorService
             }
         }
 
-        if(!empty($foreigns)) {
+        if (!empty($foreigns)) {
             foreach ($foreigns as $foreign) {
                 $method = $this->foreignGenerator->generate($foreign);
                 $tableBlueprint->setMethod($method);
@@ -131,10 +127,23 @@ class MigrationGeneratorService
     }
 
     /**
+     * @param  Table  $table
+     * @param  string  $schemaBuilder
+     * @return SchemaBlueprint
+     */
+    private function getSchemaBlueprint(Table $table, string $schemaBuilder): SchemaBlueprint
+    {
+        return new SchemaBlueprint(
+            $table->getName(),
+            $schemaBuilder
+        );
+    }
+
+    /**
      * Generates `down` schema for table.
      *
-     * @param Table $table
-     * @param array $foreigns
+     * @param  Table  $table
+     * @param  array  $foreigns
      * @return SchemaBlueprint
      */
     public function down(Table $table, array $foreigns): SchemaBlueprint
@@ -150,20 +159,6 @@ class MigrationGeneratorService
         $down->setBlueprint($downBlueprint);
 
         return $down;
-    }
-
-
-    /**
-     * @param  Table  $table
-     * @param  string  $schemaBuilder
-     * @return SchemaBlueprint
-     */
-    private function getSchemaBlueprint(Table $table, string $schemaBuilder): SchemaBlueprint
-    {
-        return new SchemaBlueprint(
-            $table->getName(),
-            $schemaBuilder
-        );
     }
 
     /**
@@ -191,11 +186,11 @@ class MigrationGeneratorService
      */
     private function makeFilename(string $pattern, string $datetimePrefix, string $table): string
     {
-        $path     = $this->settings->getPath();
+        $path = $this->settings->getPath();
         $filename = $pattern;
-        $replace  = [
+        $replace = [
             '[datetime_prefix]' => $datetimePrefix,
-            '[table]'           => $table,
+            '[table]' => $table,
         ];
         $filename = str_replace(array_keys($replace), $replace, $filename);
         return "$path/$filename";
@@ -212,11 +207,30 @@ class MigrationGeneratorService
     private function makePathLessFilename(string $pattern, string $datetimePrefix, string $table): string
     {
         $filename = $pattern;
-        $replace  = [
+        $replace = [
             '[datetime_prefix]' => $datetimePrefix,
-            '[table]'           => $table,
+            '[table]' => $table,
         ];
         $filename = str_replace(array_keys($replace), $replace, $filename);
         return "$filename";
+    }
+
+    /**
+     * @param  null  $path
+     * @param  null  $fileName
+     */
+    public function setup($path = null, $fileName = null)
+    {
+        $this->settings = app(MigrationSettings::class);
+        $this->settings->setPath($path ?? Config::get('repgenerator.migration_target_path'));
+
+        $this->settings->setTableFilename(Config::get('repgenerator.filename_pattern.table'));
+        $this->settings->setForeignKeyFilename(Config::get('repgenerator.filename_pattern.foreign_key'));
+        $this->settings->setStubPath(Config::get('repgenerator.migration_stub_path'));
+    }
+
+    public function setDate($date = null)
+    {
+        $this->settings->setDate(Carbon::parse($date ?? Carbon::now()));
     }
 }

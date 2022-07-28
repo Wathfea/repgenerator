@@ -2,7 +2,8 @@
 
 namespace App\Abstraction\Repository;
 
-interface HasRepositoryService {
+interface HasRepositoryService
+{
 
     public function getRepositoryService(): RepositoryServiceInterface;
 }

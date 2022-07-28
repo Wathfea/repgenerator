@@ -17,7 +17,7 @@ class DecimalColumnGenerator
     /**
      * (8, 2) are default value of decimal, float
      */
-    private const DECIMAL_DEFAULT_SCALE     = 2;
+    private const DECIMAL_DEFAULT_SCALE = 2;
 
     /**
      * @param  string  $type

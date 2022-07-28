@@ -49,8 +49,7 @@ class ColumnGenerator
         private CommentColumnModifier $commentColumnModifier,
         private IndexColumnModifier $indexColumnModifier,
         private UnsignedColumnModifier $unsignedColumnModifier
-    )
-    {
+    ) {
     }
 
     /**
@@ -61,8 +60,10 @@ class ColumnGenerator
     public function generate(Table $table, array $column): Method
     {
         $method = match ($column['type']) {
-            'integer', 'bigInteger', 'mediumInteger', 'smallInteger', 'tinyInteger' => $this->integerColumnGenerator->generate($column['type'], $column),
-            'date', 'dateTime', 'dateTimeTz', 'time', 'timeTz', 'timestamp', 'timestampTz' => $this->datetimeColumnGenerator->generate($column['type'], $column),
+            'integer', 'bigInteger', 'mediumInteger', 'smallInteger', 'tinyInteger' => $this->integerColumnGenerator->generate($column['type'],
+                $column),
+            'date', 'dateTime', 'dateTimeTz', 'time', 'timeTz', 'timestamp', 'timestampTz' => $this->datetimeColumnGenerator->generate($column['type'],
+                $column),
             'decimal', 'float' => $this->decimalColumnGenerator->generate($column['type'], $column),
             'double' => $this->doubleColumnGenerator->generate($column['type'], $column),
             'enum', 'set' => $this->enumAndSetColumnGenerator->generate($column['type'], $column),
@@ -78,7 +79,7 @@ class ColumnGenerator
         $method = $this->unsignedColumnModifier->chainUnsigned($method, $type, $column);
         $method = $this->defaultColumnModifier->chainDefault($method, $type, $column);
         $method = $this->commentColumnModifier->chainComment($method, $column);
-        $method = $this->indexColumnModifier->chainIndex($method,$column);
+        $method = $this->indexColumnModifier->chainIndex($method, $column);
 
         return $method;
     }

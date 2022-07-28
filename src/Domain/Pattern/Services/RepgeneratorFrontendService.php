@@ -2,6 +2,7 @@
 
 namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
 use Pentacom\Repgenerator\Domain\Pattern\Helpers\CharacterCounterStore;
@@ -18,10 +19,32 @@ class RepgeneratorFrontendService
 
     /**
      * @param  string  $name
+     * @param  array  $columns
      * @return array
      */
-    public function generateComposable(string $name): array
+    public function generateComposable(string $name, array $columns): array
     {
+        $imageLineTemplate = '';
+        /**
+         * @var  $column
+         * @var  RepgeneratorColumnAdapter $data
+         */
+        foreach ($columns as $data) {
+            if ($data->fileUploadLocation) {
+                $imageLineTemplate = str_replace(
+                    [
+                        '{{modelNameSingularLowerCase}}',
+                        '{{imageField}}',
+                    ],
+                    [
+                        strtolower($name),
+                        $data->name
+                    ],
+                    $this->repgeneratorStubService->getStub('Frontend/Vue/getMethodImageLine')
+                );
+            }
+        }
+
         $composableTemplate = str_replace(
             [
                 '{{modelNameSingular}}',
@@ -29,13 +52,15 @@ class RepgeneratorFrontendService
                 '{{modelNameSingularLowerCase}}',
                 '{{modelNamePluralLowerCase}}',
                 '{{baseUrl}}',
+                '{{getMethodImageLine}}',
             ],
             [
                 $name,
                 Str::plural($name),
                 $lowerName = strtolower($name),
                 Str::plural(strtolower($name)),
-                url('')
+                '',
+                $imageLineTemplate
             ],
             $this->repgeneratorStubService->getStub('Frontend/Vue/composable')
         );
@@ -232,6 +257,8 @@ class RepgeneratorFrontendService
     {
         $editFormStr = [];
         $columnListStr = [];
+        $imageFieldName = '';
+
         /**
          * @var  $column
          * @var  RepgeneratorColumnAdapter $data
@@ -244,17 +271,22 @@ class RepgeneratorFrontendService
                 }
                 $field = implode(' ', $nameParts);
 
-                $template = match ($data->type) {
-                    'id', 'integer', 'string', 'bigIncrements', 'bigInteger', 'binary', 'char', 'dateTimeTz', 'dateTime', 'date', 'decimal',
-                    'double', 'float', 'geometryCollection', 'geometry', 'increments', 'ipAddress', 'mediumIncrements', 'mediumInteger', 'nullableTimestamps',
-                    'rememberToken', 'set', 'smallIncrements', 'smallInteger', 'softDeletesTz', 'softDeletes', 'timeTz', 'time',
-                    'timestampTz', 'timestamp', 'timestampsTz', 'timestamps', 'tinyIncrements', 'tinyInteger', 'unsignedBigInteger', 'unsignedDecimal',
-                    'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger', 'unsignedTinyInteger', 'uuidMorphs', 'uuid', 'year' => 'inputText',
-                    'text', 'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumText', 'multiLineString',
-                    'multiPoint', 'multiPolygon', 'point', 'polygon', 'tinyText' => 'inputTextarea',
-                    'enum' => 'inputOption',
-                    'boolean' => 'inputCheckbox',
-                };
+                if ($data->fileUploadLocation) {
+                    $template = 'inputFile';
+                } else {
+                    $template = match ($data->type) {
+                        'id', 'integer', 'string', 'bigIncrements', 'bigInteger', 'binary', 'char', 'dateTimeTz', 'dateTime', 'date', 'decimal',
+                        'double', 'float', 'geometryCollection', 'geometry', 'increments', 'ipAddress', 'mediumIncrements', 'mediumInteger', 'nullableTimestamps',
+                        'rememberToken', 'set', 'smallIncrements', 'smallInteger', 'softDeletesTz', 'softDeletes', 'timeTz', 'time',
+                        'timestampTz', 'timestamp', 'timestampsTz', 'timestamps', 'tinyIncrements', 'tinyInteger', 'unsignedBigInteger', 'unsignedDecimal',
+                        'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger', 'unsignedTinyInteger', 'uuidMorphs', 'uuid', 'year' => 'inputText',
+                        'text', 'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumText', 'multiLineString',
+                        'multiPoint', 'multiPolygon', 'point', 'polygon', 'tinyText' => 'inputTextarea',
+                        'enum' => 'inputOption',
+                        'boolean' => 'inputCheckbox',
+                    };
+                }
+
 
                 if ($template == 'inputOption') {
                     $selectOptions = [];
@@ -290,6 +322,30 @@ class RepgeneratorFrontendService
                         ],
                         $this->repgeneratorStubService->getStub('Frontend/Vue/fields/inputSelect')
                     );
+                } elseif ($template == 'inputFile') {
+                    $editFormStr[] = str_replace(
+                        [
+                            '{{modelNameSingularLowerCase}}',
+                        ],
+                        [
+                            strtolower($name)
+                        ],
+                        $this->repgeneratorStubService->getStub('Frontend/Vue/fields/picture')
+                    );
+
+                    $editFormStr[] = str_replace(
+                        [
+                            '{{field}}',
+                            '{{fieldLower}}',
+                            '{{modelNameSingularLowerCase}}',
+                        ],
+                        [
+                            $field,
+                            $data->name,
+                            strtolower($name)
+                        ],
+                        $this->repgeneratorStubService->getStub('Frontend/Vue/fields/inputFile')
+                    );
                 } else {
                     $editFormStr[] = str_replace(
                         [
@@ -306,9 +362,20 @@ class RepgeneratorFrontendService
                     );
                 }
                 //Create column list
-                $columnListStr[] = $data->name.": '',";
+                if ($data->fileUploadLocation) {
+                    $imageFieldName = $data->name;
+                }
+
+                if ($data->type === 'boolean') {
+                    $columnListStr[] = $data->name.": $data->default,";
+                } else {
+                    $columnListStr[] = $data->name.": '',";
+                }
             }
         }
+
+        Log::info('FileUploadLocation', ['location' => $data->fileUploadLocation]);
+        $templateWithFileUpload = $data->fileUploadLocation === null ? 'edit' : 'editWithFileUpload';
 
         $createTemplate = str_replace(
             [
@@ -317,7 +384,8 @@ class RepgeneratorFrontendService
                 '{{modelNameSingularLowerCase}}',
                 '{{modelNamePluralLowerCase}}',
                 '{{form}}',
-                '{{columnList}}'
+                '{{columnList}}',
+                '{{imageFieldName}}'
             ],
             [
                 $name,
@@ -326,8 +394,9 @@ class RepgeneratorFrontendService
                 Str::plural(strtolower($name)),
                 $this->implodeLines($editFormStr, 2),
                 $this->implodeLines($columnListStr, 2),
+                $imageFieldName
             ],
-            $this->repgeneratorStubService->getStub('Frontend/Vue/edit')
+            $this->repgeneratorStubService->getStub('Frontend/Vue/'.$templateWithFileUpload)
         );
 
         if (!file_exists($path = resource_path('js'))) {

@@ -11,30 +11,6 @@ use Pentacom\Repgenerator\Helpers\Constants;
 trait Stringable
 {
     /**
-     * Implodes lines with tab.
-     *
-     * @param  string[]  $lines
-     * @param  int  $numberOfPrefixTab  Number of tabs to implode.
-     * @return string
-     */
-    public function implodeLines(array $lines, int $numberOfPrefixTab): string
-    {
-        $tab = Constants::TAB;
-
-        $content = '';
-        foreach ($lines as $i => $line) {
-            // First line or line break
-            if ($i === 0 || $line === Constants::LINE_BREAK) {
-                $content .= $line;
-                continue;
-            }
-
-            $content .= Constants::LINE_BREAK.str_repeat($tab, $numberOfPrefixTab).$line;
-        }
-        return $content;
-    }
-
-    /**
      * Convert $value to printable string.
      *
      * @param  mixed  $value
@@ -61,6 +37,19 @@ trait Stringable
     }
 
     /**
+     * Convert $list items to printable string.
+     *
+     * @param  array  $list
+     * @return array
+     */
+    public function mapArrayItemsToString(array $list): array
+    {
+        return (new Collection($list))->map(function ($v) {
+            return $this->convertFromAnyTypeToString($v);
+        })->toArray();
+    }
+
+    /**
      * Escapes single quotes by adding backslash.
      *
      * @param  string  $string
@@ -83,15 +72,26 @@ trait Stringable
     }
 
     /**
-     * Convert $list items to printable string.
+     * Implodes lines with tab.
      *
-     * @param  array  $list
-     * @return array
+     * @param  string[]  $lines
+     * @param  int  $numberOfPrefixTab  Number of tabs to implode.
+     * @return string
      */
-    public function mapArrayItemsToString(array $list): array
+    public function implodeLines(array $lines, int $numberOfPrefixTab): string
     {
-        return (new Collection($list))->map(function ($v) {
-            return $this->convertFromAnyTypeToString($v);
-        })->toArray();
+        $tab = Constants::TAB;
+
+        $content = '';
+        foreach ($lines as $i => $line) {
+            // First line or line break
+            if ($i === 0 || $line === Constants::LINE_BREAK) {
+                $content .= $line;
+                continue;
+            }
+
+            $content .= Constants::LINE_BREAK.str_repeat($tab, $numberOfPrefixTab).$line;
+        }
+        return $content;
     }
 }

@@ -17,6 +17,21 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController 
     private int $perPage = 10;
 
     /**
+     * @param  Request  $request
+     * @param  array  $relationships
+     * @return JsonResponse
+     */
+    public function index(Request $request, array $relationships = []): JsonResponse
+    {
+        /** @var JsonResource $resource */
+        $resource = $this->getResourceClass();
+        $filter = app($this->getFilterClass(), $request->all());
+        $perPage = $this->getPerPage($request);
+        return $resource::collection($this->getService()->getRepositoryService()->getByFilter($filter, $relationships,
+            $perPage))->toResponse($request);
+    }
+
+    /**
      * @return string
      */
     public function getResourceClass(): string
@@ -25,7 +40,7 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController 
     }
 
     /**
-     * @param string $resourceClass
+     * @param  string  $resourceClass
      * @return AbstractCrudController
      */
     public function setResourceClass(string $resourceClass): AbstractCrudController
@@ -43,7 +58,7 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController 
     }
 
     /**
-     * @param string $filterClass
+     * @param  string  $filterClass
      * @return AbstractCrudController
      */
     public function setFilterClass(string $filterClass): AbstractCrudController
@@ -53,7 +68,20 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController 
     }
 
     /**
-     * @param int $perPage
+     * @param  Request  $request
+     * @return mixed
+     */
+    protected function getPerPage(Request $request): mixed
+    {
+        $perPage = $request->get('per_page');
+        if ($perPage > 0) {
+            return $perPage;
+        }
+        return $this->perPage;
+    }
+
+    /**
+     * @param  int  $perPage
      * @return AbstractCrudController
      */
     public function setPerPage(int $perPage): AbstractCrudController
@@ -63,40 +91,15 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController 
     }
 
     /**
-     * @param Request $request
-     * @return mixed
-     */
-    protected function getPerPage(Request $request): mixed {
-        $perPage = $request->get('per_page');
-        if ( $perPage > 0 ) {
-            return $perPage;
-        }
-        return $this->perPage;
-    }
-
-    /**
      * @param  Request  $request
+     * @param  int  $id
      * @param  array  $relationships
      * @return JsonResponse
      */
-    public function index(Request $request, array $relationships = []): JsonResponse
+    public function show(Request $request, int $id, array $relationships = []): JsonResponse
     {
         /** @var JsonResource $resource */
         $resource = $this->getResourceClass();
-        $filter = app($this->getFilterClass(),$request->all());
-        $perPage = $this->getPerPage($request);
-        return $resource::collection($this->getService()->getRepositoryService()->getByFilter($filter, $relationships, $perPage))->toResponse($request);
-    }
-
-    /**
-     * @param  Request  $request
-     * @param  int  $id
-     * @return JsonResponse
-     */
-    public function show(Request $request, int $id): JsonResponse
-    {
-        /** @var JsonResource $resource */
-        $resource = $this->getResourceClass();
-        return $resource::make($this->getService()->getRepositoryService()->getById($id))->toResponse($request);
+        return $resource::make($this->getService()->getRepositoryService()->getById($id, $relationships))->toResponse($request);
     }
 }

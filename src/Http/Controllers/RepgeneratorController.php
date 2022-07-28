@@ -46,7 +46,7 @@ class RepgeneratorController extends Controller
         //Migration generation setup
         /** @var Table $table */
         $table = app(Table::class);
-        $this->migrationGeneratorService->setup(config('pentacom.migration_target_path'), Carbon::now());
+        $this->migrationGeneratorService->setup(config('pentacom.migration_target_path'));
 
 
         //Detect if CrudMenus exists or we need to create it
@@ -59,8 +59,8 @@ class RepgeneratorController extends Controller
         sleep(1);
 
         //If $fileUpload is not empty we need to create the migration and the Domain for the relationship also
-        if(!empty($fileUpload)) {
-            $messages[] = $this->generateFileRelationMigration($table, $request);
+        if (!empty($fileUpload)) {
+            $messages[] = $this->generateFileRelationMigration($table, $request, $fileUpload);
         }
 
         $messages = collect($messages)->flatten()->toArray();
@@ -142,6 +142,8 @@ class RepgeneratorController extends Controller
             $migrationColumns = [
                 'id' => 'id',
                 'name' => 'string',
+                'url' => 'string',
+                'icon' => 'string',
                 'created_at' => 'timestamp',
                 'updated_at' => 'timestamp',
             ];
@@ -150,8 +152,9 @@ class RepgeneratorController extends Controller
                 $columns[] = new RepgeneratorColumnAdapter($name, $type);
             }
 
+            $this->migrationGeneratorService->setDate(Carbon::now());
             $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], [],
-                self::CRUD_MENU_NAME);
+                self::CRUD_MENU_NAME, 'menu');
 
             $this->repgeneratorService->generate(
                 self::CRUD_MENU_NAME,
@@ -166,7 +169,8 @@ class RepgeneratorController extends Controller
                 },
                 false,
                 null,
-                $migrationName
+                $migrationName,
+                false
             );
         }
 
@@ -194,15 +198,17 @@ class RepgeneratorController extends Controller
     ): array {
         $table->setName($request->get('name'));
 
+        $this->migrationGeneratorService->setDate(Carbon::now());
         $migrationName = $this->migrationGeneratorService->generateMigrationFiles(
             $table,
             $columns,
             $indexes,
             $foreigns,
-            $request->get('name')
+            $request->get('name'),
+            $request->get('icon')
         );
 
-        if(!empty($fileUpload)) {
+        if (!empty($fileUpload)) {
             $originalTable = $table->getName();
             $originalTableSingular = Str::singular($originalTable);
 
@@ -234,6 +240,7 @@ class RepgeneratorController extends Controller
             false,
             $fileUpload,
             $migrationName,
+            false
         );
         return $messages;
     }
@@ -250,11 +257,13 @@ class RepgeneratorController extends Controller
     /**
      * @param  Table  $table
      * @param  GenerationRequest  $request
+     * @param  array  $fileUpload
      * @return array
      */
     private function generateFileRelationMigration(
         Table $table,
-        GenerationRequest $request
+        GenerationRequest $request,
+        array $fileUpload
     ): array {
         $originalTable = $table->getName();
         $originalTableSingular = Str::singular($originalTable);
@@ -285,12 +294,14 @@ class RepgeneratorController extends Controller
             'onDelete' => null
         ];
 
+        $this->migrationGeneratorService->setDate(Carbon::now());
         $migrationName = $this->migrationGeneratorService->generateMigrationFiles(
             $table,
             $columns,
             [],
             $foreigns,
-            $request->get('name').'Files'
+            $request->get('name').'Files',
+            'photograph'
         );
 
         $this->repgeneratorService->generate(
@@ -305,8 +316,9 @@ class RepgeneratorController extends Controller
                 $messages[] = $msg;
             },
             false,
-            null,
+            $fileUpload,
             $migrationName,
+            true
         );
 
         return $messages;

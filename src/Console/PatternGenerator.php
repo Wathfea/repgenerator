@@ -19,8 +19,7 @@ class PatternGenerator extends Command
                         {--M|model : Whether the generator should generate a model}
                         {--m|migration : Whether the generator should generate a migration}
                         {--P|pivot : Whether the generator should generate a pivot repo or default to model}
-                        {--R|readonly : Whether the generator should generate a readonly controller}'
-    ;
+                        {--R|readonly : Whether the generator should generate a readonly controller}';
 
     /**
      * @var string
@@ -51,7 +50,7 @@ class PatternGenerator extends Command
         $generatePivot = $this->option('pivot');
         $readOnly = $this->option('readonly');
 
-        if(Str::singular($name) !== $name) {
+        if (Str::singular($name) !== $name) {
             $this->error('Name should be singular!');
             exit;
         }
@@ -67,12 +66,12 @@ class PatternGenerator extends Command
         $service = app(RepgeneratorService::class);
         $service->setCmd($this);
 
-        $service->generate($name, $generateModel, $generatePivot, $readOnly, [], [], function($msg){
+        $service->generate($name, $generateModel, $generatePivot, $readOnly, [], [], function ($msg) {
             $this->info($msg);
         }, true);
 
 
-        if($generateMigration) {
+        if ($generateMigration) {
             $passName = strtolower(Str::plural($name));
             $this->call('migration:generate', ['name' => $passName]);
         }

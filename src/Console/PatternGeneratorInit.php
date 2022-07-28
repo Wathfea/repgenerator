@@ -3,8 +3,6 @@
 namespace Pentacom\Repgenerator\Console;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
-use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorService;
 
 /**
  * Class PatternGenerator.
@@ -14,8 +12,7 @@ class PatternGeneratorInit extends Command
     /**
      * @var string
      */
-    protected $signature = 'pattern:init {url : Your base url}'
-    ;
+    protected $signature = 'pattern:init {url : Your base url}';
 
     /**
      * @var string

@@ -3,8 +3,8 @@
 namespace Pentacom\Repgenerator\Domain\Migration\Blueprint;
 
 use Illuminate\Support\Collection;
-use Pentacom\Repgenerator\Traits\Stringable;
 use Pentacom\Repgenerator\Helpers\Constants;
+use Pentacom\Repgenerator\Traits\Stringable;
 
 /**
  * Class TableBlueprint
@@ -23,27 +23,27 @@ class TableBlueprint
     }
 
     /**
-     * @param  string  $name  Property name.
-     * @param  mixed  $value
-     * @return Property
+     * @return Property[]|Method[]|string[]
      */
-    public function setProperty(string $name, $value): Property
+    public function getLines(): array
     {
-        $property      = new Property($name, $value);
-        $this->lines[] = $property;
-        return $property;
+        return $this->lines;
     }
 
     /**
-     * @param  string  $name  Method name.
-     * @param  mixed  ...$values  Method arguments.
-     * @return Method
+     * @return Method|Property|string|null
      */
-    public function setMethodByName(string $name, ...$values): Method
+    public function removeLastLine()
     {
-        $method        = new Method($name, ...$values);
-        $this->lines[] = $method;
-        return $method;
+        return array_pop($this->lines);
+    }
+
+    /**
+     *
+     */
+    public function setLineBreak(): void
+    {
+        $this->lines[] = Constants::LINE_BREAK;
     }
 
     /**
@@ -57,27 +57,27 @@ class TableBlueprint
     }
 
     /**
-     *
+     * @param  string  $name  Method name.
+     * @param  mixed  ...$values  Method arguments.
+     * @return Method
      */
-    public function setLineBreak(): void
+    public function setMethodByName(string $name, ...$values): Method
     {
-        $this->lines[] = Constants::LINE_BREAK;
+        $method = new Method($name, ...$values);
+        $this->lines[] = $method;
+        return $method;
     }
 
     /**
-     * @return Method|Property|string|null
+     * @param  string  $name  Property name.
+     * @param  mixed  $value
+     * @return Property
      */
-    public function removeLastLine()
+    public function setProperty(string $name, $value): Property
     {
-        return array_pop($this->lines);
-    }
-
-    /**
-     * @return Property[]|Method[]|string[]
-     */
-    public function getLines(): array
-    {
-        return $this->lines;
+        $property = new Property($name, $value);
+        $this->lines[] = $property;
+        return $property;
     }
 
     /**
@@ -156,7 +156,7 @@ class TableBlueprint
             return $this->convertFromAnyTypeToString($v);
         })->implode(', ');
 
-        if($secondParameter = $method->getSecondParameter()) {
+        if ($secondParameter = $method->getSecondParameter()) {
             return $method->getName()."($v, '$secondParameter')";
         } else {
             return $method->getName()."($v)";

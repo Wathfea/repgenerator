@@ -13,7 +13,7 @@ use Kblais\QueryFilter\QueryFilter;
  */
 class BaseQueryFilter extends QueryFilter
 {
-    CONST PER_PAGE = 'per_page';
+    const PER_PAGE = 'per_page';
 
     /**
      * @var array
