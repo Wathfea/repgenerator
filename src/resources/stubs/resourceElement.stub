@@ -1,1 +1,1 @@
-'{{field}}' => $this->{{field}},
+'{{field}}' => {{bool}} $this->{{field}},

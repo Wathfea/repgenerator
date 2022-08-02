@@ -31,7 +31,7 @@ class {{modelName}}ServiceProvider extends ServiceProvider
     {
         $this->app->bind({{modelName}}Filter::class, function (Application $application, array $data) {
             return (new {{modelName}}Filter(request()->merge($data)))
-                ->setSearchableColumns([]);
+                ->setSearchableColumns([{{searchables}}]);
         });
 
         $this->app->singleton({{modelName}}RepositoryService::class, function () {

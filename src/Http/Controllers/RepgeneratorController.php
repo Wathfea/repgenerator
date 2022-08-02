@@ -40,7 +40,8 @@ class RepgeneratorController extends Controller
     public function generate(GenerationRequest $request): JsonResponse
     {
         //Setup fields for generation and migration
-        list($columns, $foreigns, $fileUpload) = $this->fieldsSetup($request);
+        list($columns, $foreigns, $fileUploadFieldsData) = $this->fieldsSetup($request);
+
         $indexes = []; //Itt kell átadni majd ha composite akarunk készíteni külön sorban nem chainelve.
 
         //Migration generation setup
@@ -55,12 +56,12 @@ class RepgeneratorController extends Controller
 
         //Generate migration for the main model
         $messages[] = $this->generateMainMigrationAndDomain($table, $request, $columns, $indexes, $foreigns, $messages,
-            $fileUpload);
+            $fileUploadFieldsData);
         sleep(1);
 
-        //If $fileUpload is not empty we need to create the migration and the Domain for the relationship also
-        if (!empty($fileUpload)) {
-            $messages[] = $this->generateFileRelationMigration($table, $request, $fileUpload);
+        //If $$fileUploadFieldsData is not empty we need to create the migration and the Domain for the relationship also
+        if (!empty($fileUploadFieldsData)) {
+            $messages[] = $this->generateFileRelationMigration($table, $request, $fileUploadFieldsData);
         }
 
         $messages = collect($messages)->flatten()->toArray();
@@ -75,11 +76,11 @@ class RepgeneratorController extends Controller
     {
         $columns = [];
         $foreigns = [];
-        $fileUpload = [];
+        $fileUploadFieldsData = [];
 
         foreach ($request->get('columns') as $data) {
             if ($data['uploads_files_path'] != '') {
-                $fileUpload = [
+                $fileUploadFieldsData[] = [
                     'path' => $data['uploads_files_path'],
                     'field' => $data['name']
                 ];
@@ -104,7 +105,9 @@ class RepgeneratorController extends Controller
                 $data['reference'],
                 $data['foreign'],
                 $data['uploads_files_path'],
-                false
+                $data['is_file'] ?: false,
+                $data['is_picture'] ?: false,
+                $data['searchable'] ?: false,
             );
 
             $columnIndex = [];
@@ -124,7 +127,7 @@ class RepgeneratorController extends Controller
                 ];
             }
         }
-        return array($columns, $foreigns, $fileUpload);
+        return array($columns, $foreigns, $fileUploadFieldsData);
     }
 
     /**
@@ -184,7 +187,7 @@ class RepgeneratorController extends Controller
      * @param  array  $indexes
      * @param  mixed  $foreigns
      * @param  array  $messages
-     * @param  array  $fileUpload
+     * @param  array  $fileUploadFieldsData
      * @return array
      */
     private function generateMainMigrationAndDomain(
@@ -194,7 +197,7 @@ class RepgeneratorController extends Controller
         array $indexes,
         mixed $foreigns,
         array $messages,
-        array $fileUpload
+        array $fileUploadFieldsData
     ): array {
         $table->setName($request->get('name'));
 
@@ -208,7 +211,7 @@ class RepgeneratorController extends Controller
             $request->get('icon')
         );
 
-        if (!empty($fileUpload)) {
+        if (!empty($fileUploadFieldsData)) {
             $originalTable = $table->getName();
             $originalTableSingular = Str::singular($originalTable);
 
@@ -238,7 +241,7 @@ class RepgeneratorController extends Controller
                 $messages[] = $msg;
             },
             false,
-            $fileUpload,
+            $fileUploadFieldsData,
             $migrationName,
             false
         );
@@ -257,13 +260,13 @@ class RepgeneratorController extends Controller
     /**
      * @param  Table  $table
      * @param  GenerationRequest  $request
-     * @param  array  $fileUpload
+     * @param  array  $fileUploadFieldsData
      * @return array
      */
     private function generateFileRelationMigration(
         Table $table,
         GenerationRequest $request,
-        array $fileUpload
+        array $fileUploadFieldsData
     ): array {
         $originalTable = $table->getName();
         $originalTableSingular = Str::singular($originalTable);
@@ -274,6 +277,7 @@ class RepgeneratorController extends Controller
             'id' => 'id',
             $originalTableSingular.'_id' => 'unsignedBigInteger',
             'name' => 'string',
+            'field' => 'string',
             'created_at' => 'timestamp',
             'updated_at' => 'timestamp',
         ];
@@ -316,7 +320,7 @@ class RepgeneratorController extends Controller
                 $messages[] = $msg;
             },
             false,
-            $fileUpload,
+            $fileUploadFieldsData,
             $migrationName,
             true
         );

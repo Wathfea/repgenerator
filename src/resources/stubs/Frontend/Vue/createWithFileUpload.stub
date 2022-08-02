@@ -44,8 +44,8 @@ export default {
             await store{{modelNameSingular}}({ ...{{modelNameSingularLowerCase}} })
         }
 
-        const handleFileUpload = async (event) => {
-            {{modelNameSingularLowerCase}}.{{imageFieldName}}.push(event.target.files[0])
+        const handleFileUpload = async (field, event) => {
+            {{modelNameSingularLowerCase}}[field].push(event.target.files[0])
         }
 
         return {

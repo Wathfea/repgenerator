@@ -48,8 +48,8 @@ export default {
             await update{{modelNameSingular}}({...{{modelNameSingularLowerCase}}.value})
         }
 
-        const handleFileUpload = async (event) => {
-            {{modelNameSingularLowerCase}}.value.{{imageFieldName}}.push(event.target.files[0])
+        const handleFileUpload = async (field, event) => {
+            {{modelNameSingularLowerCase}}.value[field].push(event.target.files[0])
         }
 
         return {
