@@ -3,17 +3,27 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
-- Multiple file upload
+- public vagy nem public file választó
+- kép típusnál képeket engedjen csak
+- file típusnál fileokat csak
+- szóközös megadott réteg névben pl (Person Contact) file kapcsolatok neve hibásan (szóközzel) kerül be a modellekbe. 
+- A resourceba a relation név aláhúzással  (_) kerül be
 - Relation párok beírása
-- Pivot generálás átnézése
+- CSV import
 - Factory and seeder generation for CRUD
 - Composite index generation
 - How it works section
 - CRUD UI in other Frontend frameworks
-- CSV import
 - translation a mezőkhöz
 
 ## [Unreleased]
+
+
+## [1.3.9] - 2022-08-02
+## Added 
+- Boolean mezők edit oldalon nem olvasódnak vissza
+- Multiple file upload
+- Frontend wizzard file upload refactor
 
 ## [1.3.8] - 2022-07-28
 ## Fixed

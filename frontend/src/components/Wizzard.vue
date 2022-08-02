@@ -127,6 +127,8 @@ const getDefaultColumns = () => {
             'index': [],
             'show_on_table': false,
             'uploads_files_path': '',
+            'is_file': false,
+            'is_picture': false,
         },
         {
             'name': 'created_at',
@@ -147,6 +149,8 @@ const getDefaultColumns = () => {
             'index': [],
             'show_on_table': false,
             'uploads_files_path': '',
+            'is_file': false,
+            'is_picture': false,
         },
         {
             'name': 'updated_at',
@@ -167,6 +171,8 @@ const getDefaultColumns = () => {
             'index': [],
             'show_on_table': false,
             'uploads_files_path': '',
+            'is_file': false,
+            'is_picture': false,
         }
     ]
 }
@@ -190,7 +196,9 @@ const onAddColumn = () => {
         'unsigned': false,
         'index': [],
         'show_on_table': true,
-        'uploads_files_path': ''
+        'uploads_files_path': '',
+        'is_file': false,
+        'is_picture': false,
     });
 }
 const onRemoveColumn = (data) => {
@@ -223,7 +231,7 @@ axios.get(import.meta.env.VITE_API_URL + '/repgenerator/tables').then((response)
             <Step1 :icon="icon" :modelName="modelName" @iconChanged="onIconChanged" @nameChanged="onNameChanged"/>
             <Options :options="step1Options"/>
         </div>
-        <Step2 v-if="stepNumber === 2 || isOverview()" :columns="columns" :disableAdd="isOverview()" :models="models"
+        <Step2 v-if="stepNumber === 2 || isOverview()" :columns="columns" :disableAdd="isOverview()" :models="models" :modelName="modelName"
                @addColumn="onAddColumn" @removeColumn="onRemoveColumn"/>
         <Result v-if="isLastStep()" :messages="messages"/>
 

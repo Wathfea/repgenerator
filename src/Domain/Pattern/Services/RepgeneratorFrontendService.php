@@ -2,7 +2,6 @@
 
 namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
 use Pentacom\Repgenerator\Domain\Pattern\Helpers\CharacterCounterStore;
@@ -24,14 +23,14 @@ class RepgeneratorFrontendService
      */
     public function generateComposable(string $name, array $columns): array
     {
-        $imageLineTemplate = '';
+        $imageLineTemplate = [];
         /**
          * @var  $column
          * @var  RepgeneratorColumnAdapter $data
          */
         foreach ($columns as $data) {
             if ($data->fileUploadLocation) {
-                $imageLineTemplate = str_replace(
+                $imageLineTemplate[] = str_replace(
                     [
                         '{{modelNameSingularLowerCase}}',
                         '{{imageField}}',
@@ -60,7 +59,7 @@ class RepgeneratorFrontendService
                 $lowerName = strtolower($name),
                 Str::plural(strtolower($name)),
                 '',
-                $imageLineTemplate
+                $this->implodeLines($imageLineTemplate, 0)
             ],
             $this->repgeneratorStubService->getStub('Frontend/Vue/composable')
         );
@@ -271,8 +270,10 @@ class RepgeneratorFrontendService
                 }
                 $field = implode(' ', $nameParts);
 
-                if ($data->fileUploadLocation) {
+                if ($data->fileUploadLocation && $data->is_file) {
                     $template = 'inputFile';
+                } elseif ($data->fileUploadLocation && $data->is_picture) {
+                    $template = 'inputPicture';
                 } else {
                     $template = match ($data->type) {
                         'id', 'integer', 'string', 'bigIncrements', 'bigInteger', 'binary', 'char', 'dateTimeTz', 'dateTime', 'date', 'decimal',
@@ -322,12 +323,14 @@ class RepgeneratorFrontendService
                         ],
                         $this->repgeneratorStubService->getStub('Frontend/Vue/fields/inputSelect')
                     );
-                } elseif ($template == 'inputFile') {
+                } elseif ($template == 'inputPicture') {
                     $editFormStr[] = str_replace(
                         [
+                            '{{field}}',
                             '{{modelNameSingularLowerCase}}',
                         ],
                         [
+                            strtolower($field),
                             strtolower($name)
                         ],
                         $this->repgeneratorStubService->getStub('Frontend/Vue/fields/picture')
@@ -346,7 +349,34 @@ class RepgeneratorFrontendService
                         ],
                         $this->repgeneratorStubService->getStub('Frontend/Vue/fields/inputFile')
                     );
-                } else {
+                } elseif ($template == 'inputFile') {
+                    $editFormStr[] = str_replace(
+                        [
+                            '{{field}}',
+                            '{{modelNameSingularLowerCase}}',
+                        ],
+                        [
+                            strtolower($field),
+                            strtolower($name)
+                        ],
+                        $this->repgeneratorStubService->getStub('Frontend/Vue/fields/file')
+                    );
+
+                    $editFormStr[] = str_replace(
+                        [
+                            '{{field}}',
+                            '{{fieldLower}}',
+                            '{{modelNameSingularLowerCase}}',
+                        ],
+                        [
+                            $field,
+                            $data->name,
+                            strtolower($name)
+                        ],
+                        $this->repgeneratorStubService->getStub('Frontend/Vue/fields/inputFile')
+                    );
+                }
+                else {
                     $editFormStr[] = str_replace(
                         [
                             '{{field}}',
@@ -374,7 +404,6 @@ class RepgeneratorFrontendService
             }
         }
 
-        Log::info('FileUploadLocation', ['location' => $data->fileUploadLocation]);
         $templateWithFileUpload = $data->fileUploadLocation === null ? 'edit' : 'editWithFileUpload';
 
         $createTemplate = str_replace(

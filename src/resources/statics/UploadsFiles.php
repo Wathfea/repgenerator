@@ -13,7 +13,7 @@ use ZipArchive;
 trait UploadsFiles
 {
 
-    private string $filesLocation = '';
+    private array $filesLocation = [];
 
     /**
      * @param  Model  $model
@@ -50,18 +50,19 @@ trait UploadsFiles
 
 
     /**
+     * @param $field
      * @return string
      */
-    public function getFilesLocation(): string
+    public function getFilesLocation($field): string
     {
-        return $this->filesLocation;
+        return array_key_exists($field, $this->filesLocation) ? $this->filesLocation[$field] : '';
     }
 
     /**
-     * @param  string  $filesLocation
+     * @param  array  $filesLocation
      * @return mixed
      */
-    public function setFilesLocation(string $filesLocation): mixed
+    public function setFilesLocation(array $filesLocation): mixed
     {
         $this->filesLocation = $filesLocation;
         return $this;
@@ -69,40 +70,44 @@ trait UploadsFiles
 
     /**
      * @param  Model  $model
+     * @param  string  $field
      * @param  Model  $file
      * @return string
      */
-    public function getDocumentPath(Model $model, Model $file): string
+    public function getDocumentPath(Model $model, string $field, Model $file): string
     {
-        return $this->getDocumentDirectory($model).'/'.$file->getAttribute('name');
+        return $this->getDocumentDirectory($model, $field).'/'.$file->getAttribute('name');
     }
 
     /**
      * @param  Model  $model
+     * @param  string  $field
      * @return string
      */
-    public function getDocumentDirectory(Model $model): string
+    public function getDocumentDirectory(Model $model, string $field): string
     {
-        return 'public/files/'.$this->getFilesLocation().'/'.$model->getAttribute('id');
+        return 'public/files/'.$this->getFilesLocation($field).'/'.$model->getAttribute('id');
     }
 
     /**
      * @param  Model  $model
+     * @param  string  $field
      * @param  Model  $file
      * @return string
      */
-    public function getDocumentStoragePath(Model $model, Model $file): string
+    public function getDocumentStoragePath(Model $model, string $field, Model $file): string
     {
-        return $this->getDocumentStorageDirectory($model).'/'.$file->getAttribute('name');
+        return $this->getDocumentStorageDirectory($model, $field).'/'.$file->getAttribute('name');
     }
 
     /**
      * @param  Model  $model
+     * @param  string  $field
      * @return string
      */
-    public function getDocumentStorageDirectory(Model $model): string
+    public function getDocumentStorageDirectory(Model $model, string $field): string
     {
-        return 'storage/files/'.$this->getFilesLocation().'/'.$model->getAttribute('id');
+        return 'storage/files/'.$this->getFilesLocation($field).'/'.$model->getAttribute('id');
     }
 
     /**
@@ -115,51 +120,60 @@ trait UploadsFiles
     public function uploadFiles(
         Model $model,
         array $data,
-        string $key = 'files',
+        array $keys = ['files'],
         string $relationshipName = 'files'
     ): bool {
-        $updatingDocuments = key_exists($key, $data) && !empty($data[$key]);
-        $uploadingDocuments = $updatingDocuments && count(array_filter($data[$key], function ($file) {
-                return $file->getSize() > 0;
-            }));
-        if ($uploadingDocuments) {
-            return $this->saveFiles($model, $data[$key], $relationshipName);
-        } else {
-            if (!$updatingDocuments) {
-                return $this->removeFiles($model, $relationshipName);
+        $saved = true;
+        $removed = true;
+        $removedAny = true;
+
+        foreach ($keys as $key) {
+            $updatingDocuments = key_exists($key, $data) && !empty($data[$key]);
+            $uploadingDocuments = $updatingDocuments && count(array_filter($data[$key], function ($file) {
+                    return $file->getSize() > 0;
+                }));
+
+            if ($uploadingDocuments) {
+                $saved = $this->saveFiles($model, $key, $data[$key], $relationshipName);
             } else {
-                $removingDocuments = count($data[$key]) !== $model->$relationshipName()->count();
-                $removedAny = false;
-                if ($removingDocuments) {
-                    foreach ($model->$relationshipName()->get() as $file) {
-                        $found = false;
-                        /** @var UploadedFile $keptFile */
-                        foreach ($data[$key] as $keptFile) {
-                            if ($file->name == $keptFile->getClientOriginalName()) {
-                                $found = true;
-                                break;
+                if (!$updatingDocuments) {
+                    //TODO Tomival megnézni
+                    //$removed = $this->removeFiles($model, $key, $relationshipName);
+                } else {
+                    $removingDocuments = count($data[$key]) !== $model->$relationshipName()->count();
+                    if ($removingDocuments) {
+                        foreach ($model->$relationshipName()->get() as $file) {
+                            $found = false;
+                            /** @var UploadedFile $keptFile */
+                            foreach ($data[$key] as $keptFile) {
+                                if ($file->name == $keptFile->getClientOriginalName()) {
+                                    $found = true;
+                                    break;
+                                }
                             }
-                        }
-                        if (!$found) {
-                            $removedAny = true;
-                            $this->removeFile($model, $file);
+                            if (!$found) {
+                                $removedAny = true;
+                                $this->removeFile($model, $key, $file);
+                            }
                         }
                     }
                 }
-                return $removedAny;
             }
         }
+
+        return ($saved || $removed || $removedAny);
     }
 
     /**
      * @param  Model  $model
+     * @param  string  $field
      * @param  array  $files
      * @param  string  $relationshipName
      * @return boolean
      */
-    public function saveFiles(Model $model, array $files, string $relationshipName = 'files'): bool
+    public function saveFiles(Model $model, string $field, array $files, string $relationshipName = 'files'): bool
     {
-        $filesBefore = $model->$relationshipName()->get();
+        $filesBefore = $model->$relationshipName()->where('field', $field)->get();
         foreach ($filesBefore as $fileBefore) {
             $found = false;
             /** @var UploadedFile $file */
@@ -170,7 +184,7 @@ trait UploadsFiles
                 }
             }
             if (!$found) {
-                $this->removeFile($model, $fileBefore);
+                $this->removeFile($model, $field, $fileBefore);
             }
         }
 
@@ -187,10 +201,12 @@ trait UploadsFiles
             }
             if (!$found) {
                 $fileName = $file->getClientOriginalName();
-                if ($file->storeAs($this->getDocumentDirectory($model), $fileName)) {
-                    $model->$relationshipName()->create([
-                        'name' => $fileName
-                    ]);
+                if ($file->storeAs($this->getDocumentDirectory($model, $field), $fileName)) {
+                    $data = [
+                        'name' => $fileName,
+                        'field' => $field
+                    ];
+                    $model->$relationshipName()->create($data);
                 }
             }
         }
@@ -199,25 +215,27 @@ trait UploadsFiles
 
     /**
      * @param  Model  $model
+     * @param  string  $field
      * @param  Model  $file
      * @return bool
      */
-    public function removeFile(Model $model, Model $file): bool
+    public function removeFile(Model $model, string $field, Model $file): bool
     {
-        Storage::delete($this->getDocumentPath($model, $file));
+        Storage::delete($this->getDocumentPath($model, $field, $file));
         $file->delete();
         return true;
     }
 
     /**
      * @param  Model  $model
+     * @param  string  $field
      * @param  string  $relationshipName
      * @return bool
      */
-    public function removeFiles(Model $model, string $relationshipName = 'files'): bool
+    public function removeFiles(Model $model, string $field, string $relationshipName = 'files'): bool
     {
         foreach ($model->$relationshipName()->get() as $file) {
-            $this->removeFile($model, $file);
+            $this->removeFile($model, $field, $file);
         }
         return true;
     }

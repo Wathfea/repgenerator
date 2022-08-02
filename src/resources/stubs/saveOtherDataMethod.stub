@@ -5,5 +5,5 @@
      */
     public function saveOtherData(Model $model, array $data): bool
     {
-        return app({{uploaderClass}})->uploadFiles($model, $data, '{{field}}', 'files');
+        return app({{uploaderClass}})->uploadFiles($model, $data, {{fields}}, 'files');
     }

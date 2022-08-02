@@ -27,7 +27,9 @@ class RepgeneratorColumnAdapter
      * @param  array|null  $references
      * @param  string|null  $foreign
      * @param  string|null  $fileUploadLocation
-     * @param  bool|null  $isMultiFileUpload
+     * @param  bool  $is_file
+     * @param  bool  $is_picture
+     * @param  bool  $searchable
      */
     public function __construct(
         public string $name,
@@ -47,7 +49,9 @@ class RepgeneratorColumnAdapter
         public ?array $references = null,
         public ?string $foreign = null,
         public ?string $fileUploadLocation = null,
-        public ?bool $isMultiFileUpload = false,
+        public bool $is_file = false,
+        public bool $is_picture = false,
+        public bool $searchable = false,
     ) {
 
     }
@@ -71,8 +75,13 @@ class RepgeneratorColumnAdapter
             'values' => $this->values,
             'default' => $this->default,
             'index' => $this->index,
+            'showOnTable' => $this->showOnTable,
             'references' => $this->references,
             'foreign' => $this->foreign,
+            'fileUploadLocation' => $this->fileUploadLocation,
+            'is_file' => $this->is_file,
+            'is_picture' => $this->is_picture,
+            'searchable' => $this->searchable,
         ];
     }
 }
