@@ -38,18 +38,18 @@ class RepgeneratorController extends Controller
     }
 
     /**
-     * @param  GenerationRequest|null  $request
+     * @param  GenerationRequest $request
      * @param  bool  $regenerate
      * @param  array  $regenerateData
      * @return JsonResponse
      * @throws Exception
      */
-    public function generate(GenerationRequest $request = null, bool $regenerate = false, array $regenerateData = []): JsonResponse
+    public function generate(GenerationRequest $request, bool $regenerate = false, array $regenerateData = []): JsonResponse
     {
         $messages = [];
         $regenerate ? $requestData = $regenerateData : $requestData = $request->all();
 
-        if(!RepgeneratorDomain::where('model', $requestData['name'])->get()) {
+        if(!RepgeneratorDomain::where('model', $requestData['name'])->count()) {
             $repgeneratorDomain = new RepgeneratorDomain();
             $repgeneratorDomain->model = $requestData['name'];
             $repgeneratorDomain->meta = json_encode($requestData);
@@ -418,7 +418,7 @@ class RepgeneratorController extends Controller
                 rmdir($dir);
             }
 
-            $this->generate(null, true, $domainData);
+            $this->generate(new GenerationRequest(), true, $domainData);
         }
     }
 }
