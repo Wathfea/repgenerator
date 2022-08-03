@@ -18,7 +18,11 @@ All notable changes to `repgenerator` will be documented in this file
 
 ## [Unreleased]
 
-## [1.4.1] - 2022-08-03
+## [1.4.2] - 2022-08-03
+## Fixed
+- package.json typo
+
+- ## [1.4.1] - 2022-08-03
 ## Fixed
 - package.json typo
 
