@@ -4,6 +4,7 @@ namespace Pentacom\Repgenerator\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Doctrine\DBAL\Exception;
+use FilesystemIterator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -12,7 +13,11 @@ use Pentacom\Repgenerator\Domain\Migration\Blueprint\Table;
 use Pentacom\Repgenerator\Domain\Migration\MigrationGeneratorService;
 use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorService;
+use Pentacom\Repgenerator\Http\Requests\GenerationFromTableRequest;
 use Pentacom\Repgenerator\Http\Requests\GenerationRequest;
+use Pentacom\Repgenerator\Models\RepgeneratorDomain;
+use RecursiveIteratorIterator;
+use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
 
 /**
  * Class RepgeneratorController
@@ -33,14 +38,26 @@ class RepgeneratorController extends Controller
     }
 
     /**
-     * @param  GenerationRequest  $request
+     * @param  GenerationRequest|null  $request
+     * @param  bool  $regenerate
+     * @param  array  $regenerateData
      * @return JsonResponse
      * @throws Exception
      */
-    public function generate(GenerationRequest $request): JsonResponse
+    public function generate(GenerationRequest $request = null, bool $regenerate = false, array $regenerateData = []): JsonResponse
     {
+        $messages = [];
+        $regenerate ? $requestData = $regenerateData : $requestData = $request->all();
+
+        if(!RepgeneratorDomain::where('model', $requestData['name'])->get()) {
+            $repgeneratorDomain = new RepgeneratorDomain();
+            $repgeneratorDomain->model = $requestData['name'];
+            $repgeneratorDomain->meta = json_encode($requestData);
+            $repgeneratorDomain->save();
+        }
+
         //Setup fields for generation and migration
-        list($columns, $foreigns, $fileUploadFieldsData) = $this->fieldsSetup($request);
+        list($columns, $foreigns, $fileUploadFieldsData) = $this->fieldsSetup($requestData);
 
         $indexes = []; //Itt kell átadni majd ha composite akarunk készíteni külön sorban nem chainelve.
 
@@ -49,19 +66,21 @@ class RepgeneratorController extends Controller
         $table = app(Table::class);
         $this->migrationGeneratorService->setup(config('pentacom.migration_target_path'));
 
-
-        //Detect if CrudMenus exists or we need to create it
-        $messages[] = $this->shouldCreateCrudMenuTable($table);
-        sleep(1);
+        //Only check  if not regenerate
+        if(!$regenerate) {
+            //Detect if CrudMenus exists or we need to create it
+            $messages[] = $this->shouldCreateCrudMenuTable($table);
+            sleep(1);
+        }
 
         //Generate migration for the main model
-        $messages[] = $this->generateMainMigrationAndDomain($table, $request, $columns, $indexes, $foreigns, $messages,
-            $fileUploadFieldsData);
+        $messages[] = $this->generateMainMigrationAndDomain($table, $requestData, $columns, $indexes, $foreigns, $messages,
+            $fileUploadFieldsData, $regenerate);
         sleep(1);
 
         //If $$fileUploadFieldsData is not empty we need to create the migration and the Domain for the relationship also
         if (!empty($fileUploadFieldsData)) {
-            $messages[] = $this->generateFileRelationMigration($table, $request, $fileUploadFieldsData);
+            $messages[] = $this->generateFileRelationMigrationAndDomain($table, $requestData, $fileUploadFieldsData, $regenerate);
         }
 
         $messages = collect($messages)->flatten()->toArray();
@@ -69,16 +88,16 @@ class RepgeneratorController extends Controller
     }
 
     /**
-     * @param  GenerationRequest  $request
+     * @param  array  $requestData
      * @return array
      */
-    private function fieldsSetup(GenerationRequest $request): array
+    private function fieldsSetup(array $requestData): array
     {
         $columns = [];
         $foreigns = [];
         $fileUploadFieldsData = [];
 
-        foreach ($request->get('columns') as $data) {
+        foreach ($requestData['columns'] as $data) {
             if ($data['uploads_files_path'] != '') {
                 $fileUploadFieldsData[] = [
                     'path' => $data['uploads_files_path'],
@@ -182,34 +201,41 @@ class RepgeneratorController extends Controller
 
     /**
      * @param  Table  $table
-     * @param  GenerationRequest  $request
+     * @param  array  $requestData
      * @param  mixed  $columns
      * @param  array  $indexes
      * @param  mixed  $foreigns
      * @param  array  $messages
      * @param  array  $fileUploadFieldsData
+     * @param  bool  $regenerate
      * @return array
      */
     private function generateMainMigrationAndDomain(
         Table $table,
-        GenerationRequest $request,
+        array $requestData,
         mixed $columns,
         array $indexes,
         mixed $foreigns,
         array $messages,
-        array $fileUploadFieldsData
+        array $fileUploadFieldsData,
+        bool $regenerate = false
     ): array {
-        $table->setName($request->get('name'));
+        $table->setName($requestData['name']);
 
-        $this->migrationGeneratorService->setDate(Carbon::now());
-        $migrationName = $this->migrationGeneratorService->generateMigrationFiles(
-            $table,
-            $columns,
-            $indexes,
-            $foreigns,
-            $request->get('name'),
-            $request->get('icon')
-        );
+        //Only create migration if not regenerate
+        $migrationName = null;
+        if(!$regenerate) {
+            $this->migrationGeneratorService->setDate(Carbon::now());
+            $migrationName = $this->migrationGeneratorService->generateMigrationFiles(
+                $table,
+                $columns,
+                $indexes,
+                $foreigns,
+                $requestData['name'],
+                $requestData['icon']
+            );
+        }
+
 
         if (!empty($fileUploadFieldsData)) {
             $originalTable = $table->getName();
@@ -217,7 +243,7 @@ class RepgeneratorController extends Controller
 
             $foreigns[] = [
                 'relation_type' => 'HasMany',
-                'related_model' => $request->get('name').'File',
+                'related_model' => $requestData['name'].'File',
                 'relation_name' => 'files',
                 'column' => $originalTableSingular.'_id',
                 'reference' => [
@@ -230,11 +256,11 @@ class RepgeneratorController extends Controller
         }
 
         $this->repgeneratorService->generate(
-            $this->getTransformedName($request->get('name')),
-            $request->get('model', false),
-            $request->get('pivot', false),
+            $this->getTransformedName($requestData['name']),
+            $requestData['model'] ? $requestData['name'] : false,
+            $requestData['pivot'] ? $requestData['pivot'] :  false,
             true,
-            $request->get('read_only', false),
+            $requestData['read_only'] ? $requestData['read_only'] :  false,
             $columns,
             $foreigns,
             function ($msg) use (&$messages) {
@@ -259,18 +285,20 @@ class RepgeneratorController extends Controller
 
     /**
      * @param  Table  $table
-     * @param  GenerationRequest  $request
+     * @param  array  $requestData
      * @param  array  $fileUploadFieldsData
+     * @param  bool  $regenerate
      * @return array
      */
-    private function generateFileRelationMigration(
+    private function generateFileRelationMigrationAndDomain(
         Table $table,
-        GenerationRequest $request,
-        array $fileUploadFieldsData
+        array $requestData,
+        array $fileUploadFieldsData,
+        bool $regenerate = false
     ): array {
         $originalTable = $table->getName();
         $originalTableSingular = Str::singular($originalTable);
-        $table->setName($request->get('name').'_files');
+        $table->setName($requestData['name'].'_files');
         $columns = [];
 
         $migrationColumns = [
@@ -288,7 +316,7 @@ class RepgeneratorController extends Controller
 
         $foreigns[] = [
             'relation_type' => 'BelongsTo',
-            'related_model' => $request->get('name'),
+            'related_model' => $requestData['name'],
             'column' => $originalTableSingular.'_id',
             'reference' => [
                 'name' => $originalTable
@@ -298,18 +326,23 @@ class RepgeneratorController extends Controller
             'onDelete' => null
         ];
 
-        $this->migrationGeneratorService->setDate(Carbon::now());
-        $migrationName = $this->migrationGeneratorService->generateMigrationFiles(
-            $table,
-            $columns,
-            [],
-            $foreigns,
-            $request->get('name').'Files',
-            'photograph'
-        );
+        //Only create migration if not regenerate
+        $migrationName = null;
+        if(!$regenerate) {
+            $this->migrationGeneratorService->setDate(Carbon::now());
+            $migrationName = $this->migrationGeneratorService->generateMigrationFiles(
+                $table,
+                $columns,
+                [],
+                $foreigns,
+                $requestData['name'].'Files',
+                'photograph'
+            );
+        }
+
 
         $this->repgeneratorService->generate(
-            $this->getTransformedName($request->get('name').'Files'),
+            $this->getTransformedName($requestData['name'].'Files'),
             true,
             false,
             false,
@@ -347,5 +380,45 @@ class RepgeneratorController extends Controller
             ];
         }
         return response()->json($tables);
+    }
+
+
+    /**
+     * @return JsonResponse
+     */
+    public function getGeneratedDomains(): JsonResponse
+    {
+        $domains = RepgeneratorDomain::all();
+        return response()->json($domains);
+    }
+
+    /**
+     * @param  GenerationFromTableRequest  $request
+     * @return void
+     * @throws Exception
+     */
+    public function reGenerate(GenerationFromTableRequest $request): void
+    {
+        foreach ($request->get('domains') as $domainMeta) {
+            $domainData = json_decode($domainMeta, true);
+            //Delete frontend resources
+            $dir = base_path().'/resources/js/'.$domainData['name'];
+
+            if(is_dir( $dir )) {
+                $it = new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS);
+                $files = new RecursiveIteratorIterator($it,
+                    RecursiveIteratorIterator::CHILD_FIRST);
+                foreach($files as $file) {
+                    if ($file->isDir()){
+                        rmdir($file->getRealPath());
+                    } else {
+                        unlink($file->getRealPath());
+                    }
+                }
+                rmdir($dir);
+            }
+
+            $this->generate(null, true, $domainData);
+        }
     }
 }
