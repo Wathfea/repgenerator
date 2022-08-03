@@ -23,9 +23,18 @@ class RepgeneratorServiceProvider extends ServiceProvider
     public function boot()
     {
         if ($this->app->runningInConsole()) {
+            // Exxport the config
             $this->publishes([
-                __DIR__.'/../config/config.php' => config_path('repgenerator.php'),
+                __DIR__.'/../../../../config/config.php' => config_path('repgenerator.php'),
             ], 'config');
+
+            // Export the migration
+            if (! class_exists('CreateRepgeneratorDomainsTable')) {
+                $this->publishes([
+                    __DIR__ . '/../../../../database/migrations/create_repgenerator_domains_table.stub' => database_path('migrations/' . date('Y_m_d_His', time()) . '_create_repgenerator_domains_table.php'),
+                    // you can add any number of migrations here
+                ], 'migrations');
+            }
 
             // Registering package commands.
             $this->commands([PatternGenerator::class]);

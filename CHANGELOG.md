@@ -19,6 +19,10 @@ All notable changes to `repgenerator` will be documented in this file
 ## [Unreleased]
 
 
+## [1.4.0] - 2022-08-03
+## Added
+- Regenerate frontend section
+
 ## [1.3.9] - 2022-08-02
 ## Added 
 - Boolean mezők edit oldalon nem olvasódnak vissza

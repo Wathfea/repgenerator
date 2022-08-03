@@ -17,6 +17,10 @@ Then run
 php artisan pattern:init http://yoursite.com
 ```
 
+```
+php artisan vendor:publish --provider="Pentacom\Repgenerator\Domain\Pattern\Providers\RepgeneratorServiceProvider" --tag="migrations"
+```
+
 ## Usage
 
 Navigate in your browser to http://yoursite.com/wizzard and follow the wizzard steps.

@@ -1,21 +1,33 @@
 <script setup>
 import Wizzard from "./components/Wizzard.vue";
 import Dashboard from "./components/Dashboard.vue";
+import RebuildFrontend from "./components/RebuildFrontend.vue";
+
 import {ref} from "vue";
 import imgUrl from './assets/banner.jpg'
 
 const develop = ref(false);
 const choosing = ref(true);
+
 const usingWizzard = ref(false);
 const usingDashboard = ref(false);
+const usingRebuildFrontend = ref(false);
+
 const chooseWizzard = () => {
     usingWizzard.value = true;
     choosing.value = false;
 }
+
 const chooseDashboard = () => {
     usingDashboard.value = true;
     choosing.value = false;
-}</script>
+}
+
+const chooseRebuildFrontend = () => {
+    usingRebuildFrontend.value = true;
+    choosing.value = false;
+}
+</script>
 <template>
     <div>
         <div v-if="choosing">
@@ -36,12 +48,18 @@ const chooseDashboard = () => {
                             @click="chooseWizzard">
                         Wizzard
                     </button>
+
+                    <button class="mt-3 block w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                            @click="chooseRebuildFrontend">
+                        Rebuild frontend
+                    </button>
                 </div>
             </div>
         </div>
         <div v-else>
             <Wizzard v-if="usingWizzard"
                      class="bg-white p-10 shadow max-w-screen-2xl mx-auto py-12 px-4 sm:px-6 lg:px-8"/>
+            <RebuildFrontend v-else-if="usingRebuildFrontend" class="bg-white p-10 shadow max-w-screen-2xl mx-auto py-12 px-4 sm:px-6 lg:px-8" />
             <Dashboard v-else-if="usingDashboard"/>
         </div>
     </div>
