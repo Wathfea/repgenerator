@@ -13,7 +13,11 @@ use Kblais\QueryFilter\QueryFilter;
  */
 class BaseQueryFilter extends QueryFilter
 {
-    const PER_PAGE = 'per_page';
+    CONST PER_PAGE = 'per_page';
+    CONST SEARCH_DATE = 'date';
+    CONST SEARCH_TYPES = [
+        self::SEARCH_DATE
+    ];
 
     /**
      * @var array
@@ -85,6 +89,17 @@ class BaseQueryFilter extends QueryFilter
         return $this->builder->where('id', $id);
     }
 
+
+    /**
+     * @param  Builder  $builder
+     * @param  string  $column
+     * @param  string  $value
+     */
+    private function globalSearchColumn(Builder $builder, string $column, string $value)
+    {
+        $builder->orWhere($column, 'like', '%'.$value.'%');
+    }
+
     /**
      * @param  string  $search
      */
@@ -96,15 +111,107 @@ class BaseQueryFilter extends QueryFilter
                     $builder->orWhereHas($index, function (Builder $relationBuilder) use ($value, $search) {
                         $relationBuilder->where(function (Builder $qb) use ($value, $search) {
                             foreach ($value as $column) {
-                                $this->searchColumn($qb, $column, $search);
+                                $this->globalSearchColumn($qb, $column, $search);
                             }
                         });
                     });
-                } else {
-                    $this->searchColumn($builder, $value, $search);
+                } else if ( !in_array($value, static::SEARCH_TYPES) ) {
+                    $this->globalSearchColumn($builder, $value, $search);
                 }
             }
         });
+    }
+
+    /**
+     * @param Builder $builder
+     * @param $type
+     * @param $columnName
+     * @param $acceptedValue
+     * @return void
+     */
+    private function searchType(Builder $builder, $type, $columnName, $acceptedValue): void
+    {
+        switch($type) {
+            case 'date':
+                $dates = array_filter(array_map(function($dateString) {
+                    return strlen($dateString) > 0 ? date($dateString) : null;
+                }, explode(',', $acceptedValue)));
+                if ( count($dates) > 1 ) {
+                    $builder->whereBetween($columnName,$dates);
+                } else {
+                    $builder->whereDate($columnName,$dates[0]);
+                }
+                break;
+            default:
+                $values = explode(',', $acceptedValue);
+                if ( count($values) > 1 ) {
+                    $builder->whereIn($columnName, $values);
+                } else {
+                    $builder->where($columnName, 'like', '%'. $acceptedValue .'%');
+                }
+                break;
+        }
+    }
+
+    /**
+     * @param Builder $builder
+     * @param $columnOrRelation
+     * @param $typeOrSearch
+     * @param $acceptedValue
+     * @return void
+     */
+    private function searchColumn(Builder $builder, $columnOrRelation, $typeOrSearch, $acceptedValue): void
+    {
+        if ( is_array($typeOrSearch) ) {
+            $relationSearch = explode('.', $columnOrRelation);
+            $relationName = $relationSearch[0];
+            if ( count($relationSearch) > 0 ) {
+                $columnName = $relationSearch[1];
+            } else {
+                $columnName = $relationName;
+            }
+            $builder->whereHas($relationName, function (Builder $relationBuilder) use ($typeOrSearch, $acceptedValue, $columnName) {
+                foreach ( $typeOrSearch as $relationKey => $relationValue) {
+                    $isSearch = is_array($relationValue);
+                    if ( !$isSearch && $relationValue !== $columnName ) {
+                        continue;
+                    }
+                    $this->searchColumn($relationBuilder, $isSearch ? $relationKey : $relationValue, $isSearch ? $relationValue : null, $acceptedValue);
+                }
+            });
+        } else {
+            $this->searchType($builder, $typeOrSearch, $columnOrRelation, $acceptedValue);
+        }
+    }
+
+    /**
+     * @param string|array $columns
+     * @return void
+     */
+    public function searchColumns(string|array $columns): void {
+        if ( !is_array($columns) ) {
+            $columns = [$columns];
+        }
+        foreach ( $columns as $search ) {
+            $columnData = explode(':', $search);
+            $columnName = explode('.', $columnData[0])[0];
+            $acceptedValue = $columnData[1];
+            foreach ( $this->getSearchableColumns() as $index => $value ) {
+                $isSearching = false;
+                if ( is_array($value) && $index == $columnName ) {
+                    $isSearching = true;
+                } else {
+                    $compare = $value;
+                    if ( in_array($value, static::SEARCH_TYPES) ) {
+                        $compare = $index;
+                    }
+                    $isSearching = $compare == $columnName;
+                }
+                if ( $isSearching ) {
+                    $this->searchColumn($this->builder, $columnData[0], $value, $acceptedValue);
+                }
+            }
+        }
     }
 
     /**
@@ -126,15 +233,6 @@ class BaseQueryFilter extends QueryFilter
         return $this;
     }
 
-    /**
-     * @param  Builder  $builder
-     * @param  string  $column
-     * @param  string  $value
-     */
-    private function searchColumn(Builder $builder, string $column, string $value)
-    {
-        $builder->orWhere($column, 'like', '%'.$value.'%');
-    }
 
     /**
      * @param  $column
@@ -143,10 +241,12 @@ class BaseQueryFilter extends QueryFilter
     {
         // 1. We build the array that will hold multi-column supportable
         // sort data (even if we are only sorting by a single column)
-        $orderDirections = request()->get('sort_dir');
+        $orderDirections = request()->get('sort_dir', 'asc');
         $orderDirections = !empty($orderDirections) ? (is_array($orderDirections) ? $orderDirections : [$orderDirections]) : [];
         foreach ($orderDirections as $index => $orderDirection) {
-            $orderDirections[$index] = is_bool($orderDirection) ? ($orderDirection ? 'asc' : 'desc') : (is_string($orderDirection) ? ($orderDirection === 'true' ? 'desc' : 'asc') : $orderDirection);
+            $orderDirections[$index] = is_bool($orderDirection) ? ($orderDirection ? 'asc' : 'desc') : (is_string($orderDirection) && !in_array($orderDirection,[
+                'asc', 'desc'
+            ]) ? ($orderDirection === 'true' ? 'desc' : 'asc') : $orderDirection);
         }
 
         // 2. We build the array that will hold the columns by which
