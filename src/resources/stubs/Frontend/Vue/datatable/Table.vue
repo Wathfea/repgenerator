@@ -65,10 +65,10 @@
                 }">
                   <slot
                       :name="`cell(${key})`"
-                      :value="model[key]"
+                      :value="getCellData(column, key, model)"
                       :item="model"
                   >
-                    {{ model[key] }}
+                    {{ getCellData(column, key, model) }}
                   </slot>
                 </td>
                 <td class="flex justify-end relative whitespace-nowrap py-4 pl-3 text-sm font-medium sm:pr-6 lg:pr-8">
@@ -182,7 +182,6 @@ for ( let index in props.setColumns ) {
     sortDirection : setQuery.sort_by === index ? setQuery.sort_dir : null,
     isSearchOpen: false
   }
-
 }
 const currentPage = ref(1);
 const perPage = 10;
@@ -194,16 +193,22 @@ let user = reactive({
   id: 0,
 })
 
+const getCellData = (column, key, model) => {
+  if ( column.data.cellGetter ) {
+    return column.data.cellGetter(model);
+  }
+  return model[key];
+}
 
 const prevPage = async () => {
   paginatingLeft.value = true;
-  await getModels(--currentPage.value, perPage);
+  await getModels(--currentPage.value, perPage, currentRoute.query);
   paginatingLeft.value = false;
 }
 
 const nextPage = async () => {
   paginatingRight.value = true;
-  await getModels(++currentPage.value, perPage);
+  await getModels(++currentPage.value, perPage, currentRoute.query);
   paginatingRight.value = false;
 }
 
@@ -286,7 +291,7 @@ const deleteModel = async (id) => {
   }
 
   await destroyModel(id)
-  await getModels(1, perPage)
+  await getModels(1, perPage, currentRoute.query)
 }
 
 const getColumnName = (key) => {
@@ -306,5 +311,5 @@ const onOpenSearch = (column) => {
   columns.value[column].isSearchOpen = true;
 }
 
-getModels(currentRoute.query.page ?? 1, perPage, currentRoute.query)
+getModels(currentRoute.query.page ?? 1, currentRoute.query.per_page ?? perPage, currentRoute.query)
 </script>
