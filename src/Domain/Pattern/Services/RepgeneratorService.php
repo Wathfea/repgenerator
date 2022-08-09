@@ -55,6 +55,7 @@ class RepgeneratorService
      * @param  array|null  $fileUploadFieldsData
      * @param  string|null  $migrationName
      * @param  bool  $isGeneratedFileDomain
+     * @param  bool  $softDelete
      */
     public function generate(
         string $name,
@@ -69,6 +70,7 @@ class RepgeneratorService
         array $fileUploadFieldsData = null,
         string $migrationName = null,
         bool $isGeneratedFileDomain = false,
+        bool $softDelete = false,
     ) {
         $this->createDirectories();
         $callback('Directories generated!');
@@ -82,7 +84,7 @@ class RepgeneratorService
             if ($generatePivot) {
                 $this->modelPivot($name);
             } else {
-                $this->model($name, $columns, $foreigns);
+                $this->model($name, $columns, $foreigns, $softDelete);
             }
             $callback('Model is ready!');
         }
@@ -234,8 +236,9 @@ class RepgeneratorService
      * @param  string  $name
      * @param  array  $columns
      * @param  array  $foreigns
+     * @param  bool  $softDelete
      */
-    private function model(string $name, array $columns, array $foreigns)
+    private function model(string $name, array $columns, array $foreigns, bool $softDelete = false)
     {
         $use = [];
         $relationTemplate = [];
@@ -266,7 +269,7 @@ class RepgeneratorService
                         '{{relationType}}',
                         '{{relationName}}',
                         '{{relationMethodCall}}',
-                        '{{relatedModel}}'
+                        '{{relatedModel}}',
                     ],
                     [
                         $relationType,
@@ -288,18 +291,26 @@ class RepgeneratorService
             $fillableStr[] = "'".$column->name."',";
         }
 
+        $trait = '';
+        if($softDelete) {
+            $use[] = 'use Illuminate\Database\Eloquent\SoftDeletes;';
+            $trait = ', SoftDeletes';
+        }
+
         $modelTemplate = str_replace(
             [
                 '{{modelName}}',
                 '{{use}}',
                 '{{relation}}',
-                '{{fillableFields}}'
+                '{{fillableFields}}',
+                '{{trait}}'
             ],
             [
                 $name,
                 $this->implodeLines($use, 0),
                 $this->implodeLines($relationTemplate, 2),
-                $this->implodeLines($fillableStr, 2)
+                $this->implodeLines($fillableStr, 2),
+                $trait
             ],
             $this->repgeneratorStubService->getStub('Model')
         );

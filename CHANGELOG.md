@@ -3,6 +3,9 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
+- relationbe beírni a kulcsot
+- encrypt mező lehetősége
+- hashelt mező opció setFieldnameAttribute($fieldname) { $this->attributes['fieldname'] = Hash::make($fieldname) }
 - public vagy nem public file választó
 - kép típusnál képeket engedjen csak
 - file típusnál fileokat csak
@@ -17,6 +20,12 @@ All notable changes to `repgenerator` will be documented in this file
 - translation a mezőkhöz
 
 ## [Unreleased]
+
+## [1.4.4] - 2022-08-09
+## Added
+- Soft Delete option
+## Fixed
+- Removed enum strlower from options
 
 ## [1.4.3] - 2022-08-03
 ## Fixed
