@@ -100,6 +100,24 @@ class BaseQueryFilter extends QueryFilter
         $builder->orWhere($column, 'like', '%'.$value.'%');
     }
 
+    public function recursiveSearch(Builder $builder, $value, $index, $search) {
+        if (is_array($value)) {
+            $builder->orWhereHas($index, function (Builder $relationBuilder) use ($value, $search) {
+                $relationBuilder->where(function (Builder $qb) use ($value, $search) {
+                    foreach ($value as $innerIndex => $column) {
+                        if (!is_array($column) ) {
+                            $this->globalSearchColumn($qb, $column, $search);
+                        } else {
+                            $this->recursiveSearch($qb, $column, $innerIndex, $search);
+                        }
+                    }
+                });
+            });
+        } else if ( !in_array($value, static::SEARCH_TYPES) ) {
+            $this->globalSearchColumn($builder, $value, $search);
+        }
+    }
+
     /**
      * @param  string  $search
      */
@@ -107,17 +125,7 @@ class BaseQueryFilter extends QueryFilter
     {
         $this->builder->where(function (Builder $builder) use ($search) {
             foreach ($this->getSearchableColumns() as $index => $value) {
-                if (is_array($value)) {
-                    $builder->orWhereHas($index, function (Builder $relationBuilder) use ($value, $search) {
-                        $relationBuilder->where(function (Builder $qb) use ($value, $search) {
-                            foreach ($value as $column) {
-                                $this->globalSearchColumn($qb, $column, $search);
-                            }
-                        });
-                    });
-                } else if ( !in_array($value, static::SEARCH_TYPES) ) {
-                    $this->globalSearchColumn($builder, $value, $search);
-                }
+                $this->recursiveSearch($builder, $value, $index, $search);
             }
         });
     }
@@ -145,9 +153,9 @@ class BaseQueryFilter extends QueryFilter
             default:
                 $values = explode(',', $acceptedValue);
                 if ( count($values) > 1 ) {
-                    $builder->whereIn($columnName, $values);
+                    $builder->whereIn($builder->from . '.' . $columnName, $values);
                 } else {
-                    $builder->where($columnName, 'like', '%'. $acceptedValue .'%');
+                    $builder->where($builder->from . '.' . $columnName, 'like', '%'. $acceptedValue .'%');
                 }
                 break;
         }
@@ -196,19 +204,23 @@ class BaseQueryFilter extends QueryFilter
             $columnData = explode(':', $search);
             $columnName = explode('.', $columnData[0])[0];
             $acceptedValue = $columnData[1];
-            foreach ( $this->getSearchableColumns() as $index => $value ) {
-                $isSearching = false;
-                if ( is_array($value) && $index == $columnName ) {
-                    $isSearching = true;
-                } else {
-                    $compare = $value;
-                    if ( in_array($value, static::SEARCH_TYPES) ) {
-                        $compare = $index;
+            if ( method_exists($this, $columnName) ) {
+                $this->$columnName($acceptedValue);
+            } else {
+                foreach ( $this->getSearchableColumns() as $index => $value ) {
+                    $isSearching = false;
+                    if ( is_array($value) && $index == $columnName ) {
+                        $isSearching = true;
+                    } else {
+                        $compare = $value;
+                        if ( in_array($value, static::SEARCH_TYPES) ) {
+                            $compare = $index;
+                        }
+                        $isSearching = $compare == $columnName;
                     }
-                    $isSearching = $compare == $columnName;
-                }
-                if ( $isSearching ) {
-                    $this->searchColumn($this->builder, $columnData[0], $value, $acceptedValue);
+                    if ( $isSearching ) {
+                        $this->searchColumn($this->builder, $columnData[0], $value, $acceptedValue);
+                    }
                 }
             }
         }
