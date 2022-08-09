@@ -55,6 +55,7 @@ class RepgeneratorService
      * @param  array|null  $fileUploadFieldsData
      * @param  string|null  $migrationName
      * @param  bool  $isGeneratedFileDomain
+     * @param  bool  $softDelete
      */
     public function generate(
         string $name,
@@ -69,6 +70,7 @@ class RepgeneratorService
         array $fileUploadFieldsData = null,
         string $migrationName = null,
         bool $isGeneratedFileDomain = false,
+        bool $softDelete = false,
     ) {
         $this->createDirectories();
         $callback('Directories generated!');
@@ -82,7 +84,7 @@ class RepgeneratorService
             if ($generatePivot) {
                 $this->modelPivot($name);
             } else {
-                $this->model($name, $columns, $foreigns);
+                $this->model($name, $columns, $foreigns, $softDelete);
             }
             $callback('Model is ready!');
         }
@@ -234,11 +236,14 @@ class RepgeneratorService
      * @param  string  $name
      * @param  array  $columns
      * @param  array  $foreigns
+     * @param  bool  $softDelete
      */
-    private function model(string $name, array $columns, array $foreigns)
+    private function model(string $name, array $columns, array $foreigns, bool $softDelete = false)
     {
         $use = [];
         $relationTemplate = [];
+        $hashedTemplate = '';
+        $cryptedTemplate = '';
 
         if (!empty($foreigns)) {
             foreach ($foreigns as $foreign) {
@@ -266,7 +271,7 @@ class RepgeneratorService
                         '{{relationType}}',
                         '{{relationName}}',
                         '{{relationMethodCall}}',
-                        '{{relatedModel}}'
+                        '{{relatedModel}}',
                     ],
                     [
                         $relationType,
@@ -286,6 +291,46 @@ class RepgeneratorService
                 continue;
             }
             $fillableStr[] = "'".$column->name."',";
+
+            if($column->is_hashed) {
+                if(!in_array('use Illuminate\Support\Facades\Hash;', $use)) {
+                    $use[] = 'use Illuminate\Support\Facades\Hash;';
+                }
+                $hashedTemplate = str_replace(
+                    [
+                        '{{fieldUpper}}',
+                        '{{field}}',
+                    ],
+                    [
+                        ucfirst($column->name),
+                        strtolower($column->name),
+                    ],
+                    $this->repgeneratorStubService->getStub('modelHashedField')
+                );
+            }
+
+            if($column->is_crypted) {
+                if(!in_array('use Illuminate\Support\Facades\Crypt;', $use)) {
+                    $use[] = 'use Illuminate\Support\Facades\Crypt;';
+                }
+                $cryptedTemplate = str_replace(
+                    [
+                        '{{fieldUpper}}',
+                        '{{field}}',
+                    ],
+                    [
+                        ucfirst($column->name),
+                        strtolower($column->name),
+                    ],
+                    $this->repgeneratorStubService->getStub('modelCryptedField')
+                );
+            }
+        }
+
+        $trait = '';
+        if($softDelete) {
+            $use[] = 'use Illuminate\Database\Eloquent\SoftDeletes;';
+            $trait = ', SoftDeletes';
         }
 
         $modelTemplate = str_replace(
@@ -293,13 +338,19 @@ class RepgeneratorService
                 '{{modelName}}',
                 '{{use}}',
                 '{{relation}}',
-                '{{fillableFields}}'
+                '{{fillableFields}}',
+                '{{trait}}',
+                '{{hashedTemplate}}',
+                '{{cryptedTemplate}}'
             ],
             [
                 $name,
                 $this->implodeLines($use, 0),
                 $this->implodeLines($relationTemplate, 2),
-                $this->implodeLines($fillableStr, 2)
+                $this->implodeLines($fillableStr, 2),
+                $trait,
+                $hashedTemplate,
+                $cryptedTemplate,
             ],
             $this->repgeneratorStubService->getStub('Model')
         );

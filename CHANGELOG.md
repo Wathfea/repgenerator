@@ -3,6 +3,7 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
+- relationbe beírni a kulcsot
 - public vagy nem public file választó
 - kép típusnál képeket engedjen csak
 - file típusnál fileokat csak
@@ -17,6 +18,16 @@ All notable changes to `repgenerator` will be documented in this file
 - translation a mezőkhöz
 
 ## [Unreleased]
+
+## [1.4.5] - 2022-08-09
+## Added
+- Hashed and Crypted fields option
+
+## [1.4.4] - 2022-08-09
+## Added
+- Soft Delete option
+## Fixed
+- Removed enum strlower from options
 
 ## [1.4.3] - 2022-08-03
 ## Fixed

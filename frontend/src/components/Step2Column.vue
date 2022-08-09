@@ -354,5 +354,35 @@ const onReferenceChanged = () => {
                 </div>
             </div>
         </div>
+
+        <div class="mt-3 grid grid-cols-12 gap-y-6 gap-x-4 sm:grid-cols-12 mb-3">
+            <div class="sm:col-span-2">
+                <div class="mt-3">
+                    <div class="relative flex items-start">
+                        <div class="flex items-center h-5">
+                            <input v-model="data.is_hashed" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                   type="checkbox">
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label class="font-medium text-gray-700">Is field be hashed?</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sm:col-span-2">
+                <div class="mt-3">
+                    <div class="relative flex items-start">
+                        <div class="flex items-center h-5">
+                            <input v-model="data.is_crypted" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                   type="checkbox">
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label class="font-medium text-gray-700">Is field be crypted?</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </template>

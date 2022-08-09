@@ -35,6 +35,11 @@ const step1Options = ref({
         label: 'Readonly',
         enabled: false,
         text: 'Is the repository readonly?'
+    },
+    'softDelete': {
+        label: 'Soft Delete',
+        enabled: false,
+        text: 'Is the model use soft delete?'
     }
 });
 const scrollToTop = () => {
@@ -129,6 +134,8 @@ const getDefaultColumns = () => {
             'uploads_files_path': '',
             'is_file': false,
             'is_picture': false,
+            'is_hashed': false,
+            'is_crypted': false,
         },
         {
             'name': 'created_at',
@@ -151,6 +158,8 @@ const getDefaultColumns = () => {
             'uploads_files_path': '',
             'is_file': false,
             'is_picture': false,
+            'is_hashed': false,
+            'is_crypted': false,
         },
         {
             'name': 'updated_at',
@@ -173,6 +182,8 @@ const getDefaultColumns = () => {
             'uploads_files_path': '',
             'is_file': false,
             'is_picture': false,
+            'is_hashed': false,
+            'is_crypted': false,
         }
     ]
 }
@@ -199,6 +210,8 @@ const onAddColumn = () => {
         'uploads_files_path': '',
         'is_file': false,
         'is_picture': false,
+        'is_hashed': false,
+        'is_crypted': false,
     });
 }
 const onRemoveColumn = (data) => {
