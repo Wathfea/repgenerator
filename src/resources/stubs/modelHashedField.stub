@@ -1,0 +1,3 @@
+public function set{{fieldUpper}}Attribute(${{field}}) {
+    $this->attributes['{{field}}'] = Hash::make(${{field}});
+}

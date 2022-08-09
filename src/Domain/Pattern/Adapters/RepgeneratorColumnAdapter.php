@@ -30,6 +30,8 @@ class RepgeneratorColumnAdapter
      * @param  bool  $is_file
      * @param  bool  $is_picture
      * @param  bool  $searchable
+     * @param  bool  $is_hashed
+     * @param  bool  $is_crypted
      */
     public function __construct(
         public string $name,
@@ -52,6 +54,8 @@ class RepgeneratorColumnAdapter
         public bool $is_file = false,
         public bool $is_picture = false,
         public bool $searchable = false,
+        public bool $is_hashed = false,
+        public bool $is_crypted = false,
     ) {
 
     }
@@ -82,6 +86,8 @@ class RepgeneratorColumnAdapter
             'is_file' => $this->is_file,
             'is_picture' => $this->is_picture,
             'searchable' => $this->searchable,
+            'is_hashed' => $this->is_hashed,
+            'is_crypted' => $this->is_crypted,
         ];
     }
 }
