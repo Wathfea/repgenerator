@@ -138,8 +138,8 @@ class RepgeneratorFrontendService
                                 '{{optionName}}'
                             ],
                             [
-                                strtolower($option),
-                                $option
+                                $option,
+                                ucfirst(strtolower($option))
                             ],
                             $this->repgeneratorStubService->getStub('Frontend/Vue/fields/'.$template)
                         );
@@ -301,8 +301,8 @@ class RepgeneratorFrontendService
                                 '{{optionName}}'
                             ],
                             [
-                                strtolower($option),
-                                $option
+                                $option,
+                                ucfirst(strtolower($option))
                             ],
                             $this->repgeneratorStubService->getStub('Frontend/Vue/fields/'.$template)
                         );

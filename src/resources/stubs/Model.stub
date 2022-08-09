@@ -10,7 +10,7 @@ use App\Abstraction\Models\BaseModel;
 
 class {{modelName}} extends BaseModel
 {
-    use HasFactory, Filterable;
+    use HasFactory, Filterable {{trait}};
 
     /**
      * The attributes that are mass assignable.

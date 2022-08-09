@@ -35,6 +35,11 @@ const step1Options = ref({
         label: 'Readonly',
         enabled: false,
         text: 'Is the repository readonly?'
+    },
+    'softDelete': {
+        label: 'Soft Delete',
+        enabled: false,
+        text: 'Is the model use soft delete?'
     }
 });
 const scrollToTop = () => {

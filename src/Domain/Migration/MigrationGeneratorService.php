@@ -5,6 +5,7 @@ namespace Pentacom\Repgenerator\Domain\Migration;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
+use Pentacom\Repgenerator\Domain\Migration\Blueprint\Method;
 use Pentacom\Repgenerator\Domain\Migration\Blueprint\SchemaBlueprint;
 use Pentacom\Repgenerator\Domain\Migration\Blueprint\Table;
 use Pentacom\Repgenerator\Domain\Migration\Blueprint\TableBlueprint;
@@ -33,12 +34,13 @@ class MigrationGeneratorService
     }
 
     /**
-     * @param Table $table
-     * @param array $columns
-     * @param array $indexes
-     * @param array $foreigns
-     * @param string $modelName
-     * @param string $iconName
+     * @param  Table  $table
+     * @param  array  $columns
+     * @param  array  $indexes
+     * @param  array  $foreigns
+     * @param  string  $modelName
+     * @param  string  $iconName
+     * @param  bool  $softDelete
      * @return string
      */
     public function generateMigrationFiles(
@@ -48,8 +50,9 @@ class MigrationGeneratorService
         array $foreigns,
         string $modelName,
         string $iconName,
+        bool $softDelete
     ): string {
-        $up = $this->up($table, $columns, $indexes, $foreigns);
+        $up = $this->up($table, $columns, $indexes, $foreigns, $softDelete);
         $down = $this->down($table, $foreigns);
 
 
@@ -73,7 +76,7 @@ class MigrationGeneratorService
     /**
      * Generates `up` schema for table.
      */
-    public function up(Table $table, array $columns, array $indexes, array $foreigns): SchemaBlueprint
+    public function up(Table $table, array $columns, array $indexes, array $foreigns, bool $softDelete): SchemaBlueprint
     {
         $up = $this->getSchemaBlueprint($table, 'create');
 
@@ -119,6 +122,11 @@ class MigrationGeneratorService
                 $method = $this->foreignGenerator->generate($foreign);
                 $tableBlueprint->setMethod($method);
             }
+        }
+
+        if ($softDelete) {
+            $method = new Method('softDeletes');
+            $tableBlueprint->setMethod($method);
         }
 
         $up->setBlueprint($tableBlueprint);
