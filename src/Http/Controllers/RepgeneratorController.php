@@ -310,6 +310,8 @@ class RepgeneratorController extends Controller
             $originalTableSingular.'_id' => 'unsignedBigInteger',
             'name' => 'string',
             'field' => 'string',
+            'ext' => 'string',
+            'mime' => 'string',
             'created_at' => 'timestamp',
             'updated_at' => 'timestamp',
         ];
