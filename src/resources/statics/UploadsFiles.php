@@ -76,7 +76,7 @@ trait UploadsFiles
      */
     public function getDocumentPath(Model $model, string $field, Model $file): string
     {
-        return $this->getDocumentDirectory($model, $field).'/'.$file->getAttribute('name');
+        return $this->getDocumentDirectory($model, $field).'/'.$file->getAttribute('id');
     }
 
     /**
@@ -97,7 +97,7 @@ trait UploadsFiles
      */
     public function getDocumentStoragePath(Model $model, string $field, Model $file): string
     {
-        return $this->getDocumentStorageDirectory($model, $field).'/'.$file->getAttribute('name');
+        return $this->getDocumentStorageDirectory($model, $field).'/'.$file->getAttribute('id');
     }
 
     /**
@@ -201,12 +201,16 @@ trait UploadsFiles
             }
             if (!$found) {
                 $fileName = $file->getClientOriginalName();
-                if ($file->storeAs($this->getDocumentDirectory($model, $field), $fileName)) {
-                    $data = [
-                        'name' => $fileName,
-                        'field' => $field
-                    ];
-                    $model->$relationshipName()->create($data);
+
+                $data = [
+                    'name' => pathinfo($fileName, PATHINFO_FILENAME),
+                    'field' => $field,
+                    'ext' => $file->getClientOriginalExtension(),
+                    'mime' => $file->getClientMimeType(),
+                ];
+
+                if ($createdFileModel =  $model->$relationshipName()->create($data) ) {
+                    $file->storeAs($this->getDocumentDirectory($model, $field), $createdFileModel->id);
                 }
             }
         }

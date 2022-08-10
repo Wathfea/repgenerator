@@ -3,7 +3,11 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
-- relationbe beírni a kulcsot
+
+- Routes mappa létrehozása a layer alá, oda beírni a routot és a serviceproviderben $this->loadRoutesFrom -al betölteni
+- Provider betöltés kialakítása pl egy config fileba
+- Generálási requestet ne a db-be tároljuk hanem egy config fileba a réteghez
+- Modelben a generált relationbe beírni a kulcsot is ami alapján a kapcsolat van
 - public vagy nem public file választó
 - kép típusnál képeket engedjen csak
 - file típusnál fileokat csak
@@ -18,6 +22,11 @@ All notable changes to `repgenerator` will be documented in this file
 - translation a mezőkhöz
 
 ## [Unreleased]
+
+## [1.4.7] - 2022-08-10
+## Added
+- filefeltöltéskor eredeti név elvetése új néven mentsük a filet, mime type adatok mentése a db-be
+
 
 ## [1.4.6] - 2022-08-10
 ## Fixed
