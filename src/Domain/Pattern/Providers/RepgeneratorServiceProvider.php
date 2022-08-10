@@ -31,7 +31,7 @@ class RepgeneratorServiceProvider extends ServiceProvider
             // Export the migration
             if (! class_exists('CreateRepgeneratorDomainsTable')) {
                 $this->publishes([
-                    __DIR__ . '/../../../../database/migrations/create_repgenerator_domains_table.stub' => database_path('migrations/' . date('Y_m_d_His', time()) . '_create_repgenerator_domains_table.php'),
+                    __DIR__ . '/../../../../database/migrations/create_repgenerator_domains_table.stub' => database_path('migrations/2014_10_13_000000_create_repgenerator_domains_table.php'),
                     // you can add any number of migrations here
                 ], 'migrations');
             }

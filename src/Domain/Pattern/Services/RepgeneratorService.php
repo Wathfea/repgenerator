@@ -242,6 +242,8 @@ class RepgeneratorService
     {
         $use = [];
         $relationTemplate = [];
+        $hashedTemplate = '';
+        $cryptedTemplate = '';
 
         if (!empty($foreigns)) {
             foreach ($foreigns as $foreign) {
@@ -289,6 +291,40 @@ class RepgeneratorService
                 continue;
             }
             $fillableStr[] = "'".$column->name."',";
+
+            if($column->is_hashed) {
+                if(!in_array('use Illuminate\Support\Facades\Hash;', $use)) {
+                    $use[] = 'use Illuminate\Support\Facades\Hash;';
+                }
+                $hashedTemplate = str_replace(
+                    [
+                        '{{fieldUpper}}',
+                        '{{field}}',
+                    ],
+                    [
+                        ucfirst($column->name),
+                        strtolower($column->name),
+                    ],
+                    $this->repgeneratorStubService->getStub('modelHashedField')
+                );
+            }
+
+            if($column->is_crypted) {
+                if(!in_array('use Illuminate\Support\Facades\Crypt;', $use)) {
+                    $use[] = 'use Illuminate\Support\Facades\Crypt;';
+                }
+                $cryptedTemplate = str_replace(
+                    [
+                        '{{fieldUpper}}',
+                        '{{field}}',
+                    ],
+                    [
+                        ucfirst($column->name),
+                        strtolower($column->name),
+                    ],
+                    $this->repgeneratorStubService->getStub('modelCryptedField')
+                );
+            }
         }
 
         $trait = '';
@@ -303,14 +339,18 @@ class RepgeneratorService
                 '{{use}}',
                 '{{relation}}',
                 '{{fillableFields}}',
-                '{{trait}}'
+                '{{trait}}',
+                '{{hashedTemplate}}',
+                '{{cryptedTemplate}}'
             ],
             [
                 $name,
                 $this->implodeLines($use, 0),
                 $this->implodeLines($relationTemplate, 2),
                 $this->implodeLines($fillableStr, 2),
-                $trait
+                $trait,
+                $hashedTemplate,
+                $cryptedTemplate,
             ],
             $this->repgeneratorStubService->getStub('Model')
         );

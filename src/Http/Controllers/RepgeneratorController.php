@@ -127,6 +127,8 @@ class RepgeneratorController extends Controller
                 $data['is_file'] ?: false,
                 $data['is_picture'] ?: false,
                 $data['searchable'] ?: false,
+                $data['is_hashed'] ?: false,
+                $data['is_crypted'] ?: false,
             );
 
             $columnIndex = [];

@@ -13,12 +13,14 @@ class CreateRepgeneratorDomainsTable extends Migration
      */
     public function up()
     {
-        Schema::create('repgenerator_domains', function (Blueprint $table) {
-            $table->id();
-            $table->string('model');
-            $table->json('meta');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('repgenerator_domains')) {
+            Schema::create('repgenerator_domains', function (Blueprint $table) {
+                        $table->id();
+                        $table->string('model');
+                        $table->json('meta');
+                        $table->timestamps();
+                    });
+        }
     }
 
     /**

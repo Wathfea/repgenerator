@@ -33,6 +33,8 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/') {
             page: page,
             per_page: perPage,
         })
+        delete searchParams['page'];
+        delete searchParams['per_page'];
         Object.assign(setParams, searchParams);
         for (let index in setParams) {
             if (setParams[index] === null || setParams[index] === undefined) {
