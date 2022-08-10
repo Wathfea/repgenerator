@@ -57,6 +57,6 @@ class PatternGeneratorInit extends Command
 
         //Futtatni egy npm instalt a frontend mappába
         $path = base_path('vendor').'/pentacom/repgenerator/frontend/';
-        exec("cd $path; npm instal; npm run build");
+        exec("cd $path && npm install && npm run build");
     }
 }

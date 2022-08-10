@@ -19,6 +19,11 @@ All notable changes to `repgenerator` will be documented in this file
 
 ## [Unreleased]
 
+## [1.4.6] - 2022-08-10
+## Fixed
+- Windows compatible npm exec
+- Changed migration name for no conflic at different branch publish situation
+
 ## [1.4.5] - 2022-08-09
 ## Added
 - Hashed and Crypted fields option
