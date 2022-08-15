@@ -54,7 +54,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import {ref} from 'vue'
 import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import '@vuepic/vue-datepicker/dist/main.css'
 import Datepicker from '@vuepic/vue-datepicker';
@@ -81,16 +81,24 @@ const props = defineProps({
     required : false,
     default: ''
   },
+  column : {
+    required: true,
+    type: String
+  },
 });
 let setSearch = props.setSearch ? props.setSearch : ( props.data.valuesGetter ? [] : '' );
 setSearch = !Array.isArray(setSearch) && setSearch.indexOf(',') ? setSearch.split(',') : setSearch;
 const search = ref(setSearch);
 const date = ref(setSearch);
 const onSearch = () => {
-  emit('search', search.value);
+  emit('search', {
+    name: props.column,
+    value: search
+  });
+  onClose();
 }
-const onClose = (e) => {
-  emit('close');
+const onClose = () => {
+  emit('close', props.column);
 }
 const setDate = (value) => {
   if ( Array.isArray(value) ) {

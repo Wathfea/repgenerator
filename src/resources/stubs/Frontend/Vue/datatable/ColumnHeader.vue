@@ -1,12 +1,12 @@
 <template>
   <div>
-    <label for="email" class="block text-sm font-medium text-gray-700">{{ getName() }}</label>
+    <label class="block text-sm font-medium text-gray-700">{{ getName() }}</label>
     <div class="mt-1 rounded-md">
         <Button @click="onOpenSearch" class="-ml-px relative inline-flex items-center space-x-2 px-1 py-2 rounded-l-md border border-gray-300 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100">
           <SearchCircleOutlineIcon v-if="!search" class="h-5 w-5 text-gray-400" aria-hidden="true"/>
           <SearchCircleIcon v-else class="h-5 w-5 text-vagheggi-800" aria-hidden="true"/>
         </Button>
-        <Button :disabled="!search && sortDirection === null" :no-opacity="true" :busy="data.isSearching"  @click="onSearchAndSortCleared" class="-ml-px relative inline-flex items-center space-x-2 px-1 py-2 border border-gray-300  text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100">
+        <Button :disabled="!search && sortDirection === null" :no-opacity="true" :busy="isSearching"  @click="onSearchAndSortCleared" class="-ml-px relative inline-flex items-center space-x-2 px-1 py-2 border border-gray-300 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100">
           <XIcon :class="`h-5 w-5 text-${search !== '' || sortDirection !== null ? 'vagheggi-800' : 'gray-400'}`" aria-hidden="true"/>
         </Button>
         <Button @click="onSortChanged" type="button" class="-ml-px relative inline-flex items-center space-x-2 px-1 rounded-r-md py-2 border border-gray-300 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100">
@@ -21,7 +21,7 @@
 import { SortAscendingIcon, SortDescendingIcon, XIcon, SearchCircleIcon } from '@heroicons/vue/solid'
 import { SearchCircleIcon as SearchCircleOutlineIcon }  from '@heroicons/vue/outline'
 import Button from "~/components/Button";
-const emit = defineEmits(["changeSort", "changeSearch", "sortCleared", "closeSearch", "openSearch"]);
+const emit = defineEmits(["toggleSort", "openSearch", "clearSortAndSearch"]);
 let props = defineProps({
   data : {
     required : true,
@@ -35,11 +35,6 @@ let props = defineProps({
     type: Boolean,
     default: false
   },
-  icon : {
-    required : false,
-    type: String,
-    default: 'SearchIcon'
-  },
   sortDirection : {
     required : false,
     default: null
@@ -48,41 +43,21 @@ let props = defineProps({
     required: true,
     type: String
   },
-  setSearchOpen : {
-    required: false,
-    type: Boolean,
-  }
 })
 const onSortChanged = () => {
-  emit('changeSort', props.column);
+  emit('toggleSort', props.column);
+}
+const onOpenSearch = () => {
+  emit('openSearch', props.column);
 }
 const onSearchAndSortCleared = (e) => {
-  emit('sortCleared', props.column);
-  setSearch('');
+  emit('clearSortAndSearch', props.column);
 }
 const getName = () => {
   if ( props.data.name ) {
     return props.data.name;
   }
   return props.data;
-}
-
-const onSearch = (value) => {
-  setSearch(value);
-  onCloseSearch();
-}
-const onCloseSearch = () => {
-  emit('closeSearch', props.column);
-}
-const onOpenSearch = () => {
-  emit('openSearch', props.column);
-}
-const setSearch = (set) => {
-  emit('changeSearch', {
-    name: props.column,
-    column: (props.data.valuesGetter ? (props.data.column ? ('.' + props.data.column) : '') : ''),
-    value: set
-  });
 }
 </script>
 <style src="@vueform/multiselect/themes/default.css"></style>
