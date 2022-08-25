@@ -4,6 +4,18 @@ All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
 
+- Hero icon választó listából, ne kézi beírás. Esetleg más icon csomag? FontAwsome vagy Material?
+- Mezősorrend változtatása drag & drop-al
+- Az egyes domainek repgenerator tulajdonságait ne db-be mentse, hanem fájlokba (config.php). Így elkerülhető az hogy az egyik fejlesztő nem tudja újrageneráltatni a wizzardal a másik fejlesztő által készített domaint.
+- A formrequestekben a rule-ok ne pipeline-al összefűzött stringek legyenek, hanem tömbösített. Ha egy mezőhöz relation van rendelve akkor alapból rakja össze az exists rule-t: 'exists:App\Domain\VALAMI\Models\VALAMIMODEL,id'
+- Esetleg el kellene gondolkozni azon hogy a domainen belül kellene egy config.php amibe bekerül minden az adott domainre jellemző dolog (pl generálási beállítások). Pl.: searchable mezők, menü elhelyezés (fentebbi pont), stb.
+- Fájl tárolásnál meg kell azt oldani hogy max X ezer kép kerüljön egy könyvtárba, utána új könyvtárba mentse, ezt ID-ból lehet egyszerűen megoldani. Azért kell mert az esetleges műveleteknél a szerverek bizonyos számú (~10000) fájlt tartalmazó műveleteknél nagyon belassulnak.
+  if (!function_exists('getLevelDir')) {
+  function getLevelDir($id){
+  return substr(substr("000000000".$id,-10),0,7);
+  }
+  }
+- Hibakezelés (pl van már ilyen nevű tábla, elakad a generálás, stb)
 - Routes mappa létrehozása a layer alá, oda beírni a routot és a serviceproviderben $this->loadRoutesFrom -al betölteni
 - Provider betöltés kialakítása pl egy config fileba
 - Generálási requestet ne a db-be tároljuk hanem egy config fileba a réteghez
@@ -22,6 +34,14 @@ All notable changes to `repgenerator` will be documented in this file
 - translation a mezőkhöz
 
 ## [Unreleased]
+
+- Legyen egy timestamps checkbox ami a VÉGÉRE teszt a timestamps-t (created_at, updated_at): migráció : $table->timestamps(), model fillable-be ne tegye bele! Ha nincs bekapcsolva akkor a modelbe legyen a $timestamps = false; ÉS figyelje hogy nincs-e olyan mező aminek a neve "created_at" vagy "upadted_at", ha van akkor ezeket így kezelje pl:$table->timestamp('created_at')->nullable();
+- A kapcsolt mezőknél jó lenne ha lenne egy reload gomb hogy újra olvassa a kapcsolható táblákat. Elkezdesz egy táblát létrehozni, de nincs meg a kapcsolt tábla akkor újra kell kezdeni az egészet miután létrehoztad a kapcsolt táblát.
+- Jó lenne ha a beírt model nevet uc first-re tenné
+- File type és picture type radio legyen
+- Hashed és cyrpted radio legyen
+- az "unsigned" kezedetű mezőtípusoknál a frontenden legyen bejelölve az "unsigned" és readonly legyen, esetleg tűnjön el a frontendről, vagy a mező típus választóban ne legyenek benne az unsigned-el kezdődő mezők. Zavaró a kettő együtt.
+
 
 ## [1.4.7] - 2022-08-10
 ## Added

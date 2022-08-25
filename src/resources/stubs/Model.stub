@@ -12,6 +12,8 @@ class {{modelName}} extends BaseModel
 {
     use HasFactory, Filterable {{trait}};
 
+    {{timestamps}}
+
     /**
      * The attributes that are mass assignable.
      *

@@ -41,6 +41,7 @@ class MigrationGeneratorService
      * @param  string  $modelName
      * @param  string  $iconName
      * @param  bool  $softDelete
+     * @param  bool  $timestamps
      * @return string
      */
     public function generateMigrationFiles(
@@ -50,9 +51,10 @@ class MigrationGeneratorService
         array $foreigns,
         string $modelName,
         string $iconName,
-        bool $softDelete
+        bool $softDelete,
+        bool $timestamps,
     ): string {
-        $up = $this->up($table, $columns, $indexes, $foreigns, $softDelete);
+        $up = $this->up($table, $columns, $indexes, $foreigns, $softDelete, $timestamps);
         $down = $this->down($table, $foreigns);
 
 
@@ -76,7 +78,7 @@ class MigrationGeneratorService
     /**
      * Generates `up` schema for table.
      */
-    public function up(Table $table, array $columns, array $indexes, array $foreigns, bool $softDelete): SchemaBlueprint
+    public function up(Table $table, array $columns, array $indexes, array $foreigns, bool $softDelete, bool $timestamps): SchemaBlueprint
     {
         $up = $this->getSchemaBlueprint($table, 'create');
 
@@ -87,6 +89,15 @@ class MigrationGeneratorService
             if ($column->fileUploadLocation) {
                 continue;
             }
+
+            if(!$timestamps && ($column->name == 'created_at' || $column->name == 'updated_at')) {
+                $column->nullable = true;
+            }
+
+            if($timestamps && ($column->name == 'created_at' || $column->name == 'updated_at')) {
+                continue;
+            }
+
             $method = $this->columnGenerator->generate($table, $column->toArray());
             $tableBlueprint->setMethod($method);
         }
@@ -126,6 +137,12 @@ class MigrationGeneratorService
 
         if ($softDelete) {
             $method = new Method('softDeletes');
+            $tableBlueprint->setMethod($method);
+        }
+
+
+        if ($timestamps) {
+            $method = new Method('timestamps');
             $tableBlueprint->setMethod($method);
         }
 
