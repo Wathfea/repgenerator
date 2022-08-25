@@ -56,6 +56,7 @@ class RepgeneratorService
      * @param  string|null  $migrationName
      * @param  bool  $isGeneratedFileDomain
      * @param  bool  $softDelete
+     * @param  bool  $timestamps
      */
     public function generate(
         string $name,
@@ -71,6 +72,7 @@ class RepgeneratorService
         string $migrationName = null,
         bool $isGeneratedFileDomain = false,
         bool $softDelete = false,
+        bool $timestamps = false,
     ) {
         $this->createDirectories();
         $callback('Directories generated!');
@@ -84,7 +86,7 @@ class RepgeneratorService
             if ($generatePivot) {
                 $this->modelPivot($name);
             } else {
-                $this->model($name, $columns, $foreigns, $softDelete);
+                $this->model($name, $columns, $foreigns, $softDelete, $timestamps);
             }
             $callback('Model is ready!');
         }
@@ -237,8 +239,9 @@ class RepgeneratorService
      * @param  array  $columns
      * @param  array  $foreigns
      * @param  bool  $softDelete
+     * @param  bool  $timestamps
      */
-    private function model(string $name, array $columns, array $foreigns, bool $softDelete = false)
+    private function model(string $name, array $columns, array $foreigns, bool $softDelete, bool $timestamps)
     {
         $use = [];
         $relationTemplate = [];
@@ -271,7 +274,7 @@ class RepgeneratorService
                         '{{relationType}}',
                         '{{relationName}}',
                         '{{relationMethodCall}}',
-                        '{{relatedModel}}',
+                        '{{relatedModel}}'
                     ],
                     [
                         $relationType,
@@ -333,6 +336,11 @@ class RepgeneratorService
             $trait = ', SoftDeletes';
         }
 
+        $timestampsTemplate = '';
+        if(!$timestamps) {
+            $timestampsTemplate = 'public $timestamps = false;';
+        }
+
         $modelTemplate = str_replace(
             [
                 '{{modelName}}',
@@ -341,7 +349,8 @@ class RepgeneratorService
                 '{{fillableFields}}',
                 '{{trait}}',
                 '{{hashedTemplate}}',
-                '{{cryptedTemplate}}'
+                '{{cryptedTemplate}}',
+                '{{timestamps}}',
             ],
             [
                 $name,
@@ -351,6 +360,7 @@ class RepgeneratorService
                 $trait,
                 $hashedTemplate,
                 $cryptedTemplate,
+                $timestampsTemplate
             ],
             $this->repgeneratorStubService->getStub('Model')
         );

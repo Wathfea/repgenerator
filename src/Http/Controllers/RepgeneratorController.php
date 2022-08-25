@@ -178,7 +178,7 @@ class RepgeneratorController extends Controller
 
             $this->migrationGeneratorService->setDate(Carbon::now());
             $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], [],
-                self::CRUD_MENU_NAME, 'menu', false);
+                self::CRUD_MENU_NAME, 'menu', false, false);
 
             $this->repgeneratorService->generate(
                 self::CRUD_MENU_NAME,
@@ -235,7 +235,8 @@ class RepgeneratorController extends Controller
                 $foreigns,
                 $requestData['name'],
                 $requestData['icon'],
-                $requestData['softDelete']
+                $requestData['softDelete'],
+                $requestData['timestamps'],
             );
         }
 
@@ -273,7 +274,8 @@ class RepgeneratorController extends Controller
             $fileUploadFieldsData,
             $migrationName,
             false,
-            $requestData['softDelete']
+            $requestData['softDelete'],
+            $requestData['timestamps']
         );
         return $messages;
     }
@@ -343,6 +345,7 @@ class RepgeneratorController extends Controller
                 $foreigns,
                 $requestData['name'].'Files',
                 'photograph',
+                false,
                 false
             );
         }

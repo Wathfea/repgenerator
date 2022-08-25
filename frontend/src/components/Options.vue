@@ -1,4 +1,8 @@
 <script setup>
+import {defineEmits} from 'vue'
+
+const emit = defineEmits(['selectOption'])
+
 const props = defineProps({
     options: {
         type: Object,
@@ -8,6 +12,11 @@ const props = defineProps({
         }
     }
 })
+
+const onSelectOption = (option) => {
+    emit('selectOption', option);
+}
+
 </script>
 <template>
     <div class="mt-3">
@@ -15,7 +24,7 @@ const props = defineProps({
             <div class="relative flex items-start">
                 <div class="flex items-center h-5">
                     <input v-model="option.enabled" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                           type="checkbox">
+                           type="checkbox" @click="onSelectOption(option)">
                 </div>
                 <div class="ml-3 text-sm">
                     <label class="font-medium text-gray-700">{{ option.label }}</label>

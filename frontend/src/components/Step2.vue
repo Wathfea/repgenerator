@@ -2,7 +2,7 @@
 import Step2Column from "./Step2Column.vue";
 import {defineEmits, onMounted} from 'vue'
 
-const emit = defineEmits(['removeColumn', 'addColumn'])
+const emit = defineEmits(['removeColumn', 'addColumn', 'refreshTables'])
 const props = defineProps({
     modelName: {
         type: String,
@@ -42,15 +42,20 @@ const handleKeyPress = (e) => {
 const onRemoveColumn = (data) => {
     emit('removeColumn', data);
 }
+
 const onAddColumn = () => {
     emit('addColumn');
+}
+
+const onRefreshTables = () => {
+    emit('refreshTables');
 }
 </script>
 
 <template>
     <div class="space-y-8 divide-y divide-gray-200">
         <div class="mt-6">
-            <Step2Column v-for="column in columns" :data="column" :models="models" :modelName="modelName" @removeColumn="onRemoveColumn"/>
+            <Step2Column v-for="column in columns" :data="column" :models="models" :modelName="modelName" @removeColumn="onRemoveColumn" @refreshTables="onRefreshTables"/>
         </div>
         <button v-if="!disableAdd" class="inline-flex w-full justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700" type="button"
                 @click="onAddColumn">

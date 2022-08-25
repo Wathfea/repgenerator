@@ -11,6 +11,7 @@ import factoryImgUrl from '../assets/factory.gif'
 
 // Wizzard
 const stepNumber = ref(1);
+
 const steps = [
     {
         title: 'Name'
@@ -25,6 +26,7 @@ const steps = [
         title: 'Result'
     }
 ];
+
 const step1Options = ref({
     'pivot': {
         label: 'Pivot',
@@ -40,11 +42,18 @@ const step1Options = ref({
         label: 'Soft Delete',
         enabled: false,
         text: 'Is the model use soft delete?'
+    },
+    'timestamps': {
+        label: 'Timestamps',
+        enabled: false,
+        text: 'Is the model use timestamps?'
     }
 });
+
 const scrollToTop = () => {
     document.getElementById('scroll-anchor').scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"});
 }
+
 const resetWizzard = () => {
     stepNumber.value = 1;
     modelName.value = '';
@@ -54,8 +63,11 @@ const resetWizzard = () => {
         step1Options[index].enabled = false;
     }
 }
+
 const messages = ref([]);
+
 const generating = ref(false);
+
 const generate = () => {
     generating.value = true;
     let payload = {
@@ -75,6 +87,7 @@ const generate = () => {
         generating.value = false;
     })
 }
+
 const onNextStep = (e) => {
     e.preventDefault();
     if (stepNumber.value === steps.length) {
@@ -86,26 +99,33 @@ const onNextStep = (e) => {
         ++stepNumber.value;
     }
 }
+
 const onPreviousStep = (e) => {
     e.preventDefault();
     stepNumber.value = stepNumber.value - 1;
 }
+
 const isPreviousDisabled = () => {
     return stepNumber.value <= 1;
 }
+
 const isOverview = () => {
     return stepNumber.value === steps.length - 1;
 }
+
 const isLastStep = () => {
     return stepNumber.value === steps.length;
 }
 
 // 1. Name
 const modelName = ref('');
+
 const icon = ref('');
+
 const onNameChanged = (name) => {
     modelName.value = name;
 }
+
 const onIconChanged = (setIcon) => {
     icon.value = setIcon;
 }
@@ -136,58 +156,11 @@ const getDefaultColumns = () => {
             'is_picture': false,
             'is_hashed': false,
             'is_crypted': false,
-        },
-        {
-            'name': 'created_at',
-            'type': 'timestamp',
-            'length': '',
-            'precision': '',
-            'scale': '',
-            'default': '',
-            'auto_increment': false,
-            'nullable': false,
-            'reference': '',
-            'foreign': '',
-            'cascade': '',
-            'searchable': '',
-            'values': '',
-            'comment': '',
-            'unsigned': false,
-            'index': [],
-            'show_on_table': false,
-            'uploads_files_path': '',
-            'is_file': false,
-            'is_picture': false,
-            'is_hashed': false,
-            'is_crypted': false,
-        },
-        {
-            'name': 'updated_at',
-            'type': 'timestamp',
-            'length': '',
-            'precision': '',
-            'scale': '',
-            'default': '',
-            'auto_increment': false,
-            'nullable': false,
-            'reference': '',
-            'foreign': '',
-            'cascade': '',
-            'searchable': '',
-            'values': '',
-            'comment': '',
-            'unsigned': false,
-            'index': [],
-            'show_on_table': false,
-            'uploads_files_path': '',
-            'is_file': false,
-            'is_picture': false,
-            'is_hashed': false,
-            'is_crypted': false,
         }
     ]
 }
 const columns = ref(getDefaultColumns());
+
 const onAddColumn = () => {
     columns.value.push({
         'name': '',
@@ -222,11 +195,27 @@ const onRemoveColumn = (data) => {
         }
     }
 }
+
+const onRefreshTables = () => {
+    getTables()
+}
+
+const onSelectOption = (data) => {
+    if(data.label === "Pivot") {
+
+    }
+}
+
 // 2. Models
 const models = ref([]);
-axios.get(import.meta.env.VITE_API_URL + '/repgenerator/tables').then((response) => {
-    models.value = response.data;
-})
+
+const getTables = () => {
+    axios.get(import.meta.env.VITE_API_URL + '/repgenerator/tables').then((response) => {
+        models.value = response.data;
+    })
+}
+
+getTables()
 </script>
 
 <template>
@@ -242,10 +231,10 @@ axios.get(import.meta.env.VITE_API_URL + '/repgenerator/tables').then((response)
         </nav>
         <div v-if="stepNumber === 1 || isOverview()">
             <Step1 :icon="icon" :modelName="modelName" @iconChanged="onIconChanged" @nameChanged="onNameChanged"/>
-            <Options :options="step1Options"/>
+            <Options :options="step1Options" @selectOption="onSelectOption"/>
         </div>
         <Step2 v-if="stepNumber === 2 || isOverview()" :columns="columns" :disableAdd="isOverview()" :models="models" :modelName="modelName"
-               @addColumn="onAddColumn" @removeColumn="onRemoveColumn"/>
+               @addColumn="onAddColumn" @removeColumn="onRemoveColumn" @refreshTables="onRefreshTables"/>
         <Result v-if="isLastStep()" :messages="messages"/>
 
         <div v-if="!isLastStep()" class="pt-5 grid grid-cols-12 gap-4">

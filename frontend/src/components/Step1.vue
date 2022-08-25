@@ -1,5 +1,5 @@
 <script setup>
-import {defineEmits, ref} from 'vue'
+import {defineEmits, ref, computed} from 'vue'
 
 const emit = defineEmits(['nameChanged', 'iconChanged'])
 const props = defineProps({
@@ -16,6 +16,16 @@ const props = defineProps({
 })
 let name = ref(props.modelName);
 let icon = ref(props.icon);
+
+const ucfirstName = computed({
+    get() {
+        return name.value;
+    },
+    set(ucName) {
+        if(ucName.length < 1) {name.value = ''; return}
+        name.value = ucName.replace(/^./, ucName[0].toUpperCase());
+    }
+})
 </script>
 
 <template>
@@ -26,7 +36,7 @@ let icon = ref(props.icon);
                     Model Name (Singular - Ex. Dog )
                 </label>
                 <div class="mt-1">
-                    <input id="model-name" v-model="name" class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md" required type="text" @change="emit('nameChanged',name)">
+                    <input id="model-name" v-focus v-model="ucfirstName" class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md" required type="text" @change="emit('nameChanged',name)">
                 </div>
                 <label class="block text-sm font-medium text-gray-700 mt-1" for="model-name">
                     Hero icon <a target="_blank" href="https://heroicons.com/">https://heroicons.com/</a>
