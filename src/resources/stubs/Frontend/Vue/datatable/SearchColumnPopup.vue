@@ -29,6 +29,7 @@
                     <Multiselect
                         v-model="search"
                         mode="tags"
+                        :searchable="true"
                         v-if="data.valuesGetter"
                         :options="data.values"
                         :loading="data.valuesLoading"
@@ -123,5 +124,13 @@ const getLocalDate = (string) => {
 }
 .dp__select:hover {
   color:rgb(59 150 142);
+}
+.multiselect-tags-search-wrapper, .multiselect-tags-search {
+  outline:none !Important;
+  border:none !Important;
+  box-shadow: none !important;
+}
+.column-multiselect{
+  border-radius: 0 !Important;
 }
 </style>

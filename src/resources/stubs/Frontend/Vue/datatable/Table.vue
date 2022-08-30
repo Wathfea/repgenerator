@@ -3,7 +3,7 @@
     <div class="flex flex-col">
       <div class="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
         <div class="mb-4 flex justify-end">
-          <NuxtLink :to="`${route}/create`">
+          <NuxtLink :to="`/${route}/create`">
             <Button>Új {{ modelReadableName }}</Button>
           </NuxtLink>
         </div>
@@ -72,10 +72,10 @@
                   </slot>
                 </td>
                 <td class="flex justify-end relative whitespace-nowrap py-4 px-3 text-sm font-medium sm:pr-6 lg:pr-8">
-                  <NuxtLink :to="`/users/${model.id}`" class="text-vagheggi-600 hover:text-vagheggi-900">
+                  <NuxtLink :to="`/${route}/${model.id}`" class="text-vagheggi-600 hover:text-vagheggi-900">
                     <PencilIcon class="h-6 w-6" aria-hidden="true" />
                   </NuxtLink>
-                  <NuxtLink @click="deleteModel(model.id)" class="text-vagheggi-600 hover:text-vagheggi-900 ml-2">
+                  <NuxtLink @click="deleteModel(model.id)" class="text-vagheggi-600 hover:text-vagheggi-900 ml-2 cursor-pointer">
                     <TrashIcon class="h-6 w-6" aria-hidden="true" />
                   </NuxtLink>
                 </td>
@@ -87,11 +87,11 @@
         <nav class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6" aria-label="Pagination">
           <div class="hidden sm:block">
             <p class="text-sm text-gray-700">
-              <span class="font-medium">{{ meta.from }}</span>
+              <span class="font-medium">{{ Math.min(0,meta.from) }}</span>
               {{ ' ' }}
               és
               {{ ' ' }}
-              <span class="font-medium">{{ meta.to  }}</span>
+              <span class="font-medium">{{ Math.min(meta.to)  }}</span>
               {{ ' ' }}
               közötti sorok
               {{ ' ' }}
@@ -155,8 +155,15 @@ const props = defineProps({
     type: String,
     required: true
   },
+  fixedFilters: {
+    required: false,
+    type: Array,
+    default : () => {
+      return []
+    }
+  }
 });
-const { models, meta, getModels, searchModel, destroyModel, getBaseParamsCopy } = useModel(props.route)
+const { models, meta, getModels, searchModel, destroyModel, getBaseParamsCopy } = useModel(props.route, true, 'api/v1/', false, false, props.fixedFilters);
 
 
 const columns = ref({});
@@ -311,7 +318,7 @@ const deleteModel = async (id) => {
   }
 
   await destroyModel(id)
-  await getModels(currentRoute.query.page ?? 1, currentRoute.query.per_page ?? perPage, currentRoute.query)
+  await getModels(1, perPage, currentRoute.query)
 }
 
 const getColumnName = (key) => {
