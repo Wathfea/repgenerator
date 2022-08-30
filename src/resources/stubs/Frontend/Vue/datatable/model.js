@@ -43,7 +43,7 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/') {
         if ( isSearching ) {
             isSearching.value = true;
         }
-        const currentRoute = useRoute()
+        const currentRoute = useRoute();
         if ( currentRoute.query !== setParams && setQuery ) {
             await router.push({path: currentRoute.path, query: setParams});
         }
