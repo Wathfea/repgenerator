@@ -3,25 +3,47 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
-
-- Routes mappa létrehozása a layer alá, oda beírni a routot és a serviceproviderben $this->loadRoutesFrom -al betölteni
-- Provider betöltés kialakítása pl egy config fileba
-- Generálási requestet ne a db-be tároljuk hanem egy config fileba a réteghez
-- Modelben a generált relationbe beírni a kulcsot is ami alapján a kapcsolat van
+- Default gate és policy
 - public vagy nem public file választó
 - kép típusnál képeket engedjen csak
 - file típusnál fileokat csak
-- szóközös megadott réteg névben pl (Person Contact) file kapcsolatok neve hibásan (szóközzel) kerül be a modellekbe. 
-- A resourceba a relation név aláhúzással  (_) kerül be
 - Relation párok beírása
 - CSV import
 - Factory and seeder generation for CRUD
 - Composite index generation
 - How it works section
-- CRUD UI in other Frontend frameworks
-- translation a mezőkhöz
+- Hero icon választó listából, ne kézi beírás. Esetleg más icon csomag? FontAwsome vagy Material?
+- Mezősorrend változtatása drag & drop-al
 
 ## [Unreleased]
+
+
+## [1.4.8] - 2022-08-30
+## Added
+- New theme added for the wizzard
+- Added new config.php for each Domain for store the generation data there instead of DB
+- Added exists rule to the request validation based on the relations
+- When you choose any unsigned type you no longer need to check the unsigned checkbox
+- Model name auto upper case for the first letter when you type
+- Added a reload button for reload the database for the references selection
+- Added timestamp as an option at the begining of the generation
+- Added model name check
+- Added auto provider 
+- File store auto detect file count and change directory level based on that
+- Wizzard moved under new route for avoid route collision
+- In the model relations now the generator adds the local and owner keys as well
+
+## Fixed
+- In migrations the id field no longer add the 'id' name to the method as param
+- Hashed, Crypted, Picture and File selectors are now radio buttons
+- Now request validation is working properly
+- Model names which contained space generated a wrong file relation. 
+- File type request validation removed type check
+
+## Removed
+- Unused commands
+- RepgeneratorDomain model
+- Repgenerator Domains table base migration
 
 ## [1.4.7] - 2022-08-10
 ## Added

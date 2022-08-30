@@ -1,0 +1,16 @@
+<?php
+
+use App\Domain\{{modelName}}\Controllers\Api\v1\{{modelName}}ApiController;
+use Illuminate\Support\Facades\Route;
+
+Route::prefix('api/v1')->namespace($this->namespace)->middleware(['api'])->group(function () {
+    Route::resource('{{modelNamePluralLowerCase}}', {{modelName}}ApiController::class, [
+        'names' => [
+            'index' => 'api.{{modelNamePluralLowerCase}}.index',
+            'store' => 'api.{{modelNamePluralLowerCase}}.store',
+            'update' => 'api.{{modelNamePluralLowerCase}}.update',
+            'show' => 'api.{{modelNamePluralLowerCase}}.show',
+            'destroy' => 'api.{{modelNamePluralLowerCase}}.destroy',
+        ],
+    ])->only(['index', 'store', 'update', 'show', 'destroy']);
+});

@@ -1,7 +1,8 @@
 <script setup>
 import {defineEmits} from 'vue'
 
-const emit = defineEmits(['removeColumn'])
+const emit = defineEmits(['removeColumn', 'refreshTables'])
+
 const columnTypes = [
     'id',
     'integer',
@@ -68,6 +69,7 @@ const columnTypes = [
     'uuid',
     'year'
 ];
+
 const props = defineProps({
     modelName: {
         type: String,
@@ -95,16 +97,28 @@ const props = defineProps({
         }
     }
 })
+
 const isScaleSettable = () => {
     return ['decimal', 'double', 'float', 'unsignedDecimal'].indexOf(props.data.type) >= 0;
 }
+
+const isUnsignedSettable = () => {
+    return ['unsignedBigInteger', 'unsignedDecimal', 'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger', 'unsignedTinyInteger'].indexOf(props.data.type) <= 0;
+}
+
 const isPrecisionSettable = () => {
     return ['dateTimeTz', 'dateTime', 'decimal', 'double', 'float', 'softDeletesTz', 'softDeletes', 'time', 'timeTz', 'timestamp', 'timestampTz', 'timestamps', 'timestampsTz', 'unsignedDecimal'].indexOf(props.data.type) >= 0;
 }
+
 const onRemoveColumn = () => {
     emit('removeColumn', props.data);
 }
-const onForeignChosen = (e) => {
+
+const onRefreshTables = () => {
+    emit('refreshTables');
+}
+
+const onForeignChosen = () => {
     let setType = null;
     let foreignType = props.data.reference.columns[props.data.foreign];
     switch (foreignType) {
@@ -128,6 +142,7 @@ const onForeignChosen = (e) => {
     }
     props.data.type = setType;
 }
+
 const onReferenceChanged = () => {
     props.data.foreign = null;
 }
@@ -137,7 +152,7 @@ const onReferenceChanged = () => {
         <div class="grid grid-cols-12 gap-y-6 gap-x-4 sm:grid-cols-12">
             <div class="sm:col-span-2">
                 <div class="mt-1">
-                    <input v-model="data.name" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Field name" required="required"
+                    <input v-focus v-model="data.name" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Field name" required="required"
                            type="text">
                 </div>
             </div>
@@ -178,11 +193,10 @@ const onReferenceChanged = () => {
                 <div class="mt-3">
                     <div class="relative flex items-start">
                         <div class="flex items-center h-5">
-                            <input v-model="data.nullable" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                                   type="checkbox">
+                            <input v-model="data.nullable" id="nullable" aria-describedby="nullable-description" name="nullable" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" />
                         </div>
                         <div class="ml-3 text-sm">
-                            <label class="font-medium text-gray-700">NULL</label>
+                            <label for="nullable" class="font-medium text-gray-700">NULL</label>
                         </div>
                     </div>
                 </div>
@@ -206,11 +220,10 @@ const onReferenceChanged = () => {
                 <div class="mt-3">
                     <div class="relative flex items-start">
                         <div class="flex items-center h-5">
-                            <input v-model="data.auto_increment" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                                   type="checkbox">
+                            <input v-model="data.auto_increment" id="aic" aria-describedby="aic-description" name="nullable" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" />
                         </div>
                         <div class="ml-3 text-sm">
-                            <label class="font-medium text-gray-700">AIC</label>
+                            <label for="aic" class="font-medium text-gray-700">AIC</label>
                         </div>
                     </div>
                 </div>
@@ -219,30 +232,29 @@ const onReferenceChanged = () => {
                 <div class="mt-3">
                     <div class="relative flex items-start">
                         <div class="flex items-center h-5">
-                            <input class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                                   type="checkbox">
+                            <input v-model="data.unsigned" :disabled="!isUnsignedSettable()" id="unsigned" aria-describedby="unsigned-description" name="nullable" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" />
                         </div>
                         <div class="ml-3 text-sm">
-                            <label class="font-medium text-gray-700">Unsigned</label>
+                            <label for="unsigned" class="font-medium text-gray-700">Unsigned</label>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="mt-3 grid grid-cols-12 gap-y-6 gap-x-4 sm:grid-cols-12">
-            <div class="sm:col-span-5">
+            <div class="sm:col-span-4">
                 <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-2 mt-1">
+                    <div class="col-span-3 mt-1">
                         <label class="text-gray-700 ml-2">References</label>
                     </div>
-                    <div class="col-span-5">
+                    <div class="col-span-4">
                         <select v-model="data.reference" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
                                 @change="onReferenceChanged">
                             <option></option>
                             <option v-for="model in models" :value="model">{{ model.name }}</option>
                         </select>
                     </div>
-                    <div class="col-span-5">
+                    <div class="col-span-4">
                         <select v-model="data.foreign" :disabled="!data.reference" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
                                 @change="onForeignChosen">
                             <option></option>
@@ -252,14 +264,19 @@ const onReferenceChanged = () => {
                 </div>
             </div>
             <div class="sm:col-span-1">
+                <button class="uppercase p-3 flex items-center bg-grey-500 text-white max-w-max shadow-sm hover:shadow-lg rounded-full w-10 h-10" type="button"
+                        @click="onRefreshTables">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M13.5 2c-5.621 0-10.211 4.443-10.475 10h-3.025l5 6.625 5-6.625h-2.975c.257-3.351 3.06-6 6.475-6 3.584 0 6.5 2.916 6.5 6.5s-2.916 6.5-6.5 6.5c-1.863 0-3.542-.793-4.728-2.053l-2.427 3.216c1.877 1.754 4.389 2.837 7.155 2.837 5.79 0 10.5-4.71 10.5-10.5s-4.71-10.5-10.5-10.5z"/></svg>
+                </button>
+            </div>
+            <div class="sm:col-span-1">
                 <div class="mt-3">
                     <div class="relative flex items-start">
                         <div class="flex items-center h-5">
-                            <input v-model="data.cascade" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                                   type="checkbox">
+                            <input v-model="data.cascade" id="cascade" aria-describedby="cascade-description" name="nullable" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" />
                         </div>
                         <div class="ml-3 text-sm">
-                            <label class="font-medium text-gray-700">Cascade</label>
+                            <label for="cascade" class="font-medium text-gray-700">Cascade</label>
                         </div>
                     </div>
                 </div>
@@ -268,11 +285,10 @@ const onReferenceChanged = () => {
                 <div class="mt-3">
                     <div class="relative flex items-start">
                         <div class="flex items-center h-5">
-                            <input v-model="data.searchable" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                                   type="checkbox">
+                            <input v-model="data.searchable" id="searchable" aria-describedby="searchable-description" name="nullable" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" />
                         </div>
                         <div class="ml-3 text-sm">
-                            <label class="font-medium text-gray-700">Searchable</label>
+                            <label for="searchable" class="font-medium text-gray-700">Searchable</label>
                         </div>
                     </div>
                 </div>
@@ -308,18 +324,17 @@ const onReferenceChanged = () => {
                 <div class="mt-3">
                     <div class="relative flex items-start">
                         <div class="flex items-center h-5">
-                            <input v-model="data.show_on_table" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                                   type="checkbox">
+                            <input v-model="data.show_on_table" id="show_on_table" aria-describedby="show_on_table-description" name="nullable" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" />
                         </div>
                         <div class="ml-3 text-sm">
-                            <label class="font-medium text-gray-700">Add to CRUD</label>
+                            <label for="show_on_table" class="font-medium text-gray-700">Add to CRUD</label>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="mt-3 grid grid-cols-12 gap-y-6 gap-x-4 sm:grid-cols-12 mb-3">
-            <div class="sm:col-span-6">
+            <div class="sm:col-span-8">
                 <div>
                     <div class="mt-1 flex rounded-md shadow-sm">
                         <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm"> storage/app/public/files/{{ modelName }}file </span>
@@ -327,59 +342,58 @@ const onReferenceChanged = () => {
                     </div>
                 </div>
             </div>
-            <div class="sm:col-span-1">
+        </div>
+
+
+        <div class="mt-3 grid grid-cols-12 gap-y-6 gap-x-4 sm:grid-cols-12 mb-3">
+            <div class="sm:col-span-6">
                 <div class="mt-3">
-                    <div class="relative flex items-start">
-                        <div class="flex items-center h-5">
-                            <input v-model="data.is_file" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                                   type="checkbox">
+                    <label class="text-base font-medium text-gray-900">Choose file type</label>
+                    <p class="text-sm leading-5 text-gray-500">What king od items you will upload?</p>
+                    <fieldset class="mt-4">
+                        <legend class="sr-only">Choose file type</legend>
+                        <div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">
+                            <div class="flex items-center">
+                                <input v-model="data.is_file" id="fileType" name="fileTypeSelecter" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" />
+                                <label for="fileType" class="ml-3 block text-sm font-medium text-gray-700">
+                                    File
+                                </label>
+                            </div>
+                            <div class="flex items-center">
+                                <input v-model="data.is_picture" id="pictureType" name="fileTypeSelecter" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" />
+                                <label for="pictureType" class="ml-3 block text-sm font-medium text-gray-700">
+                                    Picture
+                                </label>
+                            </div>
                         </div>
-                        <div class="ml-3 text-sm">
-                            <label class="font-medium text-gray-700">Is file type?</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="sm:col-span-2">
-                <div class="mt-3">
-                    <div class="relative flex items-start">
-                        <div class="flex items-center h-5">
-                            <input v-model="data.is_picture" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                                   type="checkbox">
-                        </div>
-                        <div class="ml-3 text-sm">
-                            <label class="font-medium text-gray-700">Is picture type?</label>
-                        </div>
-                    </div>
+                    </fieldset>
                 </div>
             </div>
         </div>
 
+
         <div class="mt-3 grid grid-cols-12 gap-y-6 gap-x-4 sm:grid-cols-12 mb-3">
-            <div class="sm:col-span-2">
+            <div class="sm:col-span-6">
                 <div class="mt-3">
-                    <div class="relative flex items-start">
-                        <div class="flex items-center h-5">
-                            <input v-model="data.is_hashed" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                                   type="checkbox">
+                    <label class="text-base font-medium text-gray-900">Choose encryption type</label>
+                    <p class="text-sm leading-5 text-gray-500">If the field is encrypted, how? </p>
+                    <fieldset class="mt-4">
+                        <legend class="sr-only">Choose encryption type</legend>
+                        <div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">
+                            <div class="flex items-center">
+                                <input v-model="data.is_hashed" id="hashType" name="cryptTypeSelecter" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" />
+                                <label for="hashType" class="ml-3 block text-sm font-medium text-gray-700">
+                                    Hashed
+                                </label>
+                            </div>
+                            <div class="flex items-center">
+                                <input v-model="data.is_crypted" id="cryptType" name="cryptTypeSelecter" type="radio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" />
+                                <label for="cryptType" class="ml-3 block text-sm font-medium text-gray-700">
+                                    Crypted
+                                </label>
+                            </div>
                         </div>
-                        <div class="ml-3 text-sm">
-                            <label class="font-medium text-gray-700">Is field be hashed?</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="sm:col-span-2">
-                <div class="mt-3">
-                    <div class="relative flex items-start">
-                        <div class="flex items-center h-5">
-                            <input v-model="data.is_crypted" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                                   type="checkbox">
-                        </div>
-                        <div class="ml-3 text-sm">
-                            <label class="font-medium text-gray-700">Is field be crypted?</label>
-                        </div>
-                    </div>
+                    </fieldset>
                 </div>
             </div>
         </div>

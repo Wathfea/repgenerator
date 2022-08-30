@@ -4,5 +4,5 @@
 * @return {{relationType}}
 */
 public function {{relationName}}(): {{relationType}} {
-    return $this->{{relationMethodCall}}({{relatedModel}}::class);
+    return $this->{{relationMethodCall}}({{relatedModel}}::class, '{{foreignKey}}', '{{ownerKey}}');
 }

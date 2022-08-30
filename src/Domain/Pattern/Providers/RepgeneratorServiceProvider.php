@@ -2,6 +2,7 @@
 
 namespace Pentacom\Repgenerator\Domain\Pattern\Providers;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use Pentacom\Repgenerator\Console\MigrationGenerator;
 use Pentacom\Repgenerator\Console\PatternGenerator;
@@ -28,18 +29,8 @@ class RepgeneratorServiceProvider extends ServiceProvider
                 __DIR__.'/../../../../config/config.php' => config_path('repgenerator.php'),
             ], 'config');
 
-            // Export the migration
-            if (! class_exists('CreateRepgeneratorDomainsTable')) {
-                $this->publishes([
-                    __DIR__ . '/../../../../database/migrations/create_repgenerator_domains_table.stub' => database_path('migrations/2014_10_13_000000_create_repgenerator_domains_table.php'),
-                    // you can add any number of migrations here
-                ], 'migrations');
-            }
-
             // Registering package commands.
-            $this->commands([PatternGenerator::class]);
             $this->commands([PatternGeneratorInit::class]);
-            $this->commands([MigrationGenerator::class]);
         }
 
 
@@ -84,5 +75,13 @@ class RepgeneratorServiceProvider extends ServiceProvider
     {
         // Automatically apply the package configuration
         $this->mergeConfigFrom(__DIR__.'/../../../../config/config.php', 'repgenerator');
+
+
+        $directories = array_filter(glob(app_path('Domain').'/*'), 'is_dir');
+
+        foreach ($directories as $directory) {
+           $config = include($directory."/config.php");
+           $this->app->register($config['provider']);
+        }
     }
 }

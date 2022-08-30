@@ -15,6 +15,11 @@ trait UploadsFiles
 
     private array $filesLocation = [];
 
+    private function getLevelDir($id)
+    {
+        return substr(substr('000000000'.$id, -10), 0, 7);
+    }
+
     /**
      * @param  Model  $model
      * @param  string  $zipName
@@ -76,17 +81,19 @@ trait UploadsFiles
      */
     public function getDocumentPath(Model $model, string $field, Model $file): string
     {
-        return $this->getDocumentDirectory($model, $field).'/'.$file->getAttribute('id');
+        return $this->getDocumentDirectory($model, $field, $file->getAttribute('id')).'/'.$file->getAttribute('id');
     }
 
     /**
      * @param  Model  $model
      * @param  string  $field
+     * @param  int  $fileId
      * @return string
      */
-    public function getDocumentDirectory(Model $model, string $field): string
+    public function getDocumentDirectory(Model $model, string $field, int $fileId): string
     {
-        return 'public/files/'.$this->getFilesLocation($field).'/'.$model->getAttribute('id');
+        $directoryLevel = $this->getLevelDir($fileId);
+        return 'public/files/'.$this->getFilesLocation($field).'/'.$directoryLevel.'/'.$model->getAttribute('id');
     }
 
     /**
@@ -97,17 +104,20 @@ trait UploadsFiles
      */
     public function getDocumentStoragePath(Model $model, string $field, Model $file): string
     {
-        return $this->getDocumentStorageDirectory($model, $field).'/'.$file->getAttribute('id');
+        return $this->getDocumentStorageDirectory($model, $field, $file).'/'.$file->getAttribute('id');
     }
 
     /**
      * @param  Model  $model
      * @param  string  $field
+     * @param  Model  $file
      * @return string
      */
-    public function getDocumentStorageDirectory(Model $model, string $field): string
+    public function getDocumentStorageDirectory(Model $model, string $field, Model $file): string
     {
-        return 'storage/files/'.$this->getFilesLocation($field).'/'.$model->getAttribute('id');
+        $directoryLevel = $this->getLevelDir($file->getAttribute('id'));
+
+        return 'storage/files/'.$this->getFilesLocation($field).'/'.$directoryLevel.'/'.$model->getAttribute('id');
     }
 
     /**
@@ -210,7 +220,7 @@ trait UploadsFiles
                 ];
 
                 if ($createdFileModel =  $model->$relationshipName()->create($data) ) {
-                    $file->storeAs($this->getDocumentDirectory($model, $field), $createdFileModel->id);
+                    $file->storeAs($this->getDocumentDirectory($model, $field, $createdFileModel->id), $createdFileModel->id);
                 }
             }
         }

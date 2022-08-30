@@ -1,37 +1,40 @@
 <template>
   <div class="px-4 sm:px-6 lg:px-8">
     <div class="flex flex-col">
-      <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 align-middle">
-          <div class="mb-4 flex justify-end">
-            <NuxtLink to="users/create">
-              <Button>Új felhasználó</Button>
-            </NuxtLink>
-          </div>
-          <div class="overflow-hidden shadow-sm bg-gray-50 rounded">
-              <div class="p-3">
-                <label for="email" class="block text-sm font-medium text-gray-700">Keresés</label>
-                <div class="mt-1 flex rounded-md shadow-sm">
-                  <div class="relative flex items-stretch flex-grow focus-within:z-10">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <SearchIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
-                    </div>
-                    <input type="text" v-model="searchInput" v-on:keyup="onSearchAll" class="block w-full rounded-none rounded-l-md pl-10 sm:text-sm border-gray-300 focus:border-vagheggi-800 focus:shadow-vagheggi-800 focus:ring-0" placeholder="Keresés az összes oszlopban" />
-                  </div>
-                  <Button :disabled="!searchInput.length" @click="onSearchAllCleared" type="button" class="-ml-px relative inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-r-md text-gray-700 bg-gray-50 hover:bg-gray-100">
-                    <XIcon :class="`h-5 w-5 text-${ searchInput.length ? 'vagheggi-800' : 'gray-400'}`" aria-hidden="true" />
-                  </Button>
+      <div class="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
+        <div class="mb-4 flex justify-end">
+          <NuxtLink :to="`${route}/create`">
+            <Button>Új {{ modelReadableName }}</Button>
+          </NuxtLink>
+        </div>
+        <div class="shadow-sm bg-gray-50 rounded">
+          <div class="p-3">
+            <label for="email" class="block text-sm font-medium text-gray-700">Keresés</label>
+            <div class="mt-1 flex rounded-md shadow-sm">
+              <div class="relative flex items-stretch flex-grow focus-within:z-10">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <SearchIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
                 </div>
-                <div class="mt-3">
-                  <SearchBadge class="mr-2" v-for="(search,key) in searchColumns" :name="getColumnName(key)" :column="key" :search="search" :data="columns[key]" @onRemove="onRemoveSearch" @openSearch="onOpenSearch"/>
-                </div>
+                <input type="text" v-model="searchInput" v-on:keyup="onSearchAll" class="block w-full rounded-none rounded-l-md pl-10 sm:text-sm border-gray-300 focus:border-vagheggi-800 focus:shadow-vagheggi-800 focus:ring-0" placeholder="Keresés az összes oszlopban" />
               </div>
+              <Button :disabled="!searchInput.length" @click="onSearchAllCleared" type="button" class="-ml-px relative inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-r-md text-gray-700 bg-gray-50 hover:bg-gray-100">
+                <XIcon :class="`h-5 w-5 text-${ searchInput.length ? 'vagheggi-800' : 'gray-400'}`" aria-hidden="true" />
+              </Button>
             </div>
-            <table class="min-w-full divide-y divide-gray-300">
+            <div class="mt-3">
+              <SearchBadge class="mr-2" v-for="(search,key) in searchColumns" :name="getColumnName(key)" :column="key" :search="search" :data="columns[key]" @onRemove="onRemoveSearch" @openSearch="onOpenSearch"/>
+            </div>
+          </div>
+        </div>
+        <div class="overflow-x-scroll overflow-y-hidden">
+          <div class="inline-block min-w-full py-2 align-middle">
+            <table class="min-w-full divide-y divide-gray-300 w-max overflow-hidden">
               <thead class="bg-gray-50">
               <tr>
                 <th :style="{ width: column.data.width ? column.data.width : 'auto' }" v-for="(column,key) in columns" :key="key" scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
 
+                  <SearchColumnPopup v-if="column.isSearchOpen" :data="column.data" :set-search="searchColumns[key] ? searchColumns[key].value : ''"
+                                     :name="getColumnName(key)" @close="onCloseSearch" :column="key" @search="onSearchChanged"/>
                   <slot
                       :name="`header(${key})`"
                       :value="column.data"
@@ -40,14 +43,11 @@
                     <ColumnHeader
                         :data="column.data"
                         :search="searchColumns[key] ? searchColumns[key].value : ''"
-                        :set-search-open="column.isSearchOpen"
                         :is-searching="isSearching"
                         :sort-direction="column.sortDirection"
                         :column="key"
-                        @changeSort="onSortChanged"
-                        @sortCleared="onSortCleared"
-                        @changeSearch="onSearchChanged"
-                        @closeSearch="onCloseSearch"
+                        @toggleSort="onSortChanged"
+                        @clearSortAndSearch="onSearchAndSortCleared"
                         @openSearch="onOpenSearch"
                     />
                   </slot>
@@ -71,7 +71,7 @@
                     {{ getCellData(column, key, model) }}
                   </slot>
                 </td>
-                <td class="flex justify-end relative whitespace-nowrap py-4 pl-3 text-sm font-medium sm:pr-6 lg:pr-8">
+                <td class="flex justify-end relative whitespace-nowrap py-4 px-3 text-sm font-medium sm:pr-6 lg:pr-8">
                   <NuxtLink :to="`/users/${model.id}`" class="text-vagheggi-600 hover:text-vagheggi-900">
                     <PencilIcon class="h-6 w-6" aria-hidden="true" />
                   </NuxtLink>
@@ -82,37 +82,45 @@
               </tr>
               </tbody>
             </table>
-            <nav class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6" aria-label="Pagination">
-              <div class="hidden sm:block">
-                <p class="text-sm text-gray-700">
-                  Showing
-                  {{ ' ' }}
-                  <span class="font-medium">{{ meta.from }}</span>
-                  {{ ' ' }}
-                  to
-                  {{ ' ' }}
-                  <span class="font-medium">{{ meta.to  }}</span>
-                  {{ ' ' }}
-                  of
-                  {{ ' ' }}
-                  <span class="font-medium">{{ meta.total }}</span>
-                  {{ ' ' }}
-                  results
-                </p>
-              </div>
-              <div class="flex-1 flex justify-between sm:justify-end">
-                <Button :busy="paginatingLeft && !isPreviousPageDisabled" :disabled="paginatingLeft || isPreviousPageDisabled" @click="prevPage">
-                  <ArrowCircleLeftIcon class="m-auto h-5 w-5" aria-hidden="true" />
-                </Button>
-                <Button :busy="paginatingRight && !isNextPageDisabled" :disabled="paginatingRight || isNextPageDisabled" @click="nextPage" class="ml-3">
-                  <ArrowCircleRightIcon class="h-5 w-5 m-auto" aria-hidden="true" />
-                </Button>
-              </div>
-            </nav>
           </div>
         </div>
+        <nav class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6" aria-label="Pagination">
+          <div class="hidden sm:block">
+            <p class="text-sm text-gray-700">
+              <span class="font-medium">{{ meta.from }}</span>
+              {{ ' ' }}
+              és
+              {{ ' ' }}
+              <span class="font-medium">{{ meta.to  }}</span>
+              {{ ' ' }}
+              közötti sorok
+              {{ ' ' }}
+              <span class="font-medium">{{ meta.total }}</span>
+              {{ ' ' }}
+              találatból
+            </p>
+          </div>
+          <div class="flex-1 flex justify-between sm:justify-end">
+            <Button :busy="paginatingLeft && !isPreviousPageDisabled" :disabled="paginatingLeft || isPreviousPageDisabled" @click="prevPage">
+              <ArrowCircleLeftIcon class="m-auto h-5 w-5" aria-hidden="true" />
+            </Button>
+            <div class="sm:hidden block">
+              <p class="text-sm text-gray-700 pt-3">
+                <span class="font-medium">{{ meta.from }}</span>
+                {{ '-' }}
+                <span class="font-medium">{{ meta.to  }}</span>
+                {{ '/' }}
+                <span class="font-medium">{{ meta.total }}</span>
+              </p>
+            </div>
+            <Button :busy="paginatingRight && !isNextPageDisabled" :disabled="paginatingRight || isNextPageDisabled" @click="nextPage" class="ml-3">
+              <ArrowCircleRightIcon class="h-5 w-5 m-auto" aria-hidden="true" />
+            </Button>
+          </div>
+        </nav>
       </div>
     </div>
+  </div>
 </template>
 
 <script setup>
@@ -130,9 +138,15 @@ import ColumnHeader from "~/components/DataTable/ColumnHeader";
 import useModel from "~/components/model";
 import {useRoute} from "vue-router/dist/vue-router";
 import SearchBadge from "~/components/DataTable/SearchBadge";
+import SearchColumnPopup from "~/components/DataTable/SearchColumnPopup";
 
 const currentRoute = useRoute()
 const props = defineProps({
+  modelReadableName : {
+    type: String,
+    required: false,
+    default: 'bemenet'
+  },
   setColumns: {
     type: Object,
     required: true
@@ -172,10 +186,12 @@ const searchParams = ref({});
 for ( let index in props.setColumns ) {
   let data = props.setColumns[index];
   if ( data.valuesGetter ) {
-    data.valuesLoading = true;
-    const response = await data.valuesGetter();
-    data.values = response.data;
-    data.valuesLoading = false;
+    data.valuesLoading = ref(true);
+    data.values = ref([]);
+    data.valuesGetter().then((response) => {
+      data.values.value = response.data;
+      data.valuesLoading.value = false;
+    })
   }
   columns.value[index] = {
     data : data,
@@ -212,10 +228,10 @@ const nextPage = async () => {
   paginatingRight.value = false;
 }
 
-let isPreviousPageDisabled =  computed(()  => {
+const isPreviousPageDisabled =  computed(()  => {
   return meta.value.current_page <= 1;
 });
-let isNextPageDisabled = computed(() => {
+const isNextPageDisabled = computed(() => {
   return meta.value.current_page === meta.value.last_page;
 });
 
@@ -238,14 +254,19 @@ const onSortChanged = (column) => {
   searchParams.value.sort_dir = setSort;
   refreshSearch(false);
 }
-const onSortCleared = (column) => {
+const onSearchAndSortCleared = (column) => {
   columns.value[column].sortDirection = null;
   searchParams.value['sort_by'] = baseParams['sort_by'];
   searchParams.value['sort_dir'] = baseParams['sort_dir'];
   columns.value[baseParams['sort_by']].sortDirection = baseParams['sort_dir'];
-  refreshSearch(false);
+  onSearchChanged({
+    name: column,
+    value: ''
+  })
 }
 const onSearchChanged = (searchData) => {
+  let columnData = columns.value[searchData.name].data;
+  let searchOnColumn =  columnData.valuesGetter ? (columnData.column ? ('.' + columnData.column) : '') : '';
   if ( !searchData.value ) {
     delete searchColumns.value[searchData.name];
   } else {
@@ -253,7 +274,7 @@ const onSearchChanged = (searchData) => {
         !searchColumns.value[searchData.name].hasOwnProperty('value') ) {
       searchColumns.value[searchData.name] = {
         value : null,
-        column: searchData.column
+        column: searchOnColumn
       }
     }
     searchColumns.value[searchData.name].value = searchData.value;
@@ -270,7 +291,6 @@ const onSearchChanged = (searchData) => {
 const onCloseSearch = (column) => {
   columns.value[column].isSearchOpen = false;
 }
-
 const isSearching = ref(false);
 const refreshSearch = (isDelayed = true) => {
   searchModel(searchParams.value, perPage, isDelayed, isSearching)

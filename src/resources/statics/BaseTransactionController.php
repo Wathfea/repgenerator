@@ -5,6 +5,7 @@ namespace App\Abstraction\Controllers;
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -22,7 +23,7 @@ class BaseTransactionController extends Controller
      * @return Response|View|AnonymousResourceCollection
      * @throws Throwable
      */
-    public function callAction($method, $parameters): Response|View|AnonymousResourceCollection
+    public function callAction($method, $parameters): Response|View|AnonymousResourceCollection|JsonResource
     {
         if (config('testing.env') == 'pipeline') {
             return parent::callAction($method, $parameters);

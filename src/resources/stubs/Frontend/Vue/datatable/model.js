@@ -8,7 +8,6 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/') {
 
     const errors = ref('')
     const router = useRouter()
-    const currentRoute = useRoute()
     const baseParams  = {
         sort_by: 'id',
         sort_dir: 'asc',
@@ -44,6 +43,7 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/') {
         if ( isSearching ) {
             isSearching.value = true;
         }
+        const currentRoute = useRoute()
         if ( currentRoute.query !== setParams && setQuery ) {
             await router.push({path: currentRoute.path, query: setParams});
         }

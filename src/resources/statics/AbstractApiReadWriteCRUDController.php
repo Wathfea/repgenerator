@@ -10,6 +10,46 @@ use Illuminate\Support\Facades\Response;
 
 abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRUDController implements CRUDControllerInterface, ApiCRUDControllerReadWriteInterface, ApiCRUDControllerReadOnlyInterface
 {
+
+    protected string $storeRequest;
+    protected string $updateRequest;
+
+    /**
+     * @return string
+     */
+    public function getStoreRequest(): string
+    {
+        return $this->storeRequest;
+    }
+
+    /**
+     * @param string $storeRequest
+     * @return AbstractApiReadWriteCRUDController
+     */
+    public function setStoreRequest(string $storeRequest): AbstractApiReadWriteCRUDController
+    {
+        $this->storeRequest = $storeRequest;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUpdateRequest(): string
+    {
+        return $this->updateRequest;
+    }
+
+    /**
+     * @param string $updateRequest
+     * @return AbstractApiReadWriteCRUDController
+     */
+    public function setUpdateRequest(string $updateRequest): AbstractApiReadWriteCRUDController
+    {
+        $this->updateRequest = $updateRequest;
+        return $this;
+    }
+
     /**
      * @param  int  $id
      * @return JsonResponse
@@ -50,6 +90,10 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
      */
     public function store(Request $request): JsonResponse
     {
+        if ( !empty($this->storeRequest) ) {
+            $request->validate(app($this->storeRequest)->rules());
+        }
+
         try {
             $model = $this->getService()->getRepositoryService()->save($request->all());
             if ($model->exists) {
@@ -80,6 +124,9 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
      */
     public function update(Request $request, $id): JsonResponse
     {
+        if ( !empty($this->updateRequest) ) {
+            $request->validate(app($this->updateRequest)->rules());
+        }
         try {
             $modelUpdated = $this->getService()->getRepositoryService()->update($id, $request->all());
             return Response::json(
