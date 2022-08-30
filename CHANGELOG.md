@@ -42,6 +42,8 @@ All notable changes to `repgenerator` will be documented in this file
 
 ## Removed
 - Unused commands
+- RepgeneratorDomain model
+- Repgenerator Domains table base migration
 
 ## [1.4.7] - 2022-08-10
 ## Added
