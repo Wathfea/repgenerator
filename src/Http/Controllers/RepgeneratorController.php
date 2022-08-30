@@ -8,6 +8,7 @@ use FilesystemIterator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Pentacom\Repgenerator\Domain\Migration\Blueprint\Table;
 use Pentacom\Repgenerator\Domain\Migration\MigrationGeneratorService;
@@ -49,13 +50,6 @@ class RepgeneratorController extends Controller
         $messages = [];
         $regenerate ? $requestData = $regenerateData : $requestData = $request->all();
 
-        if(!RepgeneratorDomain::where('model', $requestData['name'])->count()) {
-            $repgeneratorDomain = new RepgeneratorDomain();
-            $repgeneratorDomain->model = $requestData['name'];
-            $repgeneratorDomain->meta = json_encode($requestData);
-            $repgeneratorDomain->save();
-        }
-
         //Setup fields for generation and migration
         list($columns, $foreigns, $fileUploadFieldsData) = $this->fieldsSetup($requestData);
 
@@ -78,7 +72,7 @@ class RepgeneratorController extends Controller
             $fileUploadFieldsData, $regenerate);
         sleep(1);
 
-        //If $$fileUploadFieldsData is not empty we need to create the migration and the Domain for the relationship also
+        //If $fileUploadFieldsData is not empty we need to create the migration and the Domain for the relationship also
         if (!empty($fileUploadFieldsData)) {
             $messages[] = $this->generateFileRelationMigrationAndDomain($table, $requestData, $fileUploadFieldsData, $regenerate);
         }
@@ -180,18 +174,17 @@ class RepgeneratorController extends Controller
             $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], [],
                 self::CRUD_MENU_NAME, 'menu', false, false);
 
+            $data = [
+                'name' => self::CRUD_MENU_NAME,
+            ];
+
             $this->repgeneratorService->generate(
-                self::CRUD_MENU_NAME,
-                true,
-                false,
-                false,
-                false,
+                $data,
                 $columns,
                 [],
                 function ($msg) use (&$messages) {
                     $messages[] = null;
                 },
-                false,
                 null,
                 $migrationName,
                 false
@@ -260,22 +253,14 @@ class RepgeneratorController extends Controller
         }
 
         $this->repgeneratorService->generate(
-            $this->getTransformedName($requestData['name']),
-            $requestData['model'] ? $requestData['name'] : false,
-            $requestData['pivot'] ? $requestData['pivot'] :  false,
-            true,
-            $requestData['read_only'] ? $requestData['read_only'] :  false,
+            $requestData,
             $columns,
             $foreigns,
             function ($msg) use (&$messages) {
                 $messages[] = $msg;
             },
-            false,
             $fileUploadFieldsData,
             $migrationName,
-            false,
-            $requestData['softDelete'],
-            $requestData['timestamps']
         );
         return $messages;
     }
@@ -350,21 +335,20 @@ class RepgeneratorController extends Controller
             );
         }
 
+        $data = [
+            'name' => $requestData['name'].'Files'
+        ];
 
         $this->repgeneratorService->generate(
-            $this->getTransformedName($requestData['name'].'Files'),
-            true,
-            false,
-            false,
-            false,
+            $data,
             $columns,
             $foreigns,
             function ($msg) use (&$messages) {
                 $messages[] = $msg;
             },
-            false,
             $fileUploadFieldsData,
             $migrationName,
+            false,
             true
         );
 
@@ -398,8 +382,27 @@ class RepgeneratorController extends Controller
      */
     public function getGeneratedDomains(): JsonResponse
     {
-        $domains = RepgeneratorDomain::all();
+        $domains = [];
+        $directories = array_filter(glob(app_path('Domain').'/*'), 'is_dir');
+
+        foreach ($directories as $directory) {
+            $config = include($directory.'/config.php');
+            $domains[] = [
+                'model' => $config['name'],
+                'meta' => $config['meta'],
+            ];
+        }
+
         return response()->json($domains);
+    }
+
+    /**
+     * @param  string  $table
+     * @return JsonResponse
+     */
+    public function isTableExists(string $table): JsonResponse
+    {
+        return response()->json(Schema::hasTable(strtolower(str_replace(' ', '_', Str::plural($table)))));
     }
 
     /**

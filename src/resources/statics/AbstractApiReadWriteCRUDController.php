@@ -91,8 +91,9 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
     public function store(Request $request): JsonResponse
     {
         if ( !empty($this->storeRequest) ) {
-            app($this->storeRequest)->validate($request);
+            $request->validate(app($this->storeRequest)->rules());
         }
+
         try {
             $model = $this->getService()->getRepositoryService()->save($request->all());
             if ($model->exists) {
@@ -124,7 +125,7 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
     public function update(Request $request, $id): JsonResponse
     {
         if ( !empty($this->updateRequest) ) {
-            app($this->updateRequest)->validate($request);
+            $request->validate(app($this->updateRequest)->rules());
         }
         try {
             $modelUpdated = $this->getService()->getRepositoryService()->update($id, $request->all());

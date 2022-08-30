@@ -44,36 +44,50 @@ class RepgeneratorService
 
     /**
      * @param  string  $name
-     * @param  bool  $generateModel
-     * @param  bool  $generatePivot
-     * @param  bool  $generateFrontend
-     * @param  false  $readOnly
-     * @param  RepgeneratorColumnAdapter[]  $columns
+     * @return string|array
+     */
+    private function getSingularNameWithoutSpaces(string $name): string|array
+    {
+        return str_replace(' ', '', Str::singular($name));
+    }
+
+    /**
+     * @param  string  $name
+     * @return string|array
+     */
+    private function getPluralNameWithoutSpaces(string $name): string|array
+    {
+        return str_replace(' ', '',  $name);
+    }
+
+
+    /**
+     * @param  array  $requestData
+     * @param  array  $columns
      * @param  array  $foreigns
-     * @param $callback
-     * @param  false  $fromConsole
      * @param  array|null  $fileUploadFieldsData
      * @param  string|null  $migrationName
+     * @param $callback
+     * @param  bool  $isGenerateFrontend
      * @param  bool  $isGeneratedFileDomain
-     * @param  bool  $softDelete
-     * @param  bool  $timestamps
+     * @return void
      */
     public function generate(
-        string $name,
-        bool $generateModel,
-        bool $generatePivot,
-        bool $generateFrontend,
-        bool $readOnly,
+        array $requestData,
         array $columns,
         array $foreigns,
         $callback,
-        bool $fromConsole = false,
         array $fileUploadFieldsData = null,
         string $migrationName = null,
+        bool $isGenerateFrontend = true,
         bool $isGeneratedFileDomain = false,
-        bool $softDelete = false,
-        bool $timestamps = false,
-    ) {
+    ): void {
+        $name = $this->getSingularNameWithoutSpaces($requestData['name']);
+        $isGeneratePivot = array_key_exists('pivot', $requestData) ? $requestData['pivot'] : false;
+        $isReadOnly = array_key_exists('read_only', $requestData) ? $requestData['read_only'] : false;
+        $isSoftDelete = array_key_exists('softDelete', $requestData) ? $requestData['softDelete'] : false;
+        $isTimestamps = array_key_exists('timestamps', $requestData) ? $requestData['timestamps'] : false;
+
         $this->createDirectories();
         $callback('Directories generated!');
 
@@ -82,29 +96,30 @@ class RepgeneratorService
         //Make sure name is singular
         $name = Str::singular($name);
 
-        if ($generateModel) {
-            if ($generatePivot) {
-                $this->modelPivot($name);
-            } else {
-                $this->model($name, $columns, $foreigns, $softDelete, $timestamps);
-            }
-            $callback('Model is ready!');
-        }
+        $this->config($name, $requestData);
+        $callback('Config is ready!');
 
-        $this->apiController('v1', $name, $readOnly, $fileUploadFieldsData, $isGeneratedFileDomain);
+        if ($isGeneratePivot) {
+            $this->modelPivot($name);
+        } else {
+            $this->model($name, $columns, $foreigns, $isSoftDelete, $isTimestamps);
+        }
+        $callback('Model is ready!');
+
+        $this->apiController('v1', $name, $isReadOnly, $isGeneratedFileDomain, $fileUploadFieldsData);
         $callback('API Controller is ready!');
 
-        $this->request($name, $columns);
-        $this->updateRequest($name, $columns);
+        $this->request($name, $columns, $foreigns);
+        $this->updateRequest($name, $columns, $foreigns);
         $callback('Controller requests are ready!');
 
-        $this->repositoryService($name, $generatePivot, $fileUploadFieldsData, $isGeneratedFileDomain);
+        $this->repositoryService($name, $isGeneratePivot, $isGeneratedFileDomain, $fileUploadFieldsData);
         $callback('Repository layer is ready!');
 
-        $this->service($name, $generatePivot);
+        $this->service($name, $isGeneratePivot);
         $callback('Controller service is ready!');
 
-        $this->provider($name, false, $columns, $fileUploadFieldsData, $isGeneratedFileDomain);
+        $this->provider($name, false, $columns, $isGeneratedFileDomain, $fileUploadFieldsData);
         $callback('Provider is ready!');
 
         $this->resource($name, $columns, $foreigns, $isGeneratedFileDomain);
@@ -115,24 +130,11 @@ class RepgeneratorService
 
         $this->filters($name, $columns, $foreigns, $callback);
 
-        !$generateFrontend ?: $this->frontend($name, $columns, $callback);
+        $this->apiRoutes($name);
+        $callback('API Routes is ready!');
 
-        if ($fromConsole) {
-            $this->cmd->newLine();
-            $callback('Generated files:');
-            $this->cmd->table(
-                ['Name', 'Location'],
-                $this->generatedFiles
-            );
-            $this->cmd->newLine();
-        }
 
-        $callback('Please add this line to config/app.php Application Service Providers section:');
-        $str = "App\Domain\/".$name."\Providers\/".$name."ServiceProvider::class,";
-        $str = str_replace('/', '', $str);
-        $code['code'] = $str;
-        $callback($code);
-
+        !$isGenerateFrontend ?: $this->frontend($name, $columns, $callback);
 
         $callback("Code generation has saved you from typing at least ".CharacterCounterStore::$charsCount." characters");
         $minutes = floor((CharacterCounterStore::$charsCount / 5) / 25);
@@ -154,7 +156,7 @@ class RepgeneratorService
     /**
      * Create static file holder directories
      */
-    private function createDirectories()
+    private function createDirectories(): void
     {
         if (!file_exists($path = app_path("Abstraction/Controllers"))) {
             mkdir($path, 0777, true);
@@ -196,7 +198,7 @@ class RepgeneratorService
     /**
      * @param $callback
      */
-    private function generateStaticFiles($callback)
+    private function generateStaticFiles($callback): void
     {
         $staticFiles = $this->repgeneratorStaticFilesService->copyStaticFiles();
         foreach ($staticFiles as $staticFile) {
@@ -210,7 +212,7 @@ class RepgeneratorService
     /**
      * @param  string  $name
      */
-    private function modelPivot(string $name)
+    private function modelPivot(string $name): void
     {
         $modelTemplate = str_replace(
             [
@@ -236,12 +238,77 @@ class RepgeneratorService
 
     /**
      * @param  string  $name
+     */
+    private function apiRoutes(string $name): void
+    {
+        $apiRouteTemplate = str_replace(
+            [
+                '{{modelName}}',
+                '{{modelNamePluralLowerCase}}'
+            ],
+            [
+                $name,
+                strtolower(Str::plural($name))
+            ],
+            $this->repgeneratorStubService->getStub('apiRoutes')
+        );
+
+        if (!file_exists($path = app_path("Domain/{$name}/Routes/"))) {
+            mkdir($path, 0777, true);
+        }
+
+        file_put_contents($path = app_path("Domain/{$name}/Routes/api.php"), $apiRouteTemplate);
+
+        CharacterCounterStore::addFileCharacterCount($path);
+
+        $this->generatedFiles[] = [
+            'name' => "api.php",
+            'location' => $path
+        ];
+    }
+
+    /**
+     * @param  string  $name
+     * @param  array  $requestData
+     */
+    private function config(string $name, array $requestData): void
+    {
+        $configTemplate = str_replace(
+            [
+                '{{provider}}',
+                '{{name}}',
+                '{{meta}}',
+            ],
+            [
+                "App\Domain\\".$name."\Providers\\".$name."ServiceProvider::class",
+                $name,
+                json_encode($requestData)
+            ],
+            $this->repgeneratorStubService->getStub('config')
+        );
+
+        if (!file_exists($path = app_path("Domain/{$name}/"))) {
+            mkdir($path, 0777, true);
+        }
+
+        file_put_contents($path = app_path("Domain/{$name}/config.php"), $configTemplate);
+
+        CharacterCounterStore::addFileCharacterCount($path);
+
+        $this->generatedFiles[] = [
+            'name' => "config.php",
+            'location' => $path
+        ];
+    }
+
+    /**
+     * @param  string  $name
      * @param  array  $columns
      * @param  array  $foreigns
-     * @param  bool  $softDelete
-     * @param  bool  $timestamps
+     * @param  bool  $isSoftDelete
+     * @param  bool  $isTimestamps
      */
-    private function model(string $name, array $columns, array $foreigns, bool $softDelete, bool $timestamps)
+    private function model(string $name, array $columns, array $foreigns, bool $isSoftDelete, bool $isTimestamps): void
     {
         $use = [];
         $relationTemplate = [];
@@ -252,9 +319,9 @@ class RepgeneratorService
             foreach ($foreigns as $foreign) {
                 $relationType = array_key_exists('relation_type', $foreign) ? $foreign['relation_type'] : 'BelongsTo';
                 $relatedModel = array_key_exists('related_model',
-                    $foreign) ? $foreign['related_model'] : Str::studly(Str::singular($foreign['reference']['name']));
+                    $foreign) ? $this->getPluralNameWithoutSpaces($foreign['related_model']) : Str::studly($this->getSingularNameWithoutSpaces($foreign['reference']['name']));
                 $relationName = array_key_exists('relation_name',
-                    $foreign) ? $foreign['relation_name'] : Str::lcfirst(Str::studly(Str::singular($foreign['reference']['name'])));
+                    $foreign) ? $this->getPluralNameWithoutSpaces($foreign['relation_name']) : Str::lcfirst(Str::studly($this->getSingularNameWithoutSpaces($foreign['reference']['name'])));
 
                 $modelUse = 'use App\Domain\/'.$relatedModel.'\Models\/'.$relatedModel.';';
                 $modelUse = str_replace('/', '', $modelUse);
@@ -274,13 +341,17 @@ class RepgeneratorService
                         '{{relationType}}',
                         '{{relationName}}',
                         '{{relationMethodCall}}',
-                        '{{relatedModel}}'
+                        '{{relatedModel}}',
+                        '{{foreignKey}}',
+                        '{{ownerKey}}',
                     ],
                     [
                         $relationType,
                         $relationName,
                         Str::camel($relationType),
-                        $relatedModel
+                        $relatedModel,
+                        $foreign['column'],
+                        $foreign['on']
                     ],
                     $this->repgeneratorStubService->getStub('ModelRelation')
                 );
@@ -331,13 +402,13 @@ class RepgeneratorService
         }
 
         $trait = '';
-        if($softDelete) {
+        if($isSoftDelete) {
             $use[] = 'use Illuminate\Database\Eloquent\SoftDeletes;';
             $trait = ', SoftDeletes';
         }
 
         $timestampsTemplate = '';
-        if(!$timestamps) {
+        if(!$isTimestamps) {
             $timestampsTemplate = 'public $timestamps = false;';
         }
 
@@ -382,16 +453,16 @@ class RepgeneratorService
     /**
      * @param  string  $version
      * @param  string  $name
-     * @param  bool  $readOnly
-     * @param  array|null  $fileUploadFieldsData
+     * @param  bool  $isReadOnly
      * @param  bool  $isGeneratedFileDomain
+     * @param  array|null  $fileUploadFieldsData
      */
-    private function apiController(string $version, string $name, bool $readOnly = false, array $fileUploadFieldsData = null, bool $isGeneratedFileDomain = false)
+    private function apiController(string $version, string $name, bool $isReadOnly, bool $isGeneratedFileDomain, array $fileUploadFieldsData = null): void
     {
         $use = [];
         $filesRelation = [];
 
-        if ($readOnly) {
+        if ($isReadOnly) {
             $stub = $this->repgeneratorStubService->getStub('ApiControllerReadOnly');
         } else {
             $stub = $this->repgeneratorStubService->getStub('ApiControllerReadWrite');
@@ -440,8 +511,9 @@ class RepgeneratorService
     /**
      * @param  string  $name
      * @param  array  $columns
+     * @param  array  $foreigns
      */
-    private function request(string $name, array $columns)
+    private function request(string $name, array $columns, array $foreigns): void
     {
         $requestTemplate = str_replace(
             [
@@ -450,7 +522,7 @@ class RepgeneratorService
             ],
             [
                 $name,
-                $this->implodeLines($this->rulesByColumns($columns), 2)
+                $this->implodeLines($this->rulesByColumns($columns, $foreigns), 2)
             ],
             $this->repgeneratorStubService->getStub('Request')
         );
@@ -471,35 +543,47 @@ class RepgeneratorService
 
     /**
      * @param  array  $columns
+     * @param  array  $foreigns
      * @return array
      */
-    private function rulesByColumns(array $columns): array
+    private function rulesByColumns(array $columns, array $foreigns): array
     {
         $rules = [];
-        foreach ($columns as $column) {
-            $rule = '';
-            if ($column->showOnTable) {
-                $length = '';
-                if ($column->length) {
-                    $length = '|max:'.$column->length;
-                }
+        foreach ($foreigns as $foreign) {
+            foreach ($columns as $column) {
+                $rule = '';
+                if ($column->showOnTable) {
+                    $length = '';
+                    if ($column->length) {
+                        $length = '|max:'.$column->length;
+                    }
 
-                $rule .= match ($column->type) {
-                    'binary', 'char', 'geometryCollection', 'geometry', 'ipAddress', 'rememberToken', 'set', 'softDeletes', 'uuidMorphs', 'uuid', 'text', 'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumText', 'multiLineString', 'multiPoint', 'multiPolygon', 'point', 'polygon', 'tinyText', 'string' => 'string'.$length,
-                    'enum' => 'enum',
-                    'boolean' => 'boolean',
-                    'id', 'integer', 'bigIncrements', 'bigInteger', 'double', 'float', 'decimal', 'increments', 'mediumIncrements', 'mediumInteger', 'smallIncrements', 'smallInteger', 'tinyIncrements', 'tinyInteger', 'unsignedBigInteger', 'unsignedDecimal',
-                    'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger', 'unsignedTinyInteger' => 'integer',
-                    'time', 'timestamp', 'timestamps', 'dateTime', 'date', 'year', 'nullableTimestamps' => 'date',
-                    'softDeletesTz', 'dateTimeTz', 'timeTz', 'timestampTz', 'timestampsTz' => 'timezone'
-                };
-                $rule .= '|';
-                if (!$column->nullable) {
-                    $rule .= 'required';
-                } else {
-                    $rule .= 'nullable';
+                    if (!$column->fileUploadLocation) {
+                        $rule .= match ($column->type) {
+                            'binary', 'char', 'geometryCollection', 'geometry', 'ipAddress', 'rememberToken', 'set', 'softDeletes', 'uuidMorphs', 'uuid', 'text', 'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumText', 'multiLineString', 'multiPoint', 'multiPolygon', 'point', 'polygon', 'tinyText', 'string' => 'string'.$length,
+                            'enum' => 'enum',
+                            'boolean' => 'boolean',
+                            'id', 'integer', 'bigIncrements', 'bigInteger', 'double', 'float', 'decimal', 'increments', 'mediumIncrements', 'mediumInteger', 'smallIncrements', 'smallInteger', 'tinyIncrements', 'tinyInteger', 'unsignedBigInteger', 'unsignedDecimal',
+                            'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger', 'unsignedTinyInteger' => 'integer',
+                            'time', 'timestamp', 'timestamps', 'dateTime', 'date', 'year', 'nullableTimestamps' => 'date',
+                            'softDeletesTz', 'dateTimeTz', 'timeTz', 'timestampTz', 'timestampsTz' => 'timezone'
+                        };
+
+                        $rule .= '|';
+                    }
+
+                    if (!$column->nullable) {
+                        $rule .= 'required';
+                    } else {
+                        $rule .= 'nullable';
+                    }
+
+                    if($foreign['column'] === $column->name) {
+                        $rule .= '|exists:'.$foreign['reference']['name'].','.$foreign['on'];
+                    }
+
+                    $rules[] = "'$column->name' => '$rule',";
                 }
-                $rules[] = "'$column->name' => '$rule',";
             }
         }
 
@@ -509,8 +593,9 @@ class RepgeneratorService
     /**
      * @param  string  $name
      * @param  array  $columns
+     * @param  array  $foreigns
      */
-    private function updateRequest(string $name, array $columns)
+    private function updateRequest(string $name, array $columns, array $foreigns): void
     {
         $updateRequestTemplate = str_replace(
             [
@@ -519,7 +604,7 @@ class RepgeneratorService
             ],
             [
                 $name,
-                $this->implodeLines($this->rulesByColumns($columns), 2)
+                $this->implodeLines($this->rulesByColumns($columns, $foreigns), 2)
             ],
             $this->repgeneratorStubService->getStub('UpdateRequest')
         );
@@ -540,11 +625,11 @@ class RepgeneratorService
 
     /**
      * @param  string  $name
-     * @param  bool  $generatePivot
-     * @param  array|null  $fileUploadFieldsData
+     * @param  bool  $isGeneratePivot
      * @param  bool  $isGeneratedFileDomain
+     * @param  array|null  $fileUploadFieldsData
      */
-    private function repositoryService(string $name, bool $generatePivot, array $fileUploadFieldsData = null, bool $isGeneratedFileDomain = false)
+    private function repositoryService(string $name, bool $isGeneratePivot, bool $isGeneratedFileDomain, array $fileUploadFieldsData = null): void
     {
         $use = [];
         $traits = [];
@@ -595,7 +680,7 @@ class RepgeneratorService
                 $name,
                 strtolower(Str::plural($name)),
                 strtolower($name),
-                $generatePivot ? 'Pivot' : 'Model',
+                $isGeneratePivot ? 'Pivot' : 'Model',
                 $this->implodeLines($use, 2),
                 $this->implodeLines($traits, 2),
                 $this->implodeLines($saveOtherDataMethod, 2)
@@ -622,7 +707,7 @@ class RepgeneratorService
      * @param  string  $name
      * @param  bool  $generatePivot
      */
-    private function service(string $name, bool $generatePivot = false)
+    private function service(string $name, bool $generatePivot): void
     {
         $serviceTemplate = str_replace(
             [
@@ -658,12 +743,13 @@ class RepgeneratorService
      * @param  string  $name
      * @param  bool  $isPivot
      * @param  array  $columns
-     * @param  array|null  $fileUploadFieldsData
      * @param  bool  $isGeneratedFileDomain
+     * @param  array|null  $fileUploadFieldsData
      */
-    private function provider(string $name, bool $isPivot = false, array $columns, array $fileUploadFieldsData = null, bool $isGeneratedFileDomain = false)
+    private function provider(string $name, bool $isPivot, array $columns, bool $isGeneratedFileDomain, array $fileUploadFieldsData = null): void
     {
         $serviceSetters = "";
+        $f = [];
         if ($isGeneratedFileDomain) {
 
             $fieldsPath = '[';
@@ -727,7 +813,7 @@ class RepgeneratorService
      * @param  array  $foreigns
      * @param  bool  $isGeneratedFileDomain
      */
-    private function resource(string $name, array $columns, array $foreigns, bool $isGeneratedFileDomain = false): void
+    private function resource(string $name, array $columns, array $foreigns, bool $isGeneratedFileDomain): void
     {
         $routeName = strtolower(Str::plural($name));
 
@@ -887,7 +973,7 @@ class RepgeneratorService
      * @param  array  $foreigns
      * @param $callback
      */
-    private function filters(string $name, array $columns, array $foreigns, $callback)
+    private function filters(string $name, array $columns, array $foreigns, $callback): void
     {
         $this->generatedFiles[] = $this->repgeneratorFilterService->generate($name, $columns, $foreigns);
         $callback('Filter is ready!');
@@ -898,7 +984,7 @@ class RepgeneratorService
      * @param  array  $columns
      * @param $callback
      */
-    private function frontend(string $name, array $columns, $callback)
+    private function frontend(string $name, array $columns, $callback): void
     {
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateIndex($name, $columns);
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable($name, $columns);
@@ -920,7 +1006,7 @@ class RepgeneratorService
      * @param  string  $name
      * @param  array  $columns
      */
-    private function factory(string $name, array $columns)
+    private function factory(string $name, array $columns): void
     {
         $columnFactoriesString = '';
 

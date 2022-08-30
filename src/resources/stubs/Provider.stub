@@ -3,13 +3,14 @@
 namespace App\Domain\{{modelName}}\Providers;
 
 use App\Domain\{{modelName}}\Filters\{{modelName}}Filter;
+use App\Domain\{{modelName}}\Requests\{{modelName}}Request;
+use App\Domain\{{modelName}}\Requests\{{modelName}}UpdateRequest;
 use App\Domain\{{modelName}}\Services\{{modelName}}Service;
 use App\Domain\{{modelName}}\Repositories\{{modelName}}RepositoryService;
 use App\Domain\{{modelName}}\Controllers\Api\v1\{{modelName}}ApiController;
 use App\Domain\{{modelName}}\Models\{{modelName}};
 use App\Domain\{{modelName}}\Resources\{{modelName}}Resource;
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
 /**
@@ -45,6 +46,8 @@ class {{modelName}}ServiceProvider extends ServiceProvider
 
         $this->app->singleton({{modelName}}ApiController::class, function () {
             return (new {{modelName}}ApiController(app({{modelName}}Service::class)))
+                ->setStoreRequest({{modelName}}Request::class)
+                ->setUpdateRequest({{modelName}}UpdateRequest::class)
                 ->setResourceClass({{modelName}}Resource::class)
                 ->setFilterClass({{modelName}}Filter::class);
         });
@@ -57,18 +60,6 @@ class {{modelName}}ServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->routes(function(){
-            Route::prefix('api/v1')->namespace($this->namespace)->middleware(['api'])->group(function () {
-                Route::resource('{{modelNamePluralLowerCase}}', {{modelName}}ApiController::class, [
-                    'names' => [
-                        'index' => 'api.{{modelNamePluralLowerCase}}.index',
-                        'store' => 'api.{{modelNamePluralLowerCase}}.store',
-                        'update' => 'api.{{modelNamePluralLowerCase}}.update',
-                        'show' => 'api.{{modelNamePluralLowerCase}}.show',
-                        'destroy' => 'api.{{modelNamePluralLowerCase}}.destroy',
-                    ],
-                ])->only(['index', 'store', 'update', 'show', 'destroy']);
-            });
-        })->loadRoutes();
+        $this->loadRoutesFrom(__DIR__.'/../Routes/api.php');
     }
 }

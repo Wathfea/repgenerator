@@ -16,6 +16,9 @@ class DefaultColumnGenerator
      */
     public function generate(string $type, array $column): Method
     {
-        return new Method($type, $column['name']);
+        return match ($column['name']) {
+            'id' => new Method('id'),
+            default => new Method($type, $column['name']),
+        };
     }
 }

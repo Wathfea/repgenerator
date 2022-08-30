@@ -12,6 +12,6 @@ export default defineConfig({
         }
     },
     build: {
-        outDir: '../../../../public/wizzard'
+        outDir: '../../../../public/repgenerator/wizzard'
     }
 })

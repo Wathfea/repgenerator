@@ -8,7 +8,6 @@ import axios from 'axios'
 import Options from "./Options.vue";
 import factoryImgUrl from '../assets/factory.gif'
 
-
 // Wizzard
 const stepNumber = ref(1);
 
@@ -40,12 +39,12 @@ const step1Options = ref({
     },
     'softDelete': {
         label: 'Soft Delete',
-        enabled: false,
+        enabled: true,
         text: 'Is the model use soft delete?'
     },
     'timestamps': {
         label: 'Timestamps',
-        enabled: false,
+        enabled: true,
         text: 'Is the model use timestamps?'
     }
 });
@@ -200,6 +199,12 @@ const onRefreshTables = () => {
     getTables()
 }
 
+const isTableExists = ref(false);
+
+const onTableExists = (data) => {
+    isTableExists.value = data.value;
+}
+
 const onSelectOption = (data) => {
     if(data.label === "Pivot") {
 
@@ -222,7 +227,7 @@ getTables()
     <div class="grid place-items-center h-screen" v-if="generating">
         <img :src="factoryImgUrl" alt="Repository Generator Factory" class="factory">
     </div>
-    <form @submit="onNextStep" v-else>
+    <form class="mt-5" @submit="onNextStep" v-else>
         <nav aria-label="Progress">
             <ol class="border border-gray-300 rounded-md divide-y divide-gray-300 md:flex md:divide-y-0" role="list">
                 <Step v-for="(step,index) in steps" :complete="index+1 < stepNumber" :current="stepNumber === index+1"
@@ -230,7 +235,7 @@ getTables()
             </ol>
         </nav>
         <div v-if="stepNumber === 1 || isOverview()">
-            <Step1 :icon="icon" :modelName="modelName" @iconChanged="onIconChanged" @nameChanged="onNameChanged"/>
+            <Step1 :icon="icon" :modelName="modelName"  @iconChanged="onIconChanged" @nameChanged="onNameChanged" @tableExists="onTableExists"/>
             <Options :options="step1Options" @selectOption="onSelectOption"/>
         </div>
         <Step2 v-if="stepNumber === 2 || isOverview()" :columns="columns" :disableAdd="isOverview()" :models="models" :modelName="modelName"
@@ -248,7 +253,8 @@ getTables()
             </div>
             <div class="col-span-6">
                 <button
-                    class="block w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                    :disabled="isTableExists"
+                    class="disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none block w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                     type="submit">
                     {{ isOverview() ? 'Finish' : 'Next' }}
                 </button>
