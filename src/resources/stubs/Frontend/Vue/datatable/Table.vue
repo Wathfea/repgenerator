@@ -306,12 +306,12 @@ const onSearchAllCleared = () => {
 }
 
 const deleteModel = async (id) => {
-  if (!window.confirm('You sure?')) {
+  if (!window.confirm('Biztos törli?')) {
     return
   }
 
   await destroyModel(id)
-  await getModels(1, perPage, currentRoute.query)
+  await getModels(currentRoute.query.page ?? 1, currentRoute.query.per_page ?? perPage, currentRoute.query)
 }
 
 const getColumnName = (key) => {
