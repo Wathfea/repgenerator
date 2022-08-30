@@ -3,6 +3,7 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
+- Újra generálás DB nélkül
 - Default gate és policy
 - public vagy nem public file választó
 - kép típusnál képeket engedjen csak
@@ -17,6 +18,9 @@ All notable changes to `repgenerator` will be documented in this file
 
 ## [Unreleased]
 
+## [1.4.9] - 2022-08-30
+## Fixed 
+- config load error
 
 ## [1.4.8] - 2022-08-30
 ## Added
