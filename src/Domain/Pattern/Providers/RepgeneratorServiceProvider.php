@@ -76,12 +76,13 @@ class RepgeneratorServiceProvider extends ServiceProvider
         // Automatically apply the package configuration
         $this->mergeConfigFrom(__DIR__.'/../../../../config/config.php', 'repgenerator');
 
-
         $directories = array_filter(glob(app_path('Domain').'/*'), 'is_dir');
 
         foreach ($directories as $directory) {
-           $config = include($directory."/config.php");
-           $this->app->register($config['provider']);
+            if (file_exists($directory.'/config.php')) {
+                $config = include($directory."/config.php");
+                $this->app->register($config['provider']);
+            }
         }
     }
 }
