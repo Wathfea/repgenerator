@@ -38,7 +38,7 @@ const chooseRebuildFrontend = () => {
                     <img :src="imgUrl" alt="Repository Generator Factory" class="banner">
                 </div>
                 <div class="col-span-6">
-                    <div class="code-menu hide-scrollbar z-10 mt-[50vw] h-auto w-full overflow-auto rounded-xl bg-[#272822] px-3 py-6 font-bold text-white lg:relative lg:right-0 lg:ml-auto lg:mt-[80px] lg:w-[385px] xl:right-[5%] 2xl:right-[10%] widescreen:right-[18%]" >
+                    <div class="code-menu hide-scrollbar  mt-[50vw] h-auto w-full overflow-auto rounded-xl bg-[#272822] px-3 py-6 font-bold text-white lg:relative lg:right-0 lg:ml-auto lg:mt-[80px] lg:w-[385px] xl:right-[5%] 2xl:right-[10%] widescreen:right-[18%]" >
                         <div class="font-bold">
                             <span class="font-bold text-[#F92672]">protected </span><span class="font-bold text-white">$menu </span>
                             <span class="font-bold text-[#F92672]">=</span> [

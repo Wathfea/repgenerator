@@ -3,45 +3,51 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
-
-- Hero icon választó listából, ne kézi beírás. Esetleg más icon csomag? FontAwsome vagy Material?
-- Mezősorrend változtatása drag & drop-al
-- Az egyes domainek repgenerator tulajdonságait ne db-be mentse, hanem fájlokba (config.php). Így elkerülhető az hogy az egyik fejlesztő nem tudja újrageneráltatni a wizzardal a másik fejlesztő által készített domaint.
-- A formrequestekben a rule-ok ne pipeline-al összefűzött stringek legyenek, hanem tömbösített. Ha egy mezőhöz relation van rendelve akkor alapból rakja össze az exists rule-t: 'exists:App\Domain\VALAMI\Models\VALAMIMODEL,id'
-- Esetleg el kellene gondolkozni azon hogy a domainen belül kellene egy config.php amibe bekerül minden az adott domainre jellemző dolog (pl generálási beállítások). Pl.: searchable mezők, menü elhelyezés (fentebbi pont), stb.
-- Fájl tárolásnál meg kell azt oldani hogy max X ezer kép kerüljön egy könyvtárba, utána új könyvtárba mentse, ezt ID-ból lehet egyszerűen megoldani. Azért kell mert az esetleges műveleteknél a szerverek bizonyos számú (~10000) fájlt tartalmazó műveleteknél nagyon belassulnak.
-  if (!function_exists('getLevelDir')) {
-  function getLevelDir($id){
-  return substr(substr("000000000".$id,-10),0,7);
-  }
-  }
-- Hibakezelés (pl van már ilyen nevű tábla, elakad a generálás, stb)
-- Routes mappa létrehozása a layer alá, oda beírni a routot és a serviceproviderben $this->loadRoutesFrom -al betölteni
-- Provider betöltés kialakítása pl egy config fileba
-- Generálási requestet ne a db-be tároljuk hanem egy config fileba a réteghez
-- Modelben a generált relationbe beírni a kulcsot is ami alapján a kapcsolat van
+- Újra generálás DB nélkül
+- Default gate és policy
 - public vagy nem public file választó
 - kép típusnál képeket engedjen csak
 - file típusnál fileokat csak
-- szóközös megadott réteg névben pl (Person Contact) file kapcsolatok neve hibásan (szóközzel) kerül be a modellekbe. 
-- A resourceba a relation név aláhúzással  (_) kerül be
 - Relation párok beírása
 - CSV import
 - Factory and seeder generation for CRUD
 - Composite index generation
 - How it works section
-- CRUD UI in other Frontend frameworks
-- translation a mezőkhöz
+- Hero icon választó listából, ne kézi beírás. Esetleg más icon csomag? FontAwsome vagy Material?
+- Mezősorrend változtatása drag & drop-al
 
 ## [Unreleased]
 
-- Legyen egy timestamps checkbox ami a VÉGÉRE teszt a timestamps-t (created_at, updated_at): migráció : $table->timestamps(), model fillable-be ne tegye bele! Ha nincs bekapcsolva akkor a modelbe legyen a $timestamps = false; ÉS figyelje hogy nincs-e olyan mező aminek a neve "created_at" vagy "upadted_at", ha van akkor ezeket így kezelje pl:$table->timestamp('created_at')->nullable();
-- A kapcsolt mezőknél jó lenne ha lenne egy reload gomb hogy újra olvassa a kapcsolható táblákat. Elkezdesz egy táblát létrehozni, de nincs meg a kapcsolt tábla akkor újra kell kezdeni az egészet miután létrehoztad a kapcsolt táblát.
-- Jó lenne ha a beírt model nevet uc first-re tenné
-- File type és picture type radio legyen
-- Hashed és cyrpted radio legyen
-- az "unsigned" kezedetű mezőtípusoknál a frontenden legyen bejelölve az "unsigned" és readonly legyen, esetleg tűnjön el a frontendről, vagy a mező típus választóban ne legyenek benne az unsigned-el kezdődő mezők. Zavaró a kettő együtt.
+## [1.4.9] - 2022-08-30
+## Fixed 
+- config load error
 
+## [1.4.8] - 2022-08-30
+## Added
+- New theme added for the wizzard
+- Added new config.php for each Domain for store the generation data there instead of DB
+- Added exists rule to the request validation based on the relations
+- When you choose any unsigned type you no longer need to check the unsigned checkbox
+- Model name auto upper case for the first letter when you type
+- Added a reload button for reload the database for the references selection
+- Added timestamp as an option at the begining of the generation
+- Added model name check
+- Added auto provider 
+- File store auto detect file count and change directory level based on that
+- Wizzard moved under new route for avoid route collision
+- In the model relations now the generator adds the local and owner keys as well
+
+## Fixed
+- In migrations the id field no longer add the 'id' name to the method as param
+- Hashed, Crypted, Picture and File selectors are now radio buttons
+- Now request validation is working properly
+- Model names which contained space generated a wrong file relation. 
+- File type request validation removed type check
+
+## Removed
+- Unused commands
+- RepgeneratorDomain model
+- Repgenerator Domains table base migration
 
 ## [1.4.7] - 2022-08-10
 ## Added
