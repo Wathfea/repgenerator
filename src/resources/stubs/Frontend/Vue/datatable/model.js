@@ -140,19 +140,28 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
     const storeModel = async (data) => {
         errors.value = ''
         try {
-            await $larafetch(prefix + route, {
+            let response = await $larafetch(prefix + route, {
                 method: 'post',
                 body: convertDataToFormData(data),
-            });
-            await router.push({path: '/' + route });
-            addSuccess('Sikeresen mentve', data.message);
+            })
+            console.log(response);
+            if ( response.success ) {
+                await router.push({path: '/' + route });
+                addSuccess('Sikeresen mentve', data.message);
+            } else {
+                addWarning('Sikertelen mentés', data.failed);
+            }
         } catch (e) {
-            if (e.response && e.response.status === 422) {
-                let data = e.response.data || e.response._data;
-                for (const key in data) {
-                    errors.value += data.errors[key] + ' ';
+            if (e.response ) {
+                switch(e.response.status){
+                    case 422:
+                        let data = e.response.data || e.response._data;
+                        for (const key in data) {
+                            errors.value += data.errors[key] + ' ';
+                        }
+                        addWarning('Sikertelen mentés', data.message);
+                        break;
                 }
-                addWarning('Sikertelen mentés', data.message);
             }
         }
 
@@ -167,11 +176,16 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
             });
             addSuccess('Sikeresen mentve', data.message);
         } catch (e) {
-            if (e.response && e.response.status === 422) {
-                for (const key in e.response.data.errors) {
-                    errors.value += e.response.data.errors[key][0] + ' ';
+            if (e.response) {
+                switch(e.response.status)
+                {
+                    case 422:
+                        for (const key in e.response.data.errors) {
+                            errors.value += e.response.data.errors[key][0] + ' ';
+                        }
+                        addWarning('Sikertelen mentés', data.message);
+                        break;
                 }
-                addWarning('Sikertelen mentés', data.message);
             }
         }
     }
