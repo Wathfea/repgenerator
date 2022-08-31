@@ -87,11 +87,11 @@
         <nav class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6" aria-label="Pagination">
           <div class="hidden sm:block">
             <p class="text-sm text-gray-700">
-              <span class="font-medium">{{ Math.min(0,meta.from) }}</span>
+              <span class="font-medium">{{ Math.max(0,meta.from) }}</span>
               {{ ' ' }}
               és
               {{ ' ' }}
-              <span class="font-medium">{{ Math.min(meta.to)  }}</span>
+              <span class="font-medium">{{ Math.max(0,meta.to)  }}</span>
               {{ ' ' }}
               közötti sorok
               {{ ' ' }}
@@ -106,9 +106,9 @@
             </Button>
             <div class="sm:hidden block">
               <p class="text-sm text-gray-700 pt-3">
-                <span class="font-medium">{{ meta.from }}</span>
+                <span class="font-medium">{{  Math.max(0,meta.from)  }}</span>
                 {{ '-' }}
-                <span class="font-medium">{{ meta.to  }}</span>
+                <span class="font-medium">{{ Math.max(0,meta.to) }}</span>
                 {{ '/' }}
                 <span class="font-medium">{{ meta.total }}</span>
               </p>
