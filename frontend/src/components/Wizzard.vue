@@ -199,10 +199,10 @@ const onRefreshTables = () => {
     getTables()
 }
 
-const isTableExists = ref(false);
+const isValidTable = ref(true);
 
-const onTableExists = (data) => {
-    isTableExists.value = data.value;
+const onIsValidTable = (data) => {
+    isValidTable.value = data.value;
 }
 
 const onSelectOption = (data) => {
@@ -235,7 +235,7 @@ getTables()
             </ol>
         </nav>
         <div v-if="stepNumber === 1 || isOverview()">
-            <Step1 :icon="icon" :modelName="modelName"  @iconChanged="onIconChanged" @nameChanged="onNameChanged" @tableExists="onTableExists"/>
+            <Step1 :icon="icon" :modelName="modelName"  @iconChanged="onIconChanged" @nameChanged="onNameChanged" @isValidTable="onIsValidTable"/>
             <Options :options="step1Options" @selectOption="onSelectOption"/>
         </div>
         <Step2 v-if="stepNumber === 2 || isOverview()" :columns="columns" :disableAdd="isOverview()" :models="models" :modelName="modelName"
@@ -253,7 +253,7 @@ getTables()
             </div>
             <div class="col-span-6">
                 <button
-                    :disabled="isTableExists"
+                    :disabled="!isValidTable"
                     class="disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none block w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                     type="submit">
                     {{ isOverview() ? 'Finish' : 'Next' }}

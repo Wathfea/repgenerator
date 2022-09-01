@@ -1,13 +1,15 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {$larafetch} from "~/utils/$larafetch";
+import {useNotifications} from "~/composables/useNotifications";
 
-export default function useModel(route, setQuery = true, prefix = 'api/v1/') {
+export default function useModel(route, setQuery = true, prefix = 'api/v1/', cacheVersion = null, localCache = false, fixedFilters = []) {
     const model = ref({})
     const models = ref([])
 
     const errors = ref('')
     const router = useRouter()
+    const { addWarning, addSuccess, addInfo } = useNotifications();
     const baseParams  = {
         sort_by: 'id',
         sort_dir: 'asc',
@@ -44,17 +46,45 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/') {
             isSearching.value = true;
         }
         const currentRoute = useRoute()
-        if ( currentRoute.query !== setParams && setQuery ) {
-            await router.push({path: currentRoute.path, query: setParams});
+        if ( currentRoute && currentRoute.query !== setParams && setQuery ) {
+            await router.push({path: currentRoute.path, query: setParams, hash: currentRoute.hash});
         }
-        let response = await $larafetch(`${prefix}${route}?` + buildParams(setParams), {
-            method: 'get'
+        let requiresCache = false;
+        if ( cacheVersion !== null ) {
+            let cacheVersionKey = route+'CacheVersion';
+            let currentCacheVersion = parseInt(localStorage.getItem(cacheVersionKey));
+            if ( !currentCacheVersion || currentCacheVersion !== cacheVersion ) {
+                localStorage.setItem(cacheVersionKey, cacheVersion);
+                requiresCache = true;
+            }
+        }
+
+        if ( fixedFilters ) {
+            for ( let index in fixedFilters ) {
+                let filter = fixedFilters[index];
+                setParams[filter.column] = filter.value;
+            }
+        }
+        let paramQuery = buildParams(setParams);
+        let cacheKey = route+'Cache?' + paramQuery;
+        if ( !requiresCache && localCache && localStorage.getItem(cacheKey)  ) {
+            let cacheData = JSON.parse(localStorage.getItem(cacheKey));
+            models.value = cacheData.data;
+            models.meta = cacheData.meta;
+            return cacheData
+        }
+        let response = await $larafetch(`${prefix}${route}?` + paramQuery, {
+            method: 'get',
+            cache: !requiresCache ? 'force-cache' : 'default'
         });
         if ( isSearching ) {
             isSearching.value = false;
         }
         models.value = response.data;
         meta.value = response.meta;
+        if ( requiresCache && localCache ) {
+            localStorage.setItem(cacheKey, JSON.stringify(response));
+        }
         return response;
     }
 
@@ -76,6 +106,7 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/') {
         })
         model.value = response.data.data
         meta.value = response.meta;
+        return response;
     }
 
     const searchTimeout = ref(null);
@@ -88,53 +119,72 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/') {
         },isDelayed ? 500 : 0);
     }
 
+    const convertDataToFormData = (data) => {
+        const formData = new FormData()
+        Object.keys(data).forEach(key => {
+            if(Array.isArray(data[key])) {
+                for(let i in data[key]) {
+                    formData.append(key+'[]', data[key][i])
+                }
+            } else {
+                // Temporary fix for sending booleans
+                if ( typeof data[key] === 'boolean' ) {
+                    data[key] = data[key] ? 1 : 0;
+                }
+                formData.append(key, data[key])
+            }
+        });
+        return formData;
+    }
+
     const storeModel = async (data) => {
         errors.value = ''
         try {
-            let formData = new FormData()
-            Object.keys(data).forEach(key => {
-                if(Array.isArray(data[key])) {
-                    for(let i in data[key]) {
-                        formData.append(key+'[]', data[key][i])
-                    }
-                } else {
-                    // Temporary fix for sending booleans
-                    if ( typeof data[key] === 'boolean' ) {
-                        data[key] = data[key] ? 1 : 0;
-                    }
-                    formData.append(key, data[key])
-                }
-            });
-            await $larafetch(route, {
+            let response = await $larafetch(prefix + route, {
                 method: 'post',
-                data: formData,
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-            await router.push({ name: `${route}.index` })
+                body: convertDataToFormData(data),
+            })
+            console.log(response);
+            if ( response.success ) {
+                await router.push({path: '/' + route });
+                addSuccess('Sikeresen mentve', data.message);
+            } else {
+                addWarning('Sikertelen mentés', data.failed);
+            }
         } catch (e) {
-            if (e.response.status === 422) {
-                for (const key in e.response.data.errors) {
-                    errors.value += e.response.data.errors[key][0] + ' ';
+            if (e.response ) {
+                switch(e.response.status){
+                    case 422:
+                        let data = e.response.data || e.response._data;
+                        for (const key in data) {
+                            errors.value += data.errors[key] + ' ';
+                        }
+                        addWarning('Sikertelen mentés', data.message);
+                        break;
                 }
             }
         }
 
     }
 
-    const updateModel = async (id) => {
+    const updateModel = async (id, data) => {
         errors.value = ''
         try {
-            await $larafetch(`${prefix}${route}/${id}`, {
-                method: 'patch',
-                data: model.value
+            await $larafetch(prefix + route + '/' + id, {
+                method: 'post',
+                body: convertDataToFormData(data)
             });
-            await router.push({ name: `${route}.index` })
+            addSuccess('Sikeresen mentve', data.message);
         } catch (e) {
-            if (e.response.status === 422) {
-                for (const key in e.response.data.errors) {
-                    errors.value += e.response.data.errors[key][0] + ' ';
+            if (e.response) {
+                switch(e.response.status)
+                {
+                    case 422:
+                        for (const key in e.response.data.errors) {
+                            errors.value += e.response.data.errors[key][0] + ' ';
+                        }
+                        addWarning('Sikertelen mentés', data.message);
+                        break;
                 }
             }
         }
@@ -144,6 +194,7 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/') {
         await $larafetch(`${prefix}${route}/${id}`, {
             method: 'delete'
         })
+        addSuccess('Sikeresen törölve');
     }
 
     return {

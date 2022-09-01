@@ -266,15 +266,6 @@ class RepgeneratorController extends Controller
     }
 
     /**
-     * @param  string  $name
-     * @return string|array
-     */
-    private function getTransformedName(string $name): string|array
-    {
-        return str_replace(' ', '', Str::singular($name));
-    }
-
-    /**
      * @param  Table  $table
      * @param  array  $requestData
      * @param  array  $fileUploadFieldsData
@@ -310,6 +301,7 @@ class RepgeneratorController extends Controller
         $foreigns[] = [
             'relation_type' => 'BelongsTo',
             'related_model' => $requestData['name'],
+            'relation_name' => '',
             'column' => $originalTableSingular.'_id',
             'reference' => [
                 'name' => $originalTable
@@ -400,9 +392,16 @@ class RepgeneratorController extends Controller
      * @param  string  $table
      * @return JsonResponse
      */
-    public function isTableExists(string $table): JsonResponse
+    public function validateTable(string $table): JsonResponse
     {
-        return response()->json(Schema::hasTable(strtolower(str_replace(' ', '_', Str::plural($table)))));
+        $isSingular = Str::singular($table) === $table;
+        $isExists = Schema::hasTable(strtolower(str_replace(' ', '_', Str::plural($table))));
+
+        $valid = false;
+        if($isSingular && !$isExists) {
+            $valid = true;
+        }
+        return response()->json($valid);
     }
 
     /**

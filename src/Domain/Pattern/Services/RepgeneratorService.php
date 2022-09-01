@@ -28,16 +28,39 @@ class RepgeneratorService
     protected array $generatedFiles = [];
 
     /**
+     * Model name should be ucfirst,no space,no special chars,singular E.g. Dog
+     *
+     * @var string
+     */
+    public string $modelName;
+
+    /**
+     * Lower case, plural version of $modelName E.g. dogs
+     *
+     * @var string
+     */
+    public string $modelNamePluralLowerCase;
+
+    /**
+     * Lower case, singular version of $modelName E.g. dog
+     *
+     * @var string
+     */
+    public string $modelNameSingularLowerCase;
+
+    /**
      * @param  RepgeneratorStubService  $repgeneratorStubService
      * @param  RepgeneratorStaticFilesService  $repgeneratorStaticFilesService
      * @param  RepgeneratorFilterService  $repgeneratorFilterService
      * @param  RepgeneratorFrontendService  $repgeneratorFrontendService
+     * @param  RepgeneratorNameTransformerService  $nameTransformerService
      */
     public function __construct(
         private RepgeneratorStubService $repgeneratorStubService,
         private RepgeneratorStaticFilesService $repgeneratorStaticFilesService,
         private RepgeneratorFilterService $repgeneratorFilterService,
-        private RepgeneratorFrontendService $repgeneratorFrontendService
+        private RepgeneratorFrontendService $repgeneratorFrontendService,
+        private RepgeneratorNameTransformerService $nameTransformerService
     ) {
 
     }
@@ -82,7 +105,33 @@ class RepgeneratorService
         bool $isGenerateFrontend = true,
         bool $isGeneratedFileDomain = false,
     ): void {
-        $name = $this->getSingularNameWithoutSpaces($requestData['name']);
+        //Setup names
+        $this->nameTransformerService->setModelName($requestData['name']);
+        $this->modelName = $this->nameTransformerService->getModelName();
+        $this->modelNameSingularLowerCase = $this->nameTransformerService->getModelNameSingularLowerCase();
+        $this->modelNamePluralLowerCase = $this->nameTransformerService->getModelNamePluralLowerCase();
+
+        if (!empty($foreigns)) {
+            $foreigns = collect($foreigns)->map(function ($foreign) {
+                $this->nameTransformerService->setRelationName($foreign['reference']['name']);
+                $this->nameTransformerService->setModelName($foreign['reference']['name']);
+
+                if (!array_key_exists('relation_type', $foreign)) {
+                    $foreign['relation_type'] = 'BelongsTo';
+                    $foreign['related_model'] = $this->nameTransformerService->getModelName();
+                    $foreign['relation_name'] = $this->nameTransformerService->getRelationMethodNameSingular();
+                }
+
+                if($foreign['relation_name'] === '') {
+                    $foreign['relation_name'] = $this->nameTransformerService->getRelationMethodNameSingular();
+
+                }
+
+                return $foreign;
+            })->toArray();
+        }
+
+        //Setup bools
         $isGeneratePivot = array_key_exists('pivot', $requestData) ? $requestData['pivot'] : false;
         $isReadOnly = array_key_exists('read_only', $requestData) ? $requestData['read_only'] : false;
         $isSoftDelete = array_key_exists('softDelete', $requestData) ? $requestData['softDelete'] : false;
@@ -93,48 +142,45 @@ class RepgeneratorService
 
         $this->generateStaticFiles($callback);
 
-        //Make sure name is singular
-        $name = Str::singular($name);
-
-        $this->config($name, $requestData);
+        $this->config($this->modelName, $requestData);
         $callback('Config is ready!');
 
         if ($isGeneratePivot) {
-            $this->modelPivot($name);
+            $this->modelPivot($this->modelName);
         } else {
-            $this->model($name, $columns, $foreigns, $isSoftDelete, $isTimestamps);
+            $this->model($this->modelName, $columns, $foreigns, $isSoftDelete, $isTimestamps);
         }
         $callback('Model is ready!');
 
-        $this->apiController('v1', $name, $isReadOnly, $isGeneratedFileDomain, $fileUploadFieldsData);
+        $this->apiController('v1', $this->modelName, $isReadOnly, $isGeneratedFileDomain, $fileUploadFieldsData);
         $callback('API Controller is ready!');
 
-        $this->request($name, $columns, $foreigns);
-        $this->updateRequest($name, $columns, $foreigns);
+        $this->request($this->modelName, $columns, $foreigns);
+        $this->updateRequest($this->modelName, $columns, $foreigns);
         $callback('Controller requests are ready!');
 
-        $this->repositoryService($name, $isGeneratePivot, $isGeneratedFileDomain, $fileUploadFieldsData);
+        $this->repositoryService($this->modelName, $isGeneratePivot, $isGeneratedFileDomain, $fileUploadFieldsData);
         $callback('Repository layer is ready!');
 
-        $this->service($name, $isGeneratePivot);
+        $this->service($this->modelName, $isGeneratePivot);
         $callback('Controller service is ready!');
 
-        $this->provider($name, false, $columns, $isGeneratedFileDomain, $fileUploadFieldsData);
+        $this->provider($this->modelName, false, $columns, $isGeneratedFileDomain, $fileUploadFieldsData);
         $callback('Provider is ready!');
 
-        $this->resource($name, $columns, $foreigns, $isGeneratedFileDomain);
+        $this->resource($this->modelName, $columns, $foreigns, $isGeneratedFileDomain);
         $callback('Resource is ready!');
 
         //$this->factory($name, $columns);
         //$callback('Factory is ready!');
 
-        $this->filters($name, $columns, $foreigns, $callback);
+        $this->filters($this->modelName, $columns, $foreigns, $callback);
 
-        $this->apiRoutes($name);
+        $this->apiRoutes($this->modelName);
         $callback('API Routes is ready!');
 
 
-        !$isGenerateFrontend ?: $this->frontend($name, $columns, $callback);
+        !$isGenerateFrontend ?: $this->frontend($this->modelName, $columns, $callback);
 
         $callback("Code generation has saved you from typing at least ".CharacterCounterStore::$charsCount." characters");
         $minutes = floor((CharacterCounterStore::$charsCount / 5) / 25);
@@ -317,11 +363,9 @@ class RepgeneratorService
 
         if (!empty($foreigns)) {
             foreach ($foreigns as $foreign) {
-                $relationType = array_key_exists('relation_type', $foreign) ? $foreign['relation_type'] : 'BelongsTo';
-                $relatedModel = array_key_exists('related_model',
-                    $foreign) ? $this->getPluralNameWithoutSpaces($foreign['related_model']) : Str::studly($this->getSingularNameWithoutSpaces($foreign['reference']['name']));
-                $relationName = array_key_exists('relation_name',
-                    $foreign) ? $this->getPluralNameWithoutSpaces($foreign['relation_name']) : Str::lcfirst(Str::studly($this->getSingularNameWithoutSpaces($foreign['reference']['name'])));
+                $relationType = $foreign['relation_type'];
+                $relatedModel = $foreign['related_model'];
+                $relationName = $foreign['relation_name'];
 
                 $modelUse = 'use App\Domain\/'.$relatedModel.'\Models\/'.$relatedModel.';';
                 $modelUse = str_replace('/', '', $modelUse);
@@ -485,8 +529,8 @@ class RepgeneratorService
             ],
             [
                 $name,
-                strtolower(Str::plural($name)),
-                strtolower($name),
+                $this->modelNamePluralLowerCase,
+                $this->modelNameSingularLowerCase,
                 $this->implodeLines($use, 2),
                 $this->implodeLines($filesRelation, 2),
             ],
@@ -678,8 +722,8 @@ class RepgeneratorService
             ],
             [
                 $name,
-                strtolower(Str::plural($name)),
-                strtolower($name),
+                $this->modelNamePluralLowerCase,
+                $this->modelNameSingularLowerCase,
                 $isGeneratePivot ? 'Pivot' : 'Model',
                 $this->implodeLines($use, 2),
                 $this->implodeLines($traits, 2),
@@ -718,8 +762,8 @@ class RepgeneratorService
             ],
             [
                 $name,
-                strtolower(Str::plural($name)),
-                strtolower($name),
+                $this->modelNamePluralLowerCase,
+                $this->modelNameSingularLowerCase,
                 $generatePivot ? 'Pivot' : 'Model',
             ],
             $this->repgeneratorStubService->getStub('Service')
@@ -784,8 +828,8 @@ class RepgeneratorService
             ],
             [
                 $name,
-                strtolower(Str::plural($name)),
-                strtolower($name),
+                $this->modelNamePluralLowerCase,
+                $this->modelNameSingularLowerCase,
                 $isPivot ? 'TODO::class' : $name.'::class',
                 $serviceSetters,
                 $searchables

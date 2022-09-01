@@ -39,7 +39,7 @@
   const onOpenSearch = () => {
     emit('openSearch', props.column);
   }
-  let columnName = '';
+  let columnName = 'id';
   if ( props.search.column ) {
     let columnData = props.search.column.split('.');
     if ( columnData.length > 1 ) {
