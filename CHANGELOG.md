@@ -3,6 +3,11 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
+- Relation type selector
+- Update request fileupload esetén a required ne kerüljön be
+- File relation domain resourceban  'url' => asset(app(LifeAwardWinnerFileRepositoryService::class)->getDocumentStoragePath($this->resource->life_award_winner, //HIBA lifeAwardWinner kéne legyen
+  $this->resource->field, $this->resource)),
+
 - Újra generálás DB nélkül
 - Default gate és policy
 - public vagy nem public file választó
@@ -17,6 +22,12 @@ All notable changes to `repgenerator` will be documented in this file
 - Mezősorrend változtatása drag & drop-al
 
 ## [Unreleased]
+
+## [1.5.0] - 2022-09-01
+## Added
+- Model name checks
+- Refactored name transformation
+- Renamed route
 
 ## [1.4.9] - 2022-08-30
 ## Fixed 

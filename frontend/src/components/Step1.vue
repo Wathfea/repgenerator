@@ -2,7 +2,7 @@
 import {defineEmits, ref, computed} from 'vue'
 import axios from "axios";
 
-const emit = defineEmits(['nameChanged', 'iconChanged', 'tableExists'])
+const emit = defineEmits(['nameChanged', 'iconChanged', 'isValidTable'])
 const props = defineProps({
     modelName: {
         type: String,
@@ -18,15 +18,15 @@ const props = defineProps({
 let name = ref(props.modelName);
 let icon = ref(props.icon);
 
-const tableExists = ref(false);
+const isValidTable = ref(true);
 
 const checkTable = () => {
     emit('nameChanged',name.value)
 
-    axios.get(import.meta.env.VITE_API_URL + '/repgenerator/isTableExist/'+name.value).then((response) => {
-        tableExists.value = response.data;
+    axios.get(import.meta.env.VITE_API_URL + '/repgenerator/validateTable/'+name.value).then((response) => {
+        isValidTable.value = response.data;
 
-        emit('tableExists', tableExists)
+        emit('isValidTable', isValidTable)
     })
 }
 
@@ -36,7 +36,7 @@ const ucfirstName = computed({
     },
     set(ucName) {
         if(ucName.length < 1) {name.value = ''; return}
-        name.value = ucName.replace(/^./, ucName[0].toUpperCase());
+        name.value = ucName.replace(/^./, ucName[0].toUpperCase()).replace(/[^A-Za-z]/, '');
     }
 })
 </script>
@@ -48,7 +48,7 @@ const ucfirstName = computed({
                 <label class="block text-sm font-medium text-gray-700" for="model-name">
                     Model Name (Singular - Ex. Dog )
                 </label>
-                <p v-if="tableExists" class="mt-2 text-sm text-red-600" id="table-error">This table name is already exists</p>
+                <p v-if="!isValidTable" class="mt-2 text-sm text-red-600" id="table-error">This table name is already exists or the name is not singular</p>
                 <div class="mt-1">
                     <input id="model-name" v-focus v-model="ucfirstName" class="shadow-sm block w-full sm:text-sm  rounded-md" :class="tableExists ? 'border-red-300 text-red-900 placeholder-red-300 focus:outline-none focus:ring-red-500 focus:border-red-500' : 'border-gray-300' " required type="text" @change="checkTable">
                 </div>

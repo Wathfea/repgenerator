@@ -9,6 +9,7 @@ use Pentacom\Repgenerator\Console\PatternGenerator;
 use Pentacom\Repgenerator\Console\PatternGeneratorInit;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorFilterService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorFrontendService;
+use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorNameTransformerService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorStaticFilesService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorStubService;
@@ -59,7 +60,8 @@ class RepgeneratorServiceProvider extends ServiceProvider
                 app(RepgeneratorStubService::class),
                 app(RepgeneratorStaticFilesService::class),
                 app(RepgeneratorFilterService::class),
-                app(RepgeneratorFrontendService::class)
+                app(RepgeneratorFrontendService::class),
+                app(RepgeneratorNameTransformerService::class)
             ));
         });
 
