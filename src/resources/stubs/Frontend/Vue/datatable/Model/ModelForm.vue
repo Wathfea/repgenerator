@@ -49,6 +49,7 @@ import { Switch } from '@headlessui/vue'
 import Multiselect from '@vueform/multiselect';
 import Button from "~/components/Button";
 import PhotoUploadV2 from "~/components/PhotoUploadV2";
+import {useRoute} from "nuxt/app";
 const emit = defineEmits(['submit']);
 const props = defineProps({
   id : {
@@ -70,6 +71,7 @@ const props = defineProps({
   }
 })
 const columns = ref({});
+const currentRoute = useRoute();
 for ( let index in props.setColumns ) {
   let data = props.setColumns[index];
   if ( data.valuesGetter && !data.values ) {
@@ -80,7 +82,7 @@ for ( let index in props.setColumns ) {
   }
   columns.value[index] = {
     data : data,
-    model : null
+    model : currentRoute.query.hasOwnProperty(index) ? currentRoute.query[index] : null
   }
 }
 if ( props.id ) {
