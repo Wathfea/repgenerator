@@ -51,10 +51,11 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
     }
 
     /**
-     * @param  int  $id
+     * @param Request $request
+     * @param int $id
      * @return JsonResponse
      */
-    public function destroy($id): JsonResponse
+    public function destroy(Request $request, int $id): JsonResponse
     {
         try {
             $model = $this->getService()->getRepositoryService()->getById($id);
@@ -122,7 +123,7 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
      * @param  int  $id
      * @return JsonResponse
      */
-    public function update(Request $request, $id): JsonResponse
+    public function update(Request $request, int $id): JsonResponse
     {
         if ( !empty($this->updateRequest) ) {
             $request->validate(app($this->updateRequest)->rules());
