@@ -26,17 +26,7 @@
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <component v-if="icon" :is="heroIcons[icon]" class="mr-4 flex-shrink-0 h-6 w-6 text-gray-300" aria-hidden="true" />
                     </div>
-                    <Multiselect
-                        v-model="search"
-                        mode="tags"
-                        :searchable="true"
-                        v-if="data.valuesGetter"
-                        :options="data.values"
-                        :loading="data.valuesLoading"
-                        label="name"
-                        value-prop="id"
-                        class="column-multiselect"
-                    />
+                    <ApiMultiselect class="column-multiselect" v-if="data.valuesGetter" :set-data="data" :value="search" @change="onSearchChange"/>
                     <input v-else autocomplete="off" v-model="search" type="email" name="email" id="email" class="focus:ring-vagheggi-500 focus:border-vagheggi-500 block w-full pl-10 sm:text-sm border-gray-300"/>
                   </div>
                 </div>
@@ -62,9 +52,9 @@ import Datepicker from '@vuepic/vue-datepicker';
 import * as heroIcons from "@heroicons/vue/solid";
 import { XIcon } from '@heroicons/vue/outline'
 import Button from "~/components/Button";
-import Multiselect from '@vueform/multiselect';
 const emit = defineEmits(['close', 'search']);
 import { hu } from 'date-fns/locale';
+import ApiMultiselect from "~/components/ApiMultiselect";
 const props = defineProps({
   data: {
     required: true,
@@ -97,6 +87,9 @@ const onSearch = () => {
     value: search
   });
   onClose();
+}
+const onSearchChange = (value) => {
+  search.value = value;
 }
 const onClose = () => {
   emit('close', props.column);

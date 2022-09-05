@@ -2,7 +2,7 @@
 import {defineEmits, ref, computed} from 'vue'
 import axios from "axios";
 
-const emit = defineEmits(['nameChanged', 'iconChanged', 'isValidTable'])
+const emit = defineEmits(['nameChanged', 'iconChanged', 'isValidTable', 'newGroupNameChanged', 'newGroupIconChanged', 'chosenMenuGroupChanged'])
 const props = defineProps({
     modelName: {
         type: String,
@@ -13,7 +13,29 @@ const props = defineProps({
         type: String,
         required: false,
         default: null
-    }
+    },
+    menuGroups: {
+        type: Array,
+        required: false,
+        default: () => {
+            return []
+        }
+    },
+    setMenuGroupId: {
+        type: Number,
+        required: false,
+        default: null
+    },
+    setNewMenuGroupName: {
+        type: String,
+        required: false,
+        default: null
+    },
+    setNewMenuGroupIcon: {
+        type: String,
+        required: false,
+        default: null
+    },
 })
 let name = ref(props.modelName);
 let icon = ref(props.icon);
@@ -36,9 +58,12 @@ const ucfirstName = computed({
     },
     set(ucName) {
         if(ucName.length < 1) {name.value = ''; return}
-        name.value = ucName.replace(/^./, ucName[0].toUpperCase()).replace(/[^A-Za-z]/, '');
+        name.value = ucName.replace(/^./, ucName[0].toUpperCase()).replace(/[^A-Za-z] /, '');
     }
 })
+const chosenMenuGroup = ref(props.setMenuGroupId);
+const newMenuGroupName = ref(props.setNewMenuGroupName);
+const newMenuGroupIcon = ref(props.setNewMenuGroupIcon);
 </script>
 
 <template>
@@ -57,6 +82,29 @@ const ucfirstName = computed({
                 </label>
                 <div class="mt-1">
                     <input id="icon-name" v-model="icon" class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md" required type="text" @change="emit('iconChanged',icon)">
+                </div>
+                <label class="block text-sm font-medium text-gray-700 mt-1" for="model-name">
+                    Menu group
+                </label>
+                <div class="mt-1">
+                    <select @change="emit('chosenMenuGroupChanged',chosenMenuGroup)" v-model="chosenMenuGroup" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required="required">
+                        <option v-for="menuGroup in menuGroups" :value="menuGroup.id">{{ menuGroup.name }}</option>
+                        <option :value="0">-= New menu group =-</option>
+                    </select>
+                </div>
+                <div v-if="chosenMenuGroup === 0">
+                    <label class="block text-sm font-medium text-gray-700 mt-1" for="model-name">
+                        New menu group name
+                    </label>
+                    <div class="mt-1">
+                        <input id="group-name" v-model="newMenuGroupName" class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md" required type="text" @change="emit('newGroupNameChanged',newMenuGroupName)">
+                    </div>
+                    <label class="block text-sm font-medium text-gray-700 mt-1" for="model-name">
+                        New menu group Hero icon <a target="_blank" href="https://heroicons.com/">https://heroicons.com/</a>
+                    </label>
+                    <div class="mt-1">
+                        <input id="group-icon" v-model="newMenuGroupIcon" class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md" required type="text" @change="emit('newGroupIconChanged',newMenuGroupIcon)">
+                    </div>
                 </div>
             </div>
         </div>

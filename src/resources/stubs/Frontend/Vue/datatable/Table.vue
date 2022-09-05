@@ -2,8 +2,8 @@
   <div class="px-4 sm:px-6 lg:px-8">
     <div class="flex flex-col">
       <div class="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
-        <div class="mb-4 flex justify-end">
-          <NuxtLink :to="`/${route}/create`">
+        <div class="mb-4 flex justify-end" v-if="!disableCreate">
+          <NuxtLink :to="`/${route}/create` + getCreateFilters()">
             <Button>Új {{ modelReadableName }}</Button>
           </NuxtLink>
         </div>
@@ -75,9 +75,10 @@
                   <NuxtLink :to="`/${route}/${model.id}`" class="text-vagheggi-600 hover:text-vagheggi-900">
                     <PencilIcon class="h-6 w-6" aria-hidden="true" />
                   </NuxtLink>
-                  <NuxtLink @click="deleteModel(model.id)" class="text-vagheggi-600 hover:text-vagheggi-900 ml-2 cursor-pointer">
+                  <NuxtLink v-if="!disableDestroy" @click="deleteModel(model.id)" class="text-vagheggi-600 hover:text-vagheggi-900 ml-2 cursor-pointer">
                     <TrashIcon class="h-6 w-6" aria-hidden="true" />
                   </NuxtLink>
+                  <slot name="actions" :value="model"/>
                 </td>
               </tr>
               </tbody>
@@ -91,7 +92,7 @@
               {{ ' ' }}
               és
               {{ ' ' }}
-              <span class="font-medium">{{ Math.max(0,meta.to)  }}</span>
+              <span class="font-medium">{{ Math.max(0, meta.to)  }}</span>
               {{ ' ' }}
               közötti sorok
               {{ ' ' }}
@@ -106,9 +107,9 @@
             </Button>
             <div class="sm:hidden block">
               <p class="text-sm text-gray-700 pt-3">
-                <span class="font-medium">{{  Math.max(0,meta.from)  }}</span>
+                <span class="font-medium">{{ Math.max(0,meta.from) }}</span>
                 {{ '-' }}
-                <span class="font-medium">{{ Math.max(0,meta.to) }}</span>
+                <span class="font-medium">{{ Math.max(0,meta.to)  }}</span>
                 {{ '/' }}
                 <span class="font-medium">{{ meta.total }}</span>
               </p>
@@ -136,11 +137,11 @@ import {
 import Button from "~/components/Button";
 import ColumnHeader from "~/components/DataTable/ColumnHeader";
 import useModel from "~/components/model";
-import {useRoute} from "vue-router/dist/vue-router";
 import SearchBadge from "~/components/DataTable/SearchBadge";
 import SearchColumnPopup from "~/components/DataTable/SearchColumnPopup";
+import {useRoute} from "nuxt/app";
 
-const currentRoute = useRoute()
+const currentRoute = useRoute();
 const props = defineProps({
   modelReadableName : {
     type: String,
@@ -154,6 +155,21 @@ const props = defineProps({
   route: {
     type: String,
     required: true
+  },
+  disableCreate: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
+  createQuery: {
+    type: String,
+    required: false,
+    default: ''
+  },
+  disableDestroy: {
+    type: Boolean,
+    required: false,
+    default: false
   },
   fixedFilters: {
     required: false,
@@ -336,6 +352,19 @@ const onRemoveSearch = (column) => {
 }
 const onOpenSearch = (column) => {
   columns.value[column].isSearchOpen = true;
+}
+const getCreateFilters = () => {
+  let filters = '';
+  if ( props.fixedFilters ) {
+    filters += '?';
+    let createFilters = [];
+    for ( let index in props.fixedFilters ) {
+      let filter = props.fixedFilters[index];
+      createFilters.push(filter.column + '=' + filter.value);
+    }
+    filters += createFilters.join('&');
+  }
+  return filters;
 }
 
 getModels(currentRoute.query.page ?? 1, currentRoute.query.per_page ?? perPage, currentRoute.query)

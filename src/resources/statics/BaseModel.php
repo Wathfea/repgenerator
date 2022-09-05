@@ -19,6 +19,10 @@ use ReflectionException;
  */
 class BaseModel extends Model
 {
+    const ID_COLUMN = 'id';
+    const CREATED_AT_COLUMN = 'created_at';
+    const UPDATED_AT_COLUMN = 'updated_at';
+
     /**
      * @param $query
      *

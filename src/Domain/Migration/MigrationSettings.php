@@ -12,6 +12,12 @@ class MigrationSettings
     /** @var string */
     private string $path;
 
+    /** @var string */
+    private string $stubPath;
+
+    /** @var string */
+    private string $menuCodeStubPath;
+
     /** @var Carbon */
     private Carbon $date;
 
@@ -99,5 +105,23 @@ class MigrationSettings
     public function setStubPath(string $stubPath): void
     {
         $this->stubPath = $stubPath;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMenuCodeStubPath(): string
+    {
+        return $this->menuCodeStubPath;
+    }
+
+    /**
+     * @param string $menuCodeStubPath
+     * @return MigrationSettings
+     */
+    public function setMenuCodeStubPath(string $menuCodeStubPath): MigrationSettings
+    {
+        $this->menuCodeStubPath = $menuCodeStubPath;
+        return $this;
     }
 }
