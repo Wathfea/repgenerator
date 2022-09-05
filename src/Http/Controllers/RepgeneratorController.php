@@ -162,8 +162,6 @@ class RepgeneratorController extends Controller
                 'name' => 'string',
                 'url' => 'string',
                 'icon' => 'string',
-                'created_at' => 'timestamp',
-                'updated_at' => 'timestamp',
             ];
 
             foreach ($migrationColumns as $name => $type) {
