@@ -7,6 +7,7 @@
         "preview": "vite preview --port 4173"
     },
     "dependencies": {
+        "axios": "^0.27",
         "@kyvg/vue3-notification": "^2.3.5",
         "vue": "^3.2.36",
         "vue-loader": "^17.0.0",

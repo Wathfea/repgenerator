@@ -2,7 +2,6 @@
 
 namespace Pentacom\Repgenerator\Http\Controllers;
 
-
 use App\Http\Controllers\Controller;
 use Doctrine\DBAL\Exception;
 use FilesystemIterator;

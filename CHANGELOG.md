@@ -3,6 +3,7 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
+- Duplicated request validation
 - Relation type selector
 - Update request fileupload esetén a required ne kerüljön be
 - File relation domain resourceban  'url' => asset(app(LifeAwardWinnerFileRepositoryService::class)->getDocumentStoragePath($this->resource->life_award_winner, //HIBA lifeAwardWinner kéne legyen
