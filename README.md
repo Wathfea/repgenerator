@@ -17,6 +17,11 @@ Then run
 php artisan pattern:init http://yoursite.com
 ```
 
+
+```bash
+npm i nuxt ohmyfetch
+```
+
 ```
 php artisan vendor:publish --provider="Pentacom\Repgenerator\Domain\Pattern\Providers\RepgeneratorServiceProvider" --tag="migrations"
 ```
