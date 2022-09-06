@@ -139,7 +139,7 @@ import ColumnHeader from "./ColumnHeader";
 import useModel from "../../composables/model";
 import SearchBadge from "./SearchBadge";
 import SearchColumnPopup from "./SearchColumnPopup";
-import {useRoute} from "nuxt/app";
+import {useRoute} from "vue-router";
 
 const currentRoute = useRoute();
 const props = defineProps({

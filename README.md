@@ -19,7 +19,7 @@ php artisan pattern:init http://yoursite.com
 
 
 ```bash
-npm i nuxt ohmyfetch
+npm i nuxt ohmyfetch ts-loader typescript
 ```
 
 ```
