@@ -1,0 +1,108 @@
+<template>
+   <Table route="users" :set-columns="setColumns" model-readable-name="felhasználó" :fixed-filters="getFixedFilters()">
+     <template #cell(vagheggi_roles)="{ value, item }">
+       <NuxtLink as="span" :to="`/roles/${role.id}#felhasznalok`" v-if="value" v-for="role in value" class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-gray-500 hover:bg-vagheggi-700 text-white mr-2">
+         {{ role.name  }}
+       </NuxtLink>
+     </template>
+     <template #cell(academy_roles)="{ value, item }">
+       <NuxtLink as="span" :to="`/roles/${role.id}#felhasznalok`" v-if="value" v-for="role in value" class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-gray-500 hover:bg-vagheggi-700 text-white mr-2">{{ role.name }}</NuxtLink>
+     </template>
+     <template #cell(hosts)="{ value, item }">
+       <span v-if="value" v-for="host in value" class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-gray-500 text-white mr-2">{{ host.name }}</span>
+     </template>
+   </Table>
+</template>
+
+<script setup>
+import Table from "../DataTable/Table";
+import useModel from "~/components/model";
+const props = defineProps({
+  filterByRoleId : {
+    required : false,
+    type: Number
+  },
+});
+const getFixedFilters = () => {
+  let fixedFilters = [];
+  if ( props.filterByRoleId ) {
+    fixedFilters.push({
+      column: 'role_id',
+      value: props.filterByRoleId
+    });
+  }
+  return fixedFilters;
+}
+
+const { getModels: getRoles }  = useModel('roles', false, 'api/v1/', 1);
+const { getModels: getHosts }  = useModel('hosts', false, 'api/v1/', 1);
+const roles = getRoles();
+const getStoredRoles = () => {
+  return roles
+}
+const getRolesForHostId = (model, hostId) => {
+  let hostRoles = [];
+  for ( let index in model.credentials ) {
+    if ( model.credentials[index].host.id === hostId ) {
+      hostRoles = hostRoles.concat(model.credentials[index].roles);
+    }
+  }
+  return hostRoles;
+}
+const setColumns = {
+  'id': {
+    name: 'ID',
+    isSorting: true
+  },
+  'last_name' : {
+    name: 'Vezetéknév',
+  },
+  'first_name': 'Keresztnév',
+  'email': 'E-mail cím',
+  'company_name': 'Cég név',
+  'tax_number': {
+    name: 'Adószám'
+  },
+  'hosts' : {
+    cellGetter: (model) => {
+      let hosts = [];
+      for ( let index in model.credentials ) {
+        hosts.push(model.credentials[index].host);
+      }
+      return hosts;
+    },
+    multi: true,
+    valuesGetter: getHosts,
+    column: 'id',
+    name: 'Host',
+  },
+  'phone_number': 'Telefonszám',
+  'contact_name': 'Kapcsolattartó',
+  'vagheggi_roles': {
+    multi: true,
+    cellGetter: (model) => {
+      return getRolesForHostId(model, 1);
+    },
+    valuesGetter: getStoredRoles,
+    column: 'id',
+    name: 'Vagheggi szerep',
+  },
+  'academy_roles': {
+    multi: true,
+    cellGetter: (model) => {
+      return getRolesForHostId(model, 2);
+    },
+    valuesGetter: getStoredRoles,
+    column: 'id',
+    name: 'Academy szerep',
+  },
+  'created_at': {
+    name: 'Létrehozva',
+    isDate: true
+  },
+  'updated_at': {
+    name: 'Frissítve',
+    isDate: true
+  }
+}
+</script>
