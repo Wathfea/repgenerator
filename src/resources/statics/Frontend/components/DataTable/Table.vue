@@ -134,11 +134,11 @@ import {
   SearchIcon,
   XIcon
 } from '@heroicons/vue/outline'
-import Button from "~/components/Button";
-import ColumnHeader from "~/components/DataTable/ColumnHeader";
-import useModel from "~/components/model";
-import SearchBadge from "~/components/DataTable/SearchBadge";
-import SearchColumnPopup from "~/components/DataTable/SearchColumnPopup";
+import Button from "../Button";
+import ColumnHeader from "ColumnHeader";
+import useModel from "../../composables/model";
+import SearchBadge from "SearchBadge";
+import SearchColumnPopup from "SearchColumnPopup";
 import {useRoute} from "nuxt/app";
 
 const currentRoute = useRoute();
@@ -146,7 +146,7 @@ const props = defineProps({
   modelReadableName : {
     type: String,
     required: false,
-    default: 'bemenet'
+    default: 'model'
   },
   setColumns: {
     type: Object,

@@ -40,7 +40,9 @@ class RepgeneratorServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(RepgeneratorStaticFilesService::class, function () {
-            return (new RepgeneratorStaticFilesService(__DIR__.'/../../../resources/statics/'));
+            return (new RepgeneratorStaticFilesService(__DIR__.'/../../../resources/statics/Backend/',
+                __DIR__.'/../../../resources/statics/Frontend/'
+            ));
         });
 
         $this->app->singleton(RepgeneratorFilterService::class, function () {
@@ -49,9 +51,14 @@ class RepgeneratorServiceProvider extends ServiceProvider
             ));
         });
 
+        $this->app->singleton(RepgeneratorNameTransformerService::class, function () {
+            return (new RepgeneratorNameTransformerService());
+        });
+
         $this->app->singleton(RepgeneratorFrontendService::class, function () {
             return (new RepgeneratorFrontendService(
-                app(RepgeneratorStubService::class)
+                app(RepgeneratorStubService::class),
+                app(RepgeneratorNameTransformerService::class),
             ));
         });
 

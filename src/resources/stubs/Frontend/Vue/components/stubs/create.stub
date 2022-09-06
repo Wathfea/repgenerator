@@ -1,8 +1,0 @@
-<template>
-    <ModelCreate :columns="getColumns()" :store-method="storeUser"/>
-</template>
-<script setup>
-import ModelCreate from "~/components/Model/ModelCreate";
-import {useUsers} from "~/composables/useUsers";
-const { storeUser, getColumns } = useUsers();
-</script>

@@ -180,7 +180,7 @@ class RepgeneratorService
         $callback('API Routes is ready!');
 
 
-        !$isGenerateFrontend ?: $this->frontend($this->modelName, $columns, $callback);
+        !$isGenerateFrontend ?: $this->frontend2($this->modelName, $columns, $callback);
 
         $callback("Code generation has saved you from typing at least ".CharacterCounterStore::$charsCount." characters");
         $minutes = floor((CharacterCounterStore::$charsCount / 5) / 25);
@@ -204,41 +204,29 @@ class RepgeneratorService
      */
     private function createDirectories(): void
     {
-        if (!file_exists($path = app_path("Abstraction/Controllers"))) {
-            mkdir($path, 0777, true);
-        }
+        foreach ( [
+                      "Abstraction",
+                      "Abstraction/Filter",
+                      "Abstraction/Models",
+                      "Abstraction/Repository",
+                      "Abstraction/Controllers",
+                      "Abstraction/Enums",
+                      "Abstraction/Traits",
+                      "Domain",
+                  ] as $folder ) {
+            if (!file_exists($path = app_path($folder))) {
+                mkdir($path, 0777, true);
+            }
+        };
 
-        if (!file_exists($path = app_path("Domain"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Filter"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Models"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Repository"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Controllers"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Enums"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path('Abstraction/Traits'))) {
-            mkdir($path, 0777, true);
-        }
+        foreach ( [
+            'js', 'js/Abstraction', 'js/Domain',
+            'js/Abstraction/components', 'js/Abstraction/composables', 'js/Abstraction/utils'
+        ] as $folder ) {
+            if (!file_exists($path = resource_path($folder))) {
+                mkdir($path, 0777, true);
+            }
+        };
     }
 
     /**
@@ -247,6 +235,7 @@ class RepgeneratorService
     private function generateStaticFiles($callback): void
     {
         $staticFiles = $this->repgeneratorStaticFilesService->copyStaticFiles();
+        $staticFiles = array_merge($staticFiles, $this->repgeneratorStaticFilesService->copyStaticFrontendFiles());
         foreach ($staticFiles as $staticFile) {
             $this->generatedFiles[] = $staticFile;
             CharacterCounterStore::addFileCharacterCount($staticFile->path);
@@ -1037,6 +1026,20 @@ class RepgeneratorService
 
         $callback('Frontend components are ready!');
     }
+    /**
+     * @param  string  $name
+     * @param  array  $columns
+     * @param $callback
+     */
+    private function frontend2(string $name, array $columns, $callback): void
+    {
+
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable2($name, $columns);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComponents2($name, $columns);
+
+        $callback('Frontend components are ready!');
+    }
+
 
     /**
      * @param  mixed  $cmd

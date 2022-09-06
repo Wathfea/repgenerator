@@ -1,0 +1,19 @@
+<template>
+  <ModelEdit :update-method="update{{ modelNameSingularUcfirst }}" :dataFunction="get{{ modelNameSingularUcfirst }}" :id="modelId" :setCurrentTab="currentTab" :addTabs="addTabs" :columns="getColumns()" @currentTabChanged="onCurrentTabChanged">
+
+  </ModelEdit>
+</template>
+<script setup>
+import ModelEdit from "../../../Abstraction/components/Model/ModelEdit";
+import {useRoute} from "nuxt/app";
+import {ref} from "vue";
+import {use{{ modelNamePluralUcfirst }}} from "~/composables/use{{ modelNamePluralUcfirst }}";
+const { get{{ modelNameSingularUcfirst }}, getColumns, update{{ modelNameSingularUcfirst }} } = use{{ modelNamePluralUcfirst }}();
+const currentRoute = useRoute();
+const currentTab = ref(currentRoute.hash.length ? currentRoute.hash : '#details');
+const onCurrentTabChanged = (tab) => {
+  currentTab.value = tab;
+}
+const modelId = parseInt(currentRoute.params.id);
+const addTabs = [];
+</script>

@@ -9,11 +9,54 @@ use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorStaticFileAdapter;
  */
 class RepgeneratorStaticFilesService
 {
-    public function __construct(protected string $staticFilesLocation)
+    public function __construct(protected string $staticFilesLocation, protected string $staticFrontendFilesLocation)
     {
 
     }
 
+    public function copyStaticFrontendFiles(string $folderPath = 'js/Abstraction/'): array {
+        $files = [
+            "components/DataTable/ColumnHeader.vue",
+            "components/DataTable/SearchBadge.vue",
+            "components/DataTable/SimpleColumnHeader.vue",
+            "components/DataTable/SearchColumnPopup.vue",
+            "components/DataTable/Table.vue",
+            "components/Model/ModelCreate.vue",
+            "components/Model/ModelEdit.vue",
+            "components/Model/ModelForm.vue",
+            "components/Model/ModelTabs.vue",
+            "components/Notification/Notification.vue",
+            "components/Notification/Notifications.vue",
+            "components/Button.vue",
+            "components/PhotoUpload.vue",
+            "composables/model.js",
+            "composables/useNotifications.ts",
+            'utils/$larafetch.ts',
+        ];
+
+        $generatedFiles = [];
+        foreach ($files as $fileOriginal) {
+            $fileParts = explode('/', $fileOriginal);
+            foreach ( $fileParts as $index => $filePart ) {
+                if ( end($fileParts) ==  $filePart ) {
+                    continue;
+                }
+                $partsSoFar = implode('/',array_slice($fileParts,0, $index+1));
+                if ( !is_dir(resource_path($folderPath . $partsSoFar))) {
+                    mkdir(resource_path($folderPath . $partsSoFar), 0777, true);
+                }
+            }
+            $nameWithExtension = end($fileParts);
+            $file = $this->getFrontendStatic($fileOriginal);
+
+            //if (!file_exists($path = app_path($fileOriginal))) {
+            $path = resource_path($folderPath. $fileOriginal);
+            file_put_contents($path, $file);
+            $generatedFiles[] = new RepgeneratorStaticFileAdapter($nameWithExtension, $path);
+            //}
+        }
+        return $generatedFiles;
+    }
 
     /**
      * @return RepgeneratorStaticFileAdapter[]
@@ -66,5 +109,14 @@ class RepgeneratorStaticFilesService
     public function getStatic(string $name): bool|string
     {
         return file_get_contents($this->staticFilesLocation.$name.".php");
+    }
+
+    /**
+     * @param  string  $name
+     * @return false|string
+     */
+    public function getFrontendStatic(string $name): bool|string
+    {
+        return file_get_contents($this->staticFrontendFilesLocation.$name);
     }
 }

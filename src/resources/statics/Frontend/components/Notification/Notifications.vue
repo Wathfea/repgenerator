@@ -4,7 +4,7 @@
   </div>
 </template>
 <script setup>
-  import {useNotifications} from "~/composables/useNotifications";
-  import Notification from "./Notification";
+  import {useNotifications} from "../../composables/useNotifications";
+  import Notification from "Notification";
   const { notifications } = useNotifications();
 </script>

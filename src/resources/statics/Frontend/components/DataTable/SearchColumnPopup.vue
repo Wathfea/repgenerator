@@ -51,7 +51,7 @@ import '@vuepic/vue-datepicker/dist/main.css'
 import Datepicker from '@vuepic/vue-datepicker';
 import * as heroIcons from "@heroicons/vue/solid";
 import { XIcon } from '@heroicons/vue/outline'
-import Button from "~/components/Button";
+import Button from "../Button";
 const emit = defineEmits(['close', 'search']);
 import { hu } from 'date-fns/locale';
 import ApiMultiselect from "~/components/ApiMultiselect";

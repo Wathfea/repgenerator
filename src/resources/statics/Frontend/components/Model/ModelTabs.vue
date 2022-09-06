@@ -2,7 +2,6 @@
   <div>
     <div class="sm:hidden">
       <label for="tabs" class="sr-only">Select a tab</label>
-      <!-- Use an "onChange" listener to redirect the user to the selected tab URL. -->
       <select id="tabs" name="tabs" class="block w-full focus:ring-vagheggi-500 focus:border-vagheggi-500 border-gray-300 rounded-md">
         <option v-for="tab in tabs" :key="tab.name" :selected="tab.current">{{ tab.name }}</option>
       </select>
