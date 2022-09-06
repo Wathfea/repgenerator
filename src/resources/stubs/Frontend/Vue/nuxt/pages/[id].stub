@@ -9,11 +9,11 @@ definePageMeta({ middleware: ["auth"] });
 <template>
   <NuxtLayout name="app-layout">
     <Head>
-      <Title>Vagheggi CMS</Title>
+      <Title>CMS</Title>
     </Head>
-    <CMSDashboard page="users" title="" :pages="[
-        {href: '/users', name: 'Felhasználók', current: false, icon: 'UserIcon'},
-        {href: '/users/' + currentRoute.params.id, name: 'Felhazsnáló szerkesztése', current: true, icon: 'UserCircleIcon'},
+    <CMSDashboard page="{{ modelNamePlural }}" title="" :pages="[
+        {href: '/{{ modelNamePlural }}', name: '{{ modelNamePluralUppercase }}', current: false, icon: '{{ modelIcon }}'},
+        {href: '/{{ modelNamePlural }}/' + currentRoute.params.id, name: 'Edit {{ modelNameUppercase }}', current: true, icon: '{{ modelIcon }}'},
       ]">
       <UserEdit/>
     </CMSDashboard>

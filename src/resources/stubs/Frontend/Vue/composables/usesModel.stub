@@ -1,0 +1,15 @@
+import useModel from "~/components/model";
+
+export const useUsers  = () => {
+    const getColumns = () => {
+        return {{ columns }}
+    }
+    const { getModels: get{{ modelNamePluralUppercase }}, getModel: get{{ modelNameUppercase }}, storeModel: store{{ modelNameUppercase }}, updateModel: update{{ modelNameUppercase }} } = useModel('{{ modelNamePlural }}', false);
+    return {
+        getColumns,
+        get{{ modelNamePluralUppercase }},
+        get{{ modelNameUppercase }},
+        store{{ modelNameUppercase }},
+        update{{ modelNameUppercase }}
+    }
+}
