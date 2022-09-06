@@ -1,0 +1,15 @@
+import useModel from "../../../Abstraction/composables/model";
+
+export const useUsers  = () => {
+    const getColumns = () => {
+        return {{ columns }}
+    }
+    const { getModels: get{{ modelNamePluralUcfirst }}, getModel: get{{ modelNameSingularUcfirst }}, storeModel: store{{ modelNameSingularUcfirst }}, updateModel: update{{ modelNameSingularUcfirst }} } = useModel('{{ modelNamePluralLowercase }}', false);
+    return {
+        getColumns,
+        get{{ modelNamePluralUcfirst }},
+        get{{ modelNameSingularUcfirst }},
+        store{{ modelNameSingularUcfirst }},
+        update{{ modelNameSingularUcfirst }}
+    }
+}

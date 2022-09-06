@@ -8,10 +8,10 @@ definePageMeta({ middleware: ["auth"] });
 <template>
   <NuxtLayout name="app-layout">
     <Head>
-      <Title>Vagheggi CMS</Title>
+      <Title>CMS</Title>
     </Head>
-    <CMSDashboard page="users" title="Felhasználók" :pages="[{href: '/users', name: 'Felhasználók', current: true, icon: 'UserIcon'}]">
-      <UserIndex/>
+    <CMSDashboard page="{{ modelNamePlural }}" title="{{ modelNameUppercase }}" :pages="[{href: '/{{ modelNamePlural }}', name: '{{ modelNameUppercase }}', current: true, icon: '{{ modelIcon }}'}]">
+      <{{ modelNameUppercase }}Index/>
     </CMSDashboard>
   </NuxtLayout>
 </template>

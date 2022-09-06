@@ -1,0 +1,3 @@
+/** @var CrudMenuService $crudMenuService */
+$crudMenuService = app(CrudMenuService::class);
+$crudMenuService->saveMenuUsingData('{{ name }}', '{{ url }}', '{{ icon }}', 1, {{ crudMenuGroupId }}, '{{ newMenuGroupName }}', '{{ newMenuGroupIcon }}');

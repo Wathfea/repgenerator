@@ -204,8 +204,9 @@ class BaseQueryFilter extends QueryFilter
             $columnData = explode(':', $search);
             $columnName = explode('.', $columnData[0])[0];
             $acceptedValue = $columnData[1];
-            if ( method_exists($this, $columnName) ) {
-                $this->$columnName($acceptedValue);
+            $methodName = lcfirst(str_replace('_', '', ucwords($columnName, '_')));
+            if ( method_exists($this, $methodName) ) {
+                $this->$methodName($acceptedValue);
             } else {
                 foreach ( $this->getSearchableColumns() as $index => $value ) {
                     $isSearching = false;

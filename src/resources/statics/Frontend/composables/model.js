@@ -1,12 +1,12 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import {$larafetch} from "~/utils/$larafetch";
-import {useNotifications} from "~/composables/useNotifications";
+import {$larafetch} from "../utils/$larafetch";
+import {useNotifications} from "useNotifications";
 
 export default function useModel(route, setQuery = true, prefix = 'api/v1/', cacheVersion = null, localCache = false, fixedFilters = []) {
     const model = ref({})
     const models = ref([])
-
+    const currentRoute = useRoute()
     const errors = ref('')
     const router = useRouter()
     const { addWarning, addSuccess, addInfo } = useNotifications();
@@ -45,7 +45,6 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
         if ( isSearching ) {
             isSearching.value = true;
         }
-        const currentRoute = useRoute()
         if ( currentRoute && currentRoute.query !== setParams && setQuery ) {
             await router.push({path: currentRoute.path, query: setParams, hash: currentRoute.hash});
         }
@@ -131,7 +130,9 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
                 if ( typeof data[key] === 'boolean' ) {
                     data[key] = data[key] ? 1 : 0;
                 }
-                formData.append(key, data[key])
+                if ( data[key] !== null ) {
+                    formData.append(key, data[key])
+                }
             }
         });
         return formData;
@@ -144,12 +145,11 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
                 method: 'post',
                 body: convertDataToFormData(data),
             })
-            console.log(response);
             if ( response.success ) {
                 await router.push({path: '/' + route });
-                addSuccess('Sikeresen mentve', data.message);
+                addSuccess('Sikeresen mentve', response.message);
             } else {
-                addWarning('Sikertelen mentés', data.failed);
+                addWarning('Sikertelen mentés', response.failed);
             }
         } catch (e) {
             if (e.response ) {
@@ -180,8 +180,9 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
                 switch(e.response.status)
                 {
                     case 422:
-                        for (const key in e.response.data.errors) {
-                            errors.value += e.response.data.errors[key][0] + ' ';
+                        let data = e.response.data || e.response._data;
+                        for (const key in data.errors) {
+                            errors.value += data.errors[key][0] + ' ';
                         }
                         addWarning('Sikertelen mentés', data.message);
                         break;
@@ -191,10 +192,20 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
     }
 
     const destroyModel = async (id) => {
-        await $larafetch(`${prefix}${route}/${id}`, {
+        let response = await $larafetch(`${prefix}${route}/${id}`, {
             method: 'delete'
         })
-        addSuccess('Sikeresen törölve');
+        switch(e.response.status) {
+            case 202:
+                addWarning('Nem sikerült törölni');
+                break;
+            case 200:
+                addSuccess('Sikeresen törölve');
+                break;
+            default:
+                addSuccess('Sikertelen törlés');
+                break;
+        }
     }
 
     return {

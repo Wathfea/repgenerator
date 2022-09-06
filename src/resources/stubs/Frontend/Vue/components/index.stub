@@ -1,0 +1,20 @@
+<template>
+   <Table route="{{ modelNamePluralLowercase }}" :set-columns="setColumns" model-readable-name="{{ modelNameSingularLowercase }}" :fixed-filters="getFixedFilters()">
+
+   </Table>
+</template>
+
+<script setup>
+import Table from "../../../Abstraction/components/DataTable/Table";
+const props = defineProps({});
+const getFixedFilters = () => {
+  let fixedFilters = [];
+  return fixedFilters;
+}
+const setColumns = {
+  'id': {
+    name: 'ID',
+    isSorting: true
+  }
+}
+</script>

@@ -18,7 +18,7 @@
           />
         </div>
         <div v-else-if="column.data.isAvatar" class="mt-1 mb-4 flex items-center">
-          <PhotoUploadV2 :column="key" :data="column.model" @changed="onPhotoChanged"/>
+          <PhotoUpload :column="key" :data="column.model" @changed="onPhotoChanged"/>
         </div>
         <div v-else-if="column.data.isUpload" class="mt-1 mb-4 flex items-center">
           <span class="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100 border-2">
@@ -47,8 +47,8 @@
 import {ref} from "vue";
 import { Switch } from '@headlessui/vue'
 import Multiselect from '@vueform/multiselect';
-import Button from "~/components/Button";
-import PhotoUploadV2 from "~/components/PhotoUploadV2";
+import Button from "../Button";
+import PhotoUpload from "../PhotoUpload";
 import {useRoute} from "nuxt/app";
 const emit = defineEmits(['submit']);
 const props = defineProps({

@@ -1,0 +1,8 @@
+<template>
+    <ModelCreate :columns="getColumns()" :store-method="store{{ modelNameSingularUcfirst }}"/>
+</template>
+<script setup>
+import ModelCreate from "../../../Abstraction/components/Model/ModelCreate";
+import {use{{ modelNamePluralUcfirst }}} from "../composables/use{{ modelNamePluralUcfirst }}";
+const { store{{ modelNameSingularUcfirst }}, getColumns } = use{{ modelNamePluralUcfirst }}();
+</script>

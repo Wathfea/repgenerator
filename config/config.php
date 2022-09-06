@@ -6,6 +6,7 @@
 return [
     // Migration stub file location.
     'migration_stub_path' => __DIR__.'/../src/resources/stubs/Migration.stub',
+    'migration_menu_code_stub_path' => __DIR__.'/../src/resources/stubs/MigrationMenuCode.stub',
 
     // Where the generated files will be saved.
     'migration_target_path' => base_path('database/migrations'),

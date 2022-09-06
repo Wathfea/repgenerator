@@ -36,6 +36,9 @@ class GenerationRequest extends FormRequest
             'columns.*.values' => ['nullable', 'string'],
             'columns.*.default' => ['nullable', 'string'],
             'columns.*.index' => ['nullable', 'array'],
+            'columns.*.menu_group_id' => ['nullable', 'integer', 'exists:crud_menu_groups,id'],
+            'columns.*.new_menu_group_name' => ['nullable', 'string'],
+            'columns.*.new_menu_group_icon' => ['nullable', 'string'],
         ];
     }
 }
