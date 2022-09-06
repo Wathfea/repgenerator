@@ -36,7 +36,7 @@ const ucfirstName = computed({
     },
     set(ucName) {
         if(ucName.length < 1) {name.value = ''; return}
-        name.value = ucName.replace(/^./, ucName[0].toUpperCase()).replace(/[^A-Za-z]/, '');
+        name.value = ucName.replace(/^./, ucName[0].toUpperCase()).replace(/[^A-Za-z] /, '');
     }
 })
 </script>
