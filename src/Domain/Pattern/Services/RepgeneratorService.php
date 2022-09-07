@@ -285,7 +285,7 @@ class RepgeneratorService
             [
                 $name,
                 strtolower(Str::plural($name)),
-                Str::lower(str_replace(' ', '_', Str::plural($name)))
+                Str::snake($name, '-')
             ],
             $this->repgeneratorStubService->getStub('apiRoutes')
         );
