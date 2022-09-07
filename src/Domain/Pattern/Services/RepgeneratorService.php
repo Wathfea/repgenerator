@@ -189,13 +189,15 @@ class RepgeneratorService
         $callback("If we count an average 5 char word and an average 25 WPM we saved you around {$minutes} minutes -> {$hours} hours");
 
         if ($migrationName) {
-            app()->register(CrudMenuServiceProvider::class);
-            Artisan::call('migrate',
-                [
-                    '--path' => '/database/migrations/'.$migrationName,
-                    '--force' => true
-                ]);
-            $callback($migrationName.' migration migrated to database!');
+            if(class_exists(CrudMenuServiceProvider::class)) {
+                app()->register(CrudMenuServiceProvider::class);
+                Artisan::call('migrate',
+                    [
+                        '--path' => '/database/migrations/'.$migrationName,
+                        '--force' => true
+                    ]);
+                $callback($migrationName.' migration migrated to database!');
+            }
         }
     }
 
@@ -745,10 +747,16 @@ class RepgeneratorService
     private function service(string $name, bool $generatePivot): void
     {
         $code = '';
+        $di = [];
+
         $codeStubPath = 'codes/' . $name . 'Service';
         if ( $this->repgeneratorStubService->doesStubExist($codeStubPath) ) {
             $code = $this->repgeneratorStubService->getStub($codeStubPath);
+
+            $di[] =  ", private ". $name. "Service $". $this->modelNameSingularLowerCase;
         }
+
+
         $serviceTemplate = str_replace(
             [
                 '{{modelName}}',
@@ -756,13 +764,15 @@ class RepgeneratorService
                 '{{modelNameSingularLowerCase}}',
                 '{{modelType}}',
                 '{{code}}',
+                '{{di}}',
             ],
             [
                 $name,
                 $this->modelNamePluralLowerCase,
                 $this->modelNameSingularLowerCase,
                 $generatePivot ? 'Pivot' : 'Model',
-                $code
+                $code,
+                $di
             ],
             $this->repgeneratorStubService->getStub('Service')
         );

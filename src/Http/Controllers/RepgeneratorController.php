@@ -64,8 +64,8 @@ class RepgeneratorController extends Controller
         //Only check  if not regenerate
         if(!$regenerate) {
             //Detect if CrudMenus exists or we need to create it
-            $messages[] = $this->shouldCreateCrudMenuGroupTable($table);
             $messages[] = $this->shouldCreateCrudMenuTable($table);
+            $messages[] = $this->shouldCreateCrudMenuGroupTable($table);
             sleep(1);
         }
 

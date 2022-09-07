@@ -16,7 +16,9 @@ class {{modelName}}Service implements Has{{modelType}}RepositoryService
         return $this->repositoryService;
     }
 
-    public function __construct(private {{modelName}}RepositoryService $repositoryService) {
+    public function __construct(private {{modelName}}RepositoryService $repositoryService {{di}}) {
 
     }
+
+    {{code}}
 }

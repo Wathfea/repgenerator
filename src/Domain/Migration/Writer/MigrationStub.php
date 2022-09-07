@@ -56,7 +56,7 @@ class MigrationStub
                 '{{ url }}' => $url,
                 '{{ icon }}' => $iconName,
                 '{{ name }}' => $name,
-                '{{ crudMenuGroupId }}' => !empty($menuGroupId) ? $menuGroupId : null,
+                '{{ crudMenuGroupId }}' => !empty($menuGroupId) ? $menuGroupId : 'null',
                 '{{ newMenuGroupName }}' => $newMenuGroupName,
                 '{{ newMenuGroupIcon }}' => $newMenuGroupIcon,
             ];
