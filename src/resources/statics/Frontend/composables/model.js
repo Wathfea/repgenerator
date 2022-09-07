@@ -195,7 +195,7 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
         let response = await $larafetch(`${prefix}${route}/${id}`, {
             method: 'delete'
         })
-        switch(e.response.status) {
+        switch(response.status) {
             case 202:
                 addWarning('Nem sikerült törölni');
                 break;
