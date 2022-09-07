@@ -140,7 +140,7 @@ class RepgeneratorService
         $this->createDirectories();
         $callback('Directories generated!');
 
-        $this->generateStaticFiles($callback);
+        $this->generateStaticFiles($requestData['chosen_output_framework'], $callback);
 
         $this->config($this->modelName, $requestData);
         $callback('Config is ready!');
@@ -230,12 +230,13 @@ class RepgeneratorService
     }
 
     /**
+     * @param string $frontendFramework
      * @param $callback
      */
-    private function generateStaticFiles($callback): void
+    private function generateStaticFiles(string $frontendFramework, $callback): void
     {
         $staticFiles = $this->repgeneratorStaticFilesService->copyStaticFiles();
-        $staticFiles = array_merge($staticFiles, $this->repgeneratorStaticFilesService->copyStaticFrontendFiles());
+        $staticFiles = array_merge($staticFiles, $this->repgeneratorStaticFilesService->copyStaticFrontendFiles($frontendFramework));
         foreach ($staticFiles as $staticFile) {
             $this->generatedFiles[] = $staticFile;
             CharacterCounterStore::addFileCharacterCount($staticFile->path);

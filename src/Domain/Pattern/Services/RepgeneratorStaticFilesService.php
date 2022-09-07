@@ -14,7 +14,7 @@ class RepgeneratorStaticFilesService
 
     }
 
-    public function copyStaticFrontendFiles(string $folderPath = 'js/Abstraction/'): array {
+    public function copyStaticFrontendFiles(string $framework, string $folderPath = 'js/Abstraction/'): array {
         $files = [
             "components/DataTable/ColumnHeader.vue",
             "components/DataTable/SearchBadge.vue",
@@ -51,6 +51,15 @@ class RepgeneratorStaticFilesService
             }
             $nameWithExtension = end($fileParts);
             $file = $this->getFrontendStatic($fileOriginal);
+            if ( $framework == 'vue' ) {
+                $replacements = [
+                    'import {useRoute} from "nuxt/app";' => 'import {useRoute} from "vue-router";',
+                    'NuxtLink' => 'RouterLink'
+                ];
+                foreach ( $replacements as $find => $replacement ) {
+                    $file = str_replace($find, $replacement, $file);
+                }
+            }
 
             //if (!file_exists($path = app_path($fileOriginal))) {
             $path = resource_path($folderPath. $fileOriginal);

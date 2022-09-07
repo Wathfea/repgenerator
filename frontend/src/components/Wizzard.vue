@@ -70,6 +70,7 @@ const generating = ref(false);
 const chosenMenuGroupId = ref(0);
 const newMenuGroupName = ref('');
 const newMenuGroupIcon = ref('');
+const chosenOutputFramework = ref('nuxt');
 const generate = () => {
     generating.value = true;
     let payload = {
@@ -78,7 +79,8 @@ const generate = () => {
         columns: columns.value,
         menu_group_id: chosenMenuGroupId.value,
         new_menu_group_name: chosenMenuGroupId.value === 0 ? newMenuGroupName.value : null,
-        new_menu_group_icon: chosenMenuGroupId.value === 0 ? newMenuGroupIcon.value : null
+        new_menu_group_icon: chosenMenuGroupId.value === 0 ? newMenuGroupIcon.value : null,
+        chosen_output_framework: chosenOutputFramework.value
     };
     for (let index in step1Options.value) {
         payload[index] = step1Options.value[index].enabled;
@@ -145,6 +147,10 @@ const onNewGroupNameChanged = (name) => {
 
 const onNewGroupIconChanged = (icon) => {
     newMenuGroupIcon.value = icon;
+}
+
+const onChosenOutputFramework = (framework) => {
+    chosenOutputFramework.value = framework;
 }
 
 // 2. Columns
@@ -265,6 +271,7 @@ getMenuGroups();
                 :set-menu-group-id="chosenMenuGroupId"
                 :set-new-menu-group-name="newMenuGroupName"
                 :set-new-menu-group-icon="newMenuGroupIcon"
+                :set-chosen-output-framework="chosenOutputFramework"
                 :icon="icon" :modelName="modelName"
                 @iconChanged="onIconChanged"
                 @nameChanged="onNameChanged"
@@ -272,6 +279,7 @@ getMenuGroups();
                 @chosenMenuGroupChanged="onChosenMenuGroupChanged"
                 @newGroupNameChanged="onNewGroupNameChanged"
                 @newGroupIconChanged="onNewGroupIconChanged"
+                @chosenOutputFramework="onChosenOutputFramework"
             />
 
             <Options :options="step1Options" @selectOption="onSelectOption"/>
