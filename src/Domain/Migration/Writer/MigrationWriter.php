@@ -30,6 +30,8 @@ class MigrationWriter
      * @param string $url
      * @param string $iconName
      * @param int|null $menuGroupId
+     * @param string|null $newMenuGroupName
+     * @param string|null $newMenuGroupIcon
      */
     public function writeTo(
         string $path,

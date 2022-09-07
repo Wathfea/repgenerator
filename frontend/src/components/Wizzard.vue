@@ -77,8 +77,8 @@ const generate = () => {
         icon: icon.value,
         columns: columns.value,
         menu_group_id: chosenMenuGroupId.value,
-        new_menu_group_name: chosenMenuGroupId.value !== 0 ? newMenuGroupName.value : null,
-        new_menu_group_icon: chosenMenuGroupId.value !== 0 ? newMenuGroupIcon.value : null
+        new_menu_group_name: chosenMenuGroupId.value === 0 ? newMenuGroupName.value : null,
+        new_menu_group_icon: chosenMenuGroupId.value === 0 ? newMenuGroupIcon.value : null
     };
     for (let index in step1Options.value) {
         payload[index] = step1Options.value[index].enabled;
