@@ -64,8 +64,8 @@ class RepgeneratorController extends Controller
         //Only check  if not regenerate
         if(!$regenerate) {
             //Detect if CrudMenus exists or we need to create it
-            $messages[] = $this->shouldCreateCrudMenuTable($table);
-            $messages[] = $this->shouldCreateCrudMenuGroupTable($table);
+            $messages[] = $this->shouldCreateCrudMenuTable($table, $request);
+            $messages[] = $this->shouldCreateCrudMenuGroupTable($table, $request);
             sleep(1);
         }
 
@@ -149,10 +149,11 @@ class RepgeneratorController extends Controller
 
     /**
      * @param  mixed  $table
+     * @param  GenerationRequest  $request
      * @return array
      * @throws Exception
      */
-    private function shouldCreateCrudMenuTable(mixed $table): array
+    private function shouldCreateCrudMenuTable(mixed $table, GenerationRequest $request): array
     {
         $messages = [];
         if (!DB::connection()->getDoctrineSchemaManager()->tablesExist(Str::plural(self::CRUD_MENU_TABLE_NAME))) {
@@ -179,6 +180,7 @@ class RepgeneratorController extends Controller
 
             $data = [
                 'name' => self::CRUD_MENU_TABLE_NAME,
+                'chosen_output_framework' => $request->chosen_output_framework
             ];
 
             $this->repgeneratorService->generate(
@@ -199,10 +201,11 @@ class RepgeneratorController extends Controller
 
     /**
      * @param  mixed  $table
+     * @param  GenerationRequest  $request
      * @return array
      * @throws Exception
      */
-    private function shouldCreateCrudMenuGroupTable(mixed $table): array
+    private function shouldCreateCrudMenuGroupTable(mixed $table, GenerationRequest $request): array
     {
         $messages = [];
         if (!DB::connection()->getDoctrineSchemaManager()->tablesExist(Str::plural(self::CRUD_MENU_GROUP_TABLE_NAME))) {
@@ -227,6 +230,7 @@ class RepgeneratorController extends Controller
 
             $data = [
                 'name' => self::CRUD_MENU_GROUP_TABLE_NAME,
+                'chosen_output_framework' => $request->chosen_output_framework
             ];
 
             $this->repgeneratorService->generate(

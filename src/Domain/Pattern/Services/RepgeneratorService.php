@@ -3,6 +3,7 @@
 namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 
 use App\Domain\CrudMenu\Providers\CrudMenuServiceProvider;
+use App\Domain\CrudMenuGroup\Providers\CrudMenuGroupServiceProvider;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
@@ -193,6 +194,11 @@ class RepgeneratorService
         if ($migrationName) {
             if(class_exists(CrudMenuServiceProvider::class)) {
                 app()->register(CrudMenuServiceProvider::class);
+
+                if(class_exists(CrudMenuGroupServiceProvider::class)) {
+                    app()->register(CrudMenuGroupServiceProvider::class);
+                }
+
                 Artisan::call('migrate',
                     [
                         '--path' => '/database/migrations/'.$migrationName,
@@ -791,7 +797,7 @@ class RepgeneratorService
                 $this->modelNameSingularLowerCase,
                 $generatePivot ? 'Pivot' : 'Model',
                 $code,
-                $this->implodeLines($uses, 2),
+                $this->implodeLines($uses, 0),
             ],
             $this->repgeneratorStubService->getStub('Service')
         );
