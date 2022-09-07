@@ -404,7 +404,9 @@ class RepgeneratorService
                 continue;
             }
             $fillableStr[] = "'".$column->name."',";
-            $columnConstants[] = 'const ' . Str::upper($column->name) . '_COLUMN = "' . $column->name . '";';
+            if ( $column->name != 'id' ) {
+                $columnConstants[] = 'const ' . Str::upper($column->name) . '_COLUMN = "' . $column->name . '";';
+            }
 
             if($column->is_hashed) {
                 if(!in_array('use Illuminate\Support\Facades\Hash;', $use)) {
