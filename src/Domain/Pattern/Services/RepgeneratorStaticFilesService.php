@@ -51,15 +51,9 @@ class RepgeneratorStaticFilesService
             }
             $nameWithExtension = end($fileParts);
             $file = $this->getFrontendStatic($fileOriginal);
-            if ( $framework == 'vue' ) {
-                $replacements = [
-                    'import {useRoute} from "nuxt/app";' => 'import {useRoute} from "vue-router";',
-                    'NuxtLink' => 'RouterLink'
-                ];
-                foreach ( $replacements as $find => $replacement ) {
-                    $file = str_replace($find, $replacement, $file);
-                }
-            }
+
+            $frontendReplacer = app(RepgeneratorFrontendFrameworkHandlerService::class);
+            $file = $frontendReplacer->replaceForFramework($framework, $file);
 
             //if (!file_exists($path = app_path($fileOriginal))) {
             $path = resource_path($folderPath. $fileOriginal);
