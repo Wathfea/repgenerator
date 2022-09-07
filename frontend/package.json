@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "scripts": {
         "dev": "vite --port 3030",
-        "build": "vite build --base=EXAMPLE_URL/repgenerator/wizzard/ --emptyOutDir",
+        "build": "vite build --base=http://repgenerator.test/repgenerator/wizzard/ --emptyOutDir",
         "preview": "vite preview --port 4173"
     },
     "dependencies": {

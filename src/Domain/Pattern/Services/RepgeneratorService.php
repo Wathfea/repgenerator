@@ -755,6 +755,11 @@ class RepgeneratorService
 
             $di[] =  ", private ". $name. "Service $". $this->modelNameSingularLowerCase;
         }
+        $uses = '';
+        $usesStubPath = 'uses/' . $name . 'Service';
+        if ( $this->repgeneratorStubService->doesStubExist($usesStubPath) ) {
+            $uses = $this->repgeneratorStubService->getStub($usesStubPath);
+        }
 
 
         $serviceTemplate = str_replace(
@@ -765,6 +770,7 @@ class RepgeneratorService
                 '{{modelType}}',
                 '{{code}}',
                 '{{di}}',
+                '{{uses}}',
             ],
             [
                 $name,
@@ -772,7 +778,8 @@ class RepgeneratorService
                 $this->modelNameSingularLowerCase,
                 $generatePivot ? 'Pivot' : 'Model',
                 $code,
-                $di
+                $di,
+                $uses,
             ],
             $this->repgeneratorStubService->getStub('Service')
         );
