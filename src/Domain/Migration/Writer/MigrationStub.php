@@ -33,6 +33,8 @@ class MigrationStub
      * @param string $url The url at which the menu is found
      * @param string $iconName
      * @param int|null $menuGroupId
+     * @param string|null $newMenuGroupName
+     * @param string|null $newMenuGroupIcon
      * @return string Migration content.
      */
     public function populateStub(
@@ -54,7 +56,7 @@ class MigrationStub
                 '{{ url }}' => $url,
                 '{{ icon }}' => $iconName,
                 '{{ name }}' => $name,
-                '{{ crudMenuGroupId }}' => $menuGroupId,
+                '{{ crudMenuGroupId }}' => !empty($menuGroupId) ? $menuGroupId : null,
                 '{{ newMenuGroupName }}' => $newMenuGroupName,
                 '{{ newMenuGroupIcon }}' => $newMenuGroupIcon,
             ];

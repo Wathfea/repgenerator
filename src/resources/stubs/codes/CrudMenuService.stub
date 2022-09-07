@@ -1,0 +1,56 @@
+
+    /**
+     * @param string $name
+     * @param CrudMenuGroupType $groupType
+     * @param string $url
+     * @param string $icon
+     * @param int $order
+     * @return CrudMenu
+     */
+    public function saveMenuUsingEnum(string $name, CrudMenuGroupType $groupType, string $url, string $icon, int $order): CrudMenu {
+        $this->crudMenuGroupService->getOrCreateByType($groupType);
+        return $this->saveMenu($name, $url, $order, $groupType->value, $icon);
+    }
+
+    /**
+     * @param string $name
+     * @param string $url
+     * @param string $icon
+     * @param int $order
+     * @param int|null $menuGroupId
+     * @param string|null $groupMenuName
+     * @param string|null $groupMenuIcon
+     * @return CrudMenu
+     */
+    public function saveMenuUsingData(string $name, string $url, string $icon, int $order,  int|null $menuGroupId = null, string|null $groupMenuName = '', string|null $groupMenuIcon = ''): CrudMenu {
+        if ( empty($menuGroupId) ) {
+            $lastGroupId = ($this->getRepositoryService()->getAll()->pluck('id')->max() ?? 0) + 1;
+            $this->crudMenuGroupService->getRepositoryService()->save([
+                CrudMenuGroup::ID_COLUMN => $lastGroupId,
+                CrudMenuGroup::NAME_COLUMN => $groupMenuName,
+                CrudMenuGroup::ICON_COLUMN => $groupMenuIcon
+            ]);
+            $menuGroupId = $lastGroupId;
+        }
+        return $this->saveMenu($name, $url, $order, $menuGroupId, $icon);
+    }
+
+    /**
+     * @param string $name
+     * @param string $url
+     * @param int $order
+     * @param int $menuGroupId
+     * @param string $icon
+     * @return CrudMenu
+     */
+    private function saveMenu(string $name, string $url, int $order, int $menuGroupId, string $icon): CrudMenu {
+        /** @var CrudMenu $crudMenu */
+        $crudMenu = $this->getRepositoryService()->save([
+            'name' => $name,
+            'url' => $url,
+            'order' => $order,
+            'crud_menu_group_id' => $menuGroupId,
+            'icon' => $icon
+        ]);
+        return $crudMenu;
+    }
