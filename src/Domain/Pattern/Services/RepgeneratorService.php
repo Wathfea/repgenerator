@@ -758,15 +758,15 @@ class RepgeneratorService
 
         $uses = [];
         if($name == 'CrudMenu') {
-            $uses[] = "use App\Domain\CrudMenuGroup\Services\CrudMenuGroupService;\n";
-            $uses[] = "use App\Domain\CrudMenu\Enums\CrudMenuGroupType;\n";
-            $uses[] = "use App\Domain\CrudMenuGroup\Models\CrudMenuGroup;\n";
-            $uses[] = "use App\Domain\CrudMenu\Models\CrudMenu;\n";
+            $uses[] = "use App\Domain\CrudMenuGroup\Services\CrudMenuGroupService;";
+            $uses[] = "use App\Domain\CrudMenu\Enums\CrudMenuGroupType;";
+            $uses[] = "use App\Domain\CrudMenuGroup\Models\CrudMenuGroup;";
+            $uses[] = "use App\Domain\CrudMenu\Models\CrudMenu;";
         }
 
         if($name == 'CrudMenuGroup') {
-            $uses[] = "use App\Domain\CrudMenuGroup\Models\CrudMenuGroup;\n";
-            $uses[] = "use App\Domain\CrudMenu\Enums\CrudMenuGroupType;\n";
+            $uses[] = "use App\Domain\CrudMenuGroup\Models\CrudMenuGroup;";
+            $uses[] = "use App\Domain\CrudMenu\Enums\CrudMenuGroupType;";
 
         }
 
