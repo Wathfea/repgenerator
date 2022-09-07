@@ -749,6 +749,11 @@ class RepgeneratorService
         if ( $this->repgeneratorStubService->doesStubExist($codeStubPath) ) {
             $code = $this->repgeneratorStubService->getStub($codeStubPath);
         }
+        $uses = '';
+        $usesStubPath = 'uses/' . $name . 'Service';
+        if ( $this->repgeneratorStubService->doesStubExist($usesStubPath) ) {
+            $uses = $this->repgeneratorStubService->getStub($usesStubPath);
+        }
         $serviceTemplate = str_replace(
             [
                 '{{modelName}}',
@@ -756,13 +761,15 @@ class RepgeneratorService
                 '{{modelNameSingularLowerCase}}',
                 '{{modelType}}',
                 '{{code}}',
+                '{{uses}}',
             ],
             [
                 $name,
                 $this->modelNamePluralLowerCase,
                 $this->modelNameSingularLowerCase,
                 $generatePivot ? 'Pivot' : 'Model',
-                $code
+                $code,
+                $uses,
             ],
             $this->repgeneratorStubService->getStub('Service')
         );
