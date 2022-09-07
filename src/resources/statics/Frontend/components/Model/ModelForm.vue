@@ -18,7 +18,7 @@
                     </Switch>
                 </div>
                 <div v-else-if="column.data.isFileManager" class="mt-1 mb-4 flex items-center">
-                    <FilemanagerInput v-model="column.model" :required="column.data.required" :disabled="!isColumnShown(column.data)"/>
+                    <FileManagerInput v-model="column.model" :required="column.data.required" :disabled="!isColumnShown(column.data)"/>
                 </div>
                 <div v-else class="mt-1 flex rounded-md shadow-sm">
                     <input v-model="column.model" :disabled="(column.data.disabled || disableUpdate) ?? false" :required="column.data.required" type="text" class="flex-1 block w-full min-w-0 rounded sm:text-sm border-gray-300" />
@@ -37,7 +37,7 @@ import Button from "../Button";
 import PhotoUpload from "../PhotoUpload";
 import {useRoute} from "nuxt/app";
 import FileUpload from "../FileUpload";
-import FilemanagerInput from "../FilemanagerInput";
+import FileManagerInput from "../FileManagerInput";
 import ApiMultiselect from "../ApiMultiselect";
 const emit = defineEmits(['submit']);
 const props = defineProps({
