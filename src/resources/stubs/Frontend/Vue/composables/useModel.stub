@@ -1,6 +1,6 @@
 import useModel from "../../../Abstraction/composables/model";
 
-export const useUsers  = () => {
+export const use{{ modelNamePluralUcfirst }}  = () => {
     const getColumns = () => {
         return {{ columns }}
     }
