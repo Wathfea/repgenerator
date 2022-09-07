@@ -4,6 +4,7 @@ namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 
 use App\Domain\CrudMenu\Providers\CrudMenuServiceProvider;
 use App\Domain\CrudMenuGroup\Providers\CrudMenuGroupServiceProvider;
+use App\Domain\CrudMenuGroup\Services\CrudMenuGroupService;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
@@ -171,6 +172,8 @@ class RepgeneratorService
         $this->provider($this->modelName, false, $columns, $isGeneratedFileDomain, $fileUploadFieldsData);
         $callback('Provider is ready!');
 
+        //$this->registerProvider($this->modelName);
+
         $this->resource($this->modelName, $columns, $foreigns, $isGeneratedFileDomain);
         $callback('Resource is ready!');
 
@@ -195,8 +198,8 @@ class RepgeneratorService
             if(class_exists(CrudMenuServiceProvider::class)) {
                 app()->register(CrudMenuServiceProvider::class);
 
-                if(class_exists(CrudMenuGroupServiceProvider::class)) {
-                    app()->register(CrudMenuGroupServiceProvider::class);
+                if(class_exists(CrudMenuGroupService::class)) {
+                    app()->register(CrudMenuGroupService::class);
                 }
 
                 Artisan::call('migrate',
@@ -209,6 +212,33 @@ class RepgeneratorService
         }
     }
 
+    /**
+     * @param  string  $name
+     * @return void
+     */
+    private function registerProvider(string $name): void
+    {
+        $namespace = Str::replaceLast('\\', '', app()->getNamespace());
+
+        $appConfig = file_get_contents(config_path('app.php'));
+        if (Str::contains($appConfig, "{$namespace}\\Domain\{$name}\Providers\{$name}ServiceProvider.php")) {
+            return;
+        }
+
+        $lineEndingCount = [
+            "\r\n" => substr_count($appConfig, "\r\n"),
+            "\r" => substr_count($appConfig, "\r"),
+            "\n" => substr_count($appConfig, "\n"),
+        ];
+
+        $eol = array_keys($lineEndingCount, max($lineEndingCount))[0];
+
+        file_put_contents(config_path('app.php'), str_replace(
+            "{$namespace}\\Providers\RouteServiceProvider::class,".$eol,
+            "{$namespace}\\Providers\RouteServiceProvider::class,".$eol."        $namespace.'\\Domain\'.$name.'\Providers\\'.$name.'ServiceProvider::class,".$eol,
+            $appConfig
+        ));
+    }
     /**
      * Create static file holder directories
      */
