@@ -5,6 +5,7 @@ namespace App\Domain\{{modelName}}\Services;
 use App\Abstraction\Repository\Has{{modelType}}RepositoryService;
 use App\Abstraction\Repository\{{modelType}}RepositoryServiceInterface;
 use App\Domain\{{modelName}}\Repositories\{{modelName}}RepositoryService;
+{{uses}}
 
 /**
  * Class {{modelName}}Service.
@@ -16,7 +17,7 @@ class {{modelName}}Service implements Has{{modelType}}RepositoryService
         return $this->repositoryService;
     }
 
-    public function __construct(private {{modelName}}RepositoryService $repositoryService {{di}}) {
+    public function __construct(private {{modelName}}RepositoryService $repositoryService) {
 
     }
 

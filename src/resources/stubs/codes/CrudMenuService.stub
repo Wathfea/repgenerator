@@ -8,7 +8,7 @@
      * @return CrudMenu
      */
     public function saveMenuUsingEnum(string $name, CrudMenuGroupType $groupType, string $url, string $icon, int $order): CrudMenu {
-        $this->crudMenuGroupService->getOrCreateByType($groupType);
+        app(CrudMenuGroupService::class)->getOrCreateByType($groupType);
         return $this->saveMenu($name, $url, $order, $groupType->value, $icon);
     }
 
@@ -25,7 +25,7 @@
     public function saveMenuUsingData(string $name, string $url, string $icon, int $order,  int|null $menuGroupId = null, string|null $groupMenuName = '', string|null $groupMenuIcon = ''): CrudMenu {
         if ( empty($menuGroupId) ) {
             $lastGroupId = ($this->getRepositoryService()->getAll()->pluck('id')->max() ?? 0) + 1;
-            $this->crudMenuGroupService->getRepositoryService()->save([
+            app(CrudMenuGroupService::class)->getRepositoryService()->save([
                 CrudMenuGroup::ID_COLUMN => $lastGroupId,
                 CrudMenuGroup::NAME_COLUMN => $groupMenuName,
                 CrudMenuGroup::ICON_COLUMN => $groupMenuIcon

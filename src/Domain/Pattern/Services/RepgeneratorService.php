@@ -747,20 +747,25 @@ class RepgeneratorService
     private function service(string $name, bool $generatePivot): void
     {
         $code = '';
-        $di = [];
 
         $codeStubPath = 'codes/' . $name . 'Service';
         if ( $this->repgeneratorStubService->doesStubExist($codeStubPath) ) {
             $code = $this->repgeneratorStubService->getStub($codeStubPath);
-
-            $di[] =  ", private ". $name. "Service $". $this->modelNameSingularLowerCase;
-        }
-        $uses = '';
-        $usesStubPath = 'uses/' . $name . 'Service';
-        if ( $this->repgeneratorStubService->doesStubExist($usesStubPath) ) {
-            $uses = $this->repgeneratorStubService->getStub($usesStubPath);
         }
 
+        $uses = [];
+        if($name == 'CrudMenu') {
+            $uses[] = "use App\Domain\CrudMenuGroup\Services\CrudMenuGroupService;\n";
+            $uses[] = "use App\Domain\CrudMenu\Enums\CrudMenuGroupType;\n";
+            $uses[] = "use App\Domain\CrudMenuGroup\Models\CrudMenuGroup;\n";
+            $uses[] = "use App\Domain\CrudMenu\Models\CrudMenu;\n";
+        }
+
+        if($name == 'CrudMenuGroup') {
+            $uses[] = "use App\Domain\CrudMenuGroup\Models\CrudMenuGroup;\n";
+            $uses[] = "use App\Domain\CrudMenu\Enums\CrudMenuGroupType;\n";
+
+        }
 
         $serviceTemplate = str_replace(
             [
@@ -769,7 +774,6 @@ class RepgeneratorService
                 '{{modelNameSingularLowerCase}}',
                 '{{modelType}}',
                 '{{code}}',
-                '{{di}}',
                 '{{uses}}',
             ],
             [
@@ -778,8 +782,7 @@ class RepgeneratorService
                 $this->modelNameSingularLowerCase,
                 $generatePivot ? 'Pivot' : 'Model',
                 $code,
-                $di,
-                $uses,
+                $this->implodeLines($uses, 2),
             ],
             $this->repgeneratorStubService->getStub('Service')
         );
