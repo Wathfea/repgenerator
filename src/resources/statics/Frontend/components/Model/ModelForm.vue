@@ -4,7 +4,7 @@
             <div class="sm:col-span-4 mt-2">
                 <label for="username" class="block text-sm font-medium text-gray-700"> {{  getColumnName(key) }} </label>
                 <div v-if="column.data.valuesGetter || column.data.values">
-                    <ApiMultiselect :set-data="column.data" :value="column.model" :force-disable="disableUpdate"/>
+                    <ApiMultiselect :column="key" :set-data="column.data" :value="column.model" :force-disable="disableUpdate" @change="onSelectChange"/>
                 </div>
                 <div v-else-if="column.data.isAvatar" class="mt-1 mb-4 flex items-center">
                     <PhotoUpload :column="key" :originalData="column.originalData"  :data="column.model" @changed="onPhotoChanged"/>
@@ -86,6 +86,9 @@ if ( props.id ) {
 }
 const onPhotoChanged = (changeData) => {
     columns.value[changeData.column].model = changeData.photo;
+}
+const onSelectChange = (changeData) => {
+    columns.value[changeData.column].model = changeData.value;
 }
 const onFileChanged = (changeData) => {
     columns.value[changeData.column].model = changeData.file;
