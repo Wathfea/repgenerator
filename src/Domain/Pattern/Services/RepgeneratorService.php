@@ -389,7 +389,7 @@ class RepgeneratorService
                         Str::camel($relationType),
                         $relatedModel,
                         $foreign['column'],
-                        $foreign['on']
+                        $foreign['on'],
                     ],
                     $this->repgeneratorStubService->getStub('ModelRelation')
                 );
@@ -398,11 +398,13 @@ class RepgeneratorService
         }
 
         $fillableStr = [];
+        $columnConstants = [];
         foreach ($columns as $column) {
             if ($column->fileUploadLocation) {
                 continue;
             }
             $fillableStr[] = "'".$column->name."',";
+            $columnConstants[] = 'const ' . Str::upper($column->name) . '_COLUMN = "' . $column->name . '";';
 
             if($column->is_hashed) {
                 if(!in_array('use Illuminate\Support\Facades\Hash;', $use)) {
@@ -460,6 +462,7 @@ class RepgeneratorService
                 '{{hashedTemplate}}',
                 '{{cryptedTemplate}}',
                 '{{timestamps}}',
+                '{{columnConstants}}',
             ],
             [
                 $name,
@@ -469,7 +472,8 @@ class RepgeneratorService
                 $trait,
                 $hashedTemplate,
                 $cryptedTemplate,
-                $timestampsTemplate
+                $timestampsTemplate,
+                $this->implodeLines($columnConstants, 1)
             ],
             $this->repgeneratorStubService->getStub('Model')
         );
@@ -1045,9 +1049,11 @@ class RepgeneratorService
 
         $callback('Frontend components are ready!');
     }
+
     /**
-     * @param  string  $name
-     * @param  array  $columns
+     * @param string $chosenOutputFramework
+     * @param string $name
+     * @param array $columns
      * @param $callback
      */
     private function frontend2(string $chosenOutputFramework, string $name, array $columns, $callback): void
