@@ -54,7 +54,7 @@ import { XIcon } from '@heroicons/vue/outline'
 import Button from "../Button";
 const emit = defineEmits(['close', 'search']);
 import { hu } from 'date-fns/locale';
-import ApiMultiselect from "~/components/ApiMultiselect";
+import ApiMultiselect from "../ApiMultiselect";
 const props = defineProps({
   data: {
     required: true,
