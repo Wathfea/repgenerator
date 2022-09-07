@@ -64,8 +64,8 @@ class RepgeneratorController extends Controller
         //Only check  if not regenerate
         if(!$regenerate) {
             //Detect if CrudMenus exists or we need to create it
-            $messages[] = $this->shouldCreateCrudMenuGroupTable($table);
             $messages[] = $this->shouldCreateCrudMenuTable($table);
+            $messages[] = $this->shouldCreateCrudMenuGroupTable($table);
             sleep(1);
         }
 
@@ -223,10 +223,10 @@ class RepgeneratorController extends Controller
 
             $this->migrationGeneratorService->setDate(Carbon::now());
             $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], [],
-                self::CRUD_MENU_NAME, 'MenuIcon', false, false);
+                self::CRUD_MENU_GROUP_TABLE_NAME, 'MenuIcon', false, false);
 
             $data = [
-                'name' => self::CRUD_MENU_NAME,
+                'name' => self::CRUD_MENU_GROUP_TABLE_NAME,
             ];
 
             $this->repgeneratorService->generate(

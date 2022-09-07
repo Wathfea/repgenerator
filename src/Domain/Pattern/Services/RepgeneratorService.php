@@ -191,13 +191,15 @@ class RepgeneratorService
         $callback("If we count an average 5 char word and an average 25 WPM we saved you around {$minutes} minutes -> {$hours} hours");
 
         if ($migrationName) {
-            app()->register(CrudMenuServiceProvider::class);
-            Artisan::call('migrate',
-                [
-                    '--path' => '/database/migrations/'.$migrationName,
-                    '--force' => true
-                ]);
-            $callback($migrationName.' migration migrated to database!');
+            if(class_exists(CrudMenuServiceProvider::class)) {
+                app()->register(CrudMenuServiceProvider::class);
+                Artisan::call('migrate',
+                    [
+                        '--path' => '/database/migrations/'.$migrationName,
+                        '--force' => true
+                    ]);
+                $callback($migrationName.' migration migrated to database!');
+            }
         }
     }
 
@@ -754,15 +756,26 @@ class RepgeneratorService
     private function service(string $name, bool $generatePivot): void
     {
         $code = '';
+
         $codeStubPath = 'codes/' . $name . 'Service';
         if ( $this->repgeneratorStubService->doesStubExist($codeStubPath) ) {
             $code = $this->repgeneratorStubService->getStub($codeStubPath);
         }
-        $uses = '';
-        $usesStubPath = 'uses/' . $name . 'Service';
-        if ( $this->repgeneratorStubService->doesStubExist($usesStubPath) ) {
-            $uses = $this->repgeneratorStubService->getStub($usesStubPath);
+
+        $uses = [];
+        if($name == 'CrudMenu') {
+            $uses[] = "use App\Domain\CrudMenuGroup\Services\CrudMenuGroupService;\n";
+            $uses[] = "use App\Domain\CrudMenu\Enums\CrudMenuGroupType;\n";
+            $uses[] = "use App\Domain\CrudMenuGroup\Models\CrudMenuGroup;\n";
+            $uses[] = "use App\Domain\CrudMenu\Models\CrudMenu;\n";
         }
+
+        if($name == 'CrudMenuGroup') {
+            $uses[] = "use App\Domain\CrudMenuGroup\Models\CrudMenuGroup;\n";
+            $uses[] = "use App\Domain\CrudMenu\Enums\CrudMenuGroupType;\n";
+
+        }
+
         $serviceTemplate = str_replace(
             [
                 '{{modelName}}',
@@ -778,7 +791,7 @@ class RepgeneratorService
                 $this->modelNameSingularLowerCase,
                 $generatePivot ? 'Pivot' : 'Model',
                 $code,
-                $uses,
+                $this->implodeLines($uses, 2),
             ],
             $this->repgeneratorStubService->getStub('Service')
         );
