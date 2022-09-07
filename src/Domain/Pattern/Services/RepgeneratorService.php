@@ -2,8 +2,6 @@
 
 namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 
-use App\Domain\CrudMenu\Providers\CrudMenuServiceProvider;
-use App\Domain\CrudMenuGroup\Providers\CrudMenuGroupServiceProvider;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
@@ -192,11 +190,11 @@ class RepgeneratorService
         $callback("If we count an average 5 char word and an average 25 WPM we saved you around {$minutes} minutes -> {$hours} hours");
 
         if ($migrationName) {
-            if(class_exists(CrudMenuServiceProvider::class)) {
-                app()->register(CrudMenuServiceProvider::class);
+            if(file_exists(app_path("Domain\CrudMenu\Providers\CrudMenuServiceProvider.php"))) {
+                app()->register("App\Domain\CrudMenu\Providers\CrudMenuServiceProvider");
 
-                if(class_exists(CrudMenuGroupServiceProvider::class)) {
-                    app()->register(CrudMenuGroupServiceProvider::class);
+                if(file_exists(app_path("Domain\CrudMenuGroup\Providers\CrudMenuGroupServiceProvider.php"))) {
+                    app()->register("App\Domain\CrudMenuGroup\Providers\CrudMenuGroupServiceProvider");
                 }
 
                 Artisan::call('migrate',

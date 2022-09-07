@@ -28,7 +28,8 @@
             app(CrudMenuGroupService::class)->getRepositoryService()->save([
                 CrudMenuGroup::ID_COLUMN => $lastGroupId,
                 CrudMenuGroup::NAME_COLUMN => $groupMenuName,
-                CrudMenuGroup::ICON_COLUMN => $groupMenuIcon
+                CrudMenuGroup::ICON_COLUMN => $groupMenuIcon,
+                CrudMenuGroup::ORDER_COLUMN => 1
             ]);
             $menuGroupId = $lastGroupId;
         }

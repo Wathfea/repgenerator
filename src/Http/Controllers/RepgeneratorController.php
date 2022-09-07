@@ -215,7 +215,6 @@ class RepgeneratorController extends Controller
             $migrationColumns = [
                 'id' => 'id',
                 'name' => 'string',
-                'url' => 'string',
                 'icon' => 'string',
                 'order' => 'integer'
             ];
