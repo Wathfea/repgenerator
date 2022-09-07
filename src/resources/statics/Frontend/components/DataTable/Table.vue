@@ -135,10 +135,10 @@ import {
   XIcon
 } from '@heroicons/vue/outline'
 import Button from "../Button";
-import ColumnHeader from "ColumnHeader";
+import ColumnHeader from "./ColumnHeader";
 import useModel from "../../composables/model";
-import SearchBadge from "SearchBadge";
-import SearchColumnPopup from "SearchColumnPopup";
+import SearchBadge from "./SearchBadge";
+import SearchColumnPopup from "./SearchColumnPopup";
 import {useRoute} from "nuxt/app";
 
 const currentRoute = useRoute();

@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {$larafetch} from "../utils/$larafetch";
-import {useNotifications} from "useNotifications";
+import {useNotifications} from "./useNotifications";
 
 export default function useModel(route, setQuery = true, prefix = 'api/v1/', cacheVersion = null, localCache = false, fixedFilters = []) {
     const model = ref({})

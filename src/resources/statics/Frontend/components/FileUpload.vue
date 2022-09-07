@@ -1,5 +1,5 @@
 <script setup>
-import Button from "Button";
+import Button from "./Button";
 import {ref, watchEffect} from "vue";
 const props = defineProps({
   data: {

@@ -6,8 +6,8 @@
   </div>
 </template>
 <script setup>
-  import ModelForm from "ModelForm";
-  import ModelTabs from "ModelTabs";
+  import ModelForm from "./ModelForm";
+  import ModelTabs from "./ModelTabs";
   import {ref} from "vue";
   import { DatabaseIcon } from '@heroicons/vue/solid'
   import {useRouter} from "vue-router";

@@ -1,7 +1,7 @@
 <script setup>
 import {computed, ref, watchEffect} from "vue";
 import { Buffer } from 'buffer'
-import Button from "Button";
+import Button from "./Button";
 const props = defineProps({
   data: {
     required : false,
