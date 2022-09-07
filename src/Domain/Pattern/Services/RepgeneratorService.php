@@ -279,11 +279,13 @@ class RepgeneratorService
         $apiRouteTemplate = str_replace(
             [
                 '{{modelName}}',
-                '{{modelNamePluralLowerCase}}'
+                '{{modelNamePluralLowerCase}}',
+                '{{modelNamePluralLowerCaseHyphenated}}'
             ],
             [
                 $name,
-                strtolower(Str::plural($name))
+                strtolower(Str::plural($name)),
+                Str::snake($name, '-')
             ],
             $this->repgeneratorStubService->getStub('apiRoutes')
         );
@@ -742,18 +744,25 @@ class RepgeneratorService
      */
     private function service(string $name, bool $generatePivot): void
     {
+        $code = '';
+        $codeStubPath = 'codes/' . $name . 'Service';
+        if ( $this->repgeneratorStubService->doesStubExist($codeStubPath) ) {
+            $code = $this->repgeneratorStubService->getStub($codeStubPath);
+        }
         $serviceTemplate = str_replace(
             [
                 '{{modelName}}',
                 '{{modelNamePluralLowerCase}}',
                 '{{modelNameSingularLowerCase}}',
                 '{{modelType}}',
+                '{{code}}',
             ],
             [
                 $name,
                 $this->modelNamePluralLowerCase,
                 $this->modelNameSingularLowerCase,
                 $generatePivot ? 'Pivot' : 'Model',
+                $code
             ],
             $this->repgeneratorStubService->getStub('Service')
         );

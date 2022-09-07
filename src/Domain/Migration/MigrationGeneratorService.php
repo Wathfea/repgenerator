@@ -71,7 +71,7 @@ class MigrationGeneratorService
             $up,
             $down,
             $modelName,
-            $table->getName(),
+            str_replace('_','-', $table->getName()),
             $iconName,
             $menuGroupId,
             $newMenuGroupName,
