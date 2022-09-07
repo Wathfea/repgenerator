@@ -8,6 +8,7 @@ use Pentacom\Repgenerator\Console\MigrationGenerator;
 use Pentacom\Repgenerator\Console\PatternGenerator;
 use Pentacom\Repgenerator\Console\PatternGeneratorInit;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorFilterService;
+use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorFrontendFrameworkHandlerService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorFrontendService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorNameTransformerService;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorService;
@@ -37,6 +38,10 @@ class RepgeneratorServiceProvider extends ServiceProvider
 
         $this->app->singleton(RepgeneratorStubService::class, function () {
             return (new RepgeneratorStubService(__DIR__.'/../../../resources/stubs/'));
+        });
+
+        $this->app->singleton(RepgeneratorFrontendFrameworkHandlerService::class, function () {
+            return (new RepgeneratorFrontendFrameworkHandlerService());
         });
 
         $this->app->singleton(RepgeneratorStaticFilesService::class, function () {

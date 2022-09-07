@@ -2,7 +2,7 @@
 import {defineEmits, ref, computed} from 'vue'
 import axios from "axios";
 
-const emit = defineEmits(['nameChanged', 'iconChanged', 'isValidTable', 'newGroupNameChanged', 'newGroupIconChanged', 'chosenMenuGroupChanged'])
+const emit = defineEmits(['nameChanged', 'iconChanged', 'isValidTable', 'newGroupNameChanged', 'newGroupIconChanged', 'chosenMenuGroupChanged', 'chosenOutputFramework'])
 const props = defineProps({
     modelName: {
         type: String,
@@ -36,6 +36,11 @@ const props = defineProps({
         required: false,
         default: null
     },
+    setChosenOutputFramework: {
+        type: String,
+        required: false,
+        default: null
+    },
 })
 let name = ref(props.modelName);
 let icon = ref(props.icon);
@@ -64,6 +69,7 @@ const ucfirstName = computed({
 const chosenMenuGroup = ref(props.setMenuGroupId);
 const newMenuGroupName = ref(props.setNewMenuGroupName);
 const newMenuGroupIcon = ref(props.setNewMenuGroupIcon);
+const chosenOutputFramework = ref(props.setChosenOutputFramework);
 </script>
 
 <template>
@@ -105,6 +111,15 @@ const newMenuGroupIcon = ref(props.setNewMenuGroupIcon);
                     <div class="mt-1">
                         <input id="group-icon" v-model="newMenuGroupIcon" class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md" required type="text" @change="emit('newGroupIconChanged',newMenuGroupIcon)">
                     </div>
+                </div>
+                <label class="block text-sm font-medium text-gray-700 mt-1" for="model-name">
+                    Output framewwork
+                </label>
+                <div class="mt-1">
+                    <select @change="emit('chosenOutputFramework',chosenOutputFramework)" v-model="chosenOutputFramework" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required="required">
+                        <option value="nuxt">Nuxt3</option>
+                        <option value="vue">Vue3</option>
+                    </select>
                 </div>
             </div>
         </div>

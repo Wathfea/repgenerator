@@ -87,13 +87,19 @@ class RepgeneratorFrontendService
     }
 
     /**
-     * @param  string  $name
-     * @param  array  $columns
+     * @param string $chosenOutputFramework
+     * @param string $name
+     * @param array $columns
      * @return array
      */
-    public function generateComposable2(string $name, array $columns): array
+    public function generateComposable2(string $chosenOutputFramework, string $name, array $columns): array
     {
         $columns = '{}';
+
+        $stub = $this->repgeneratorStubService->getStub('Frontend/Vue/composables/useModel');
+        $frontendReplacer = app(RepgeneratorFrontendFrameworkHandlerService::class);
+        $stub = $frontendReplacer->replaceForFramework($chosenOutputFramework, $stub);
+
         $composableTemplate = str_replace(
             [
                 '{{ columns }}',
@@ -107,7 +113,7 @@ class RepgeneratorFrontendService
                 $this->nameTransformerService->getModelNameSingularUcfirst(),
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
             ],
-            $this->repgeneratorStubService->getStub('Frontend/Vue/composables/useModel')
+            $stub
         );
 
         $finalPath = "js/Domain/$name/composables/use" . $this->nameTransformerService->getModelNamePluralUcfirst() . ".ts";
@@ -132,8 +138,12 @@ class RepgeneratorFrontendService
         ];
     }
 
-    public function generateComponents2(string $name, array $columns): array
+    public function generateComponents2(string $chosenOutputFramework, string $name, array $columns): array
     {
+        $stub =  $this->repgeneratorStubService->getStub('Frontend/Vue/components/create');
+        $frontendReplacer = app(RepgeneratorFrontendFrameworkHandlerService::class);
+        $stub = $frontendReplacer->replaceForFramework($chosenOutputFramework, $stub);
+
         $createTemplate = str_replace(
             [
                 '{{ modelNamePluralUcfirst }}',
@@ -145,7 +155,7 @@ class RepgeneratorFrontendService
                 $this->nameTransformerService->getModelNameSingularUcfirst(),
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
             ],
-            $this->repgeneratorStubService->getStub('Frontend/Vue/components/create')
+            $stub
         );
         $editTemplate = str_replace(
             [
