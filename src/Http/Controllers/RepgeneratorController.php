@@ -27,7 +27,6 @@ class RepgeneratorController extends Controller
 {
     const CRUD_MENU_TABLE_NAME = 'crud_menu';
     const CRUD_MENU_GROUP_TABLE_NAME = 'crud_menu_group';
-    const CRUD_MENU_NAME = 'CrudMenu';
 
     /**
      * @param  MigrationGeneratorService  $migrationGeneratorService

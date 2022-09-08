@@ -23,7 +23,7 @@
      * @return CrudMenu
      */
     public function saveMenuUsingData(string $name, string $url, string $icon, int $order,  int|null $menuGroupId = null, string|null $groupMenuName = '', string|null $groupMenuIcon = ''): CrudMenu {
-        if ( empty($menuGroupId) ) {
+        if ( $menuGroupId === null) {
             $lastGroupId = ($this->getRepositoryService()->getAll()->pluck('id')->max() ?? 0) + 1;
             app(CrudMenuGroupService::class)->getRepositoryService()->save([
                 CrudMenuGroup::ID_COLUMN => $lastGroupId,
