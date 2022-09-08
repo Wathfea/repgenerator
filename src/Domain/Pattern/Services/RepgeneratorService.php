@@ -213,6 +213,8 @@ class RepgeneratorService
                 ]);
             $callback($migrationName.' migration migrated to database!');
         }
+
+        Artisan::call('optimize');
     }
 
     /**
@@ -336,7 +338,7 @@ class RepgeneratorService
             [
                 $name,
                 strtolower(Str::plural($name)),
-                Str::snake($name, '-')
+                Str::snake(Str::plural($name), '-')
             ],
             $this->repgeneratorStubService->getStub('apiRoutes')
         );

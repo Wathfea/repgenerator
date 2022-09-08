@@ -245,7 +245,7 @@ const getTables = () => {
     })
 }
 const getMenuGroups = () => {
-    axios.get(import.meta.env.VITE_API_URL + '/api/v1/crudmenugroups').then((response) => {
+    axios.get(import.meta.env.VITE_API_URL + '/api/v1/crud-menu-groups').then((response) => {
         menuGroups.value = response.data.data;
     })
 }
