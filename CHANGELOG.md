@@ -3,7 +3,7 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
-
+- Frontend create columns missing
 - Duplicated request validation
 - Relation type selector
 - Update request fileupload esetén a required ne kerüljön be

@@ -643,7 +643,6 @@ class RepgeneratorService
     private function rulesByColumns(array $columns, array $foreigns): array
     {
         $rules = [];
-        foreach ($foreigns as $foreign) {
             foreach ($columns as $column) {
                 $rule = '';
                 if ($column->showOnTable) {
@@ -672,13 +671,14 @@ class RepgeneratorService
                         $rule .= 'nullable';
                     }
 
-                    if($foreign['column'] === $column->name) {
-                        $rule .= '|exists:'.$foreign['reference']['name'].','.$foreign['on'];
+                    foreach ($foreigns as $foreign) {
+                        if($foreign['column'] === $column->name) {
+                            $rule .= '|exists:'.$foreign['reference']['name'].','.$foreign['on'];
+                        }
                     }
 
                     $rules[] = "'$column->name' => '$rule',";
                 }
-            }
         }
 
         return $rules;
