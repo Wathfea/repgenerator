@@ -1,6 +1,0 @@
-<div>
-    <label for="{{fieldLower}}" class="block text-sm font-medium text-gray-700">{{field}}</label>
-    <div class="mt-1">
-        <input v-model="{{modelNameSingularLowerCase}}.{{fieldLower}}" type="text" name="{{fieldLower}}" id="{{fieldLower}}" class="shadow-sm focus:ring-grey-800 focus:border-gray-800 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="{{field}}" />
-    </div>
-</div>

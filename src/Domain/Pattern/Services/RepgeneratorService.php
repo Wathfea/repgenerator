@@ -184,7 +184,7 @@ class RepgeneratorService
         $callback('API Routes is ready!');
 
 
-        !$isGenerateFrontend ?: $this->frontend2($chosenOutputFramework, $this->modelName, $columns, $callback);
+        !$isGenerateFrontend ?: $this->frontend($chosenOutputFramework, $this->modelName, $columns, $callback);
 
         $callback("Code generation has saved you from typing at least ".CharacterCounterStore::$charsCount." characters");
         $minutes = floor((CharacterCounterStore::$charsCount / 5) / 25);
@@ -1099,31 +1099,16 @@ class RepgeneratorService
     }
 
     /**
-     * @param  string  $name
-     * @param  array  $columns
-     * @param $callback
-     */
-    private function frontend(string $name, array $columns, $callback): void
-    {
-        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateIndex($name, $columns);
-        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable($name, $columns);
-        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateCreate($name, $columns);
-        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateEdit($name, $columns);
-
-        $callback('Frontend components are ready!');
-    }
-
-    /**
      * @param string $chosenOutputFramework
      * @param string $name
      * @param array $columns
      * @param $callback
      */
-    private function frontend2(string $chosenOutputFramework, string $name, array $columns, $callback): void
+    private function frontend(string $chosenOutputFramework, string $name, array $columns, $callback): void
     {
 
-        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable2($chosenOutputFramework, $name, $columns);
-        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComponents2($chosenOutputFramework, $name, $columns);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable($chosenOutputFramework, $name, $columns);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComponents($chosenOutputFramework, $name, $columns);
 
         $callback('Frontend components are ready!');
     }
