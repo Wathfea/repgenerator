@@ -3,9 +3,9 @@
     <div class="flex flex-col">
       <div class="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
         <div class="mb-4 flex justify-end" v-if="!disableCreate">
-          <NuxtLink :to="`/${route}/create` + getCreateFilters()">
+          <RouterLink :to="`/${route}/create` + getCreateFilters()">
             <Button>Új {{ modelReadableName }}</Button>
-          </NuxtLink>
+          </RouterLink>
         </div>
         <div class="shadow-sm bg-gray-50 rounded">
           <div class="p-3">
@@ -72,12 +72,12 @@
                   </slot>
                 </td>
                 <td class="flex justify-end relative whitespace-nowrap py-4 px-3 text-sm font-medium sm:pr-6 lg:pr-8">
-                  <NuxtLink :to="`/${route}/${model.id}`" class="text-vagheggi-600 hover:text-vagheggi-900">
+                  <RouterLink :to="`/${route}/${model.id}`" class="text-vagheggi-600 hover:text-vagheggi-900">
                     <PencilIcon class="h-6 w-6" aria-hidden="true" />
-                  </NuxtLink>
-                  <NuxtLink v-if="!disableDestroy" @click="deleteModel(model.id)" class="text-vagheggi-600 hover:text-vagheggi-900 ml-2 cursor-pointer">
+                  </RouterLink>
+                  <RouterLink v-if="!disableDestroy" @click="deleteModel(model.id)" class="text-vagheggi-600 hover:text-vagheggi-900 ml-2 cursor-pointer">
                     <TrashIcon class="h-6 w-6" aria-hidden="true" />
-                  </NuxtLink>
+                  </RouterLink>
                   <slot name="actions" :value="model"/>
                 </td>
               </tr>
@@ -134,12 +134,12 @@ import {
   SearchIcon,
   XIcon
 } from '@heroicons/vue/outline'
-import Button from "../Button";
-import ColumnHeader from "./ColumnHeader";
-import useModel from "../../composables/model";
-import SearchBadge from "./SearchBadge";
-import SearchColumnPopup from "./SearchColumnPopup";
-import {useRoute} from "nuxt/app";
+import Button from "../Button.vue";
+import ColumnHeader from "./ColumnHeader.vue";
+import useModel from "../../composables/model.js";
+import SearchBadge from "./SearchBadge.vue";
+import SearchColumnPopup from "./SearchColumnPopup.vue";
+import {useRoute} from "vue-router";
 
 const currentRoute = useRoute();
 const props = defineProps({

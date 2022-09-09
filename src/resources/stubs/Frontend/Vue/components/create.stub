@@ -2,7 +2,7 @@
     <ModelCreate :columns="getColumns()" :store-method="store{{ modelNameSingularUcfirst }}"/>
 </template>
 <script setup>
-import ModelCreate from "../../../Abstraction/components/Model/ModelCreate";
-import {use{{ modelNamePluralUcfirst }}} from "../composables/use{{ modelNamePluralUcfirst }}";
+import ModelCreate from "../../../Abstraction/components/Model/ModelCreate.vue";
+import {use{{ modelNamePluralUcfirst }}} from "../composables/use{{ modelNamePluralUcfirst }}.ts";
 const { store{{ modelNameSingularUcfirst }}, getColumns } = use{{ modelNamePluralUcfirst }}();
 </script>

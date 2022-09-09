@@ -2,7 +2,7 @@
   <ModelForm :setColumns="columns" @submit="onSubmit" :isSubmitting="isSubmitting"/>
 </template>
 <script setup>
-import ModelForm from "./ModelForm";
+import ModelForm from "./ModelForm.vue";
 import {ref} from "vue";
 const props = defineProps({
   columns : {

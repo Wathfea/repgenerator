@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import Table from "../../../Abstraction/components/DataTable/Table";
+import Table from "../../../Abstraction/components/DataTable/Table.vue";
 const props = defineProps({});
 const getFixedFilters = () => {
   let fixedFilters = [];

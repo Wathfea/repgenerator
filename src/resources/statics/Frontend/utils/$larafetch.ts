@@ -1,3 +1,4 @@
+// @ts-ignore
 import { $fetch, FetchOptions, FetchError } from "ohmyfetch";
 
 const CSRF_COOKIE = "XSRF-TOKEN";
@@ -26,8 +27,6 @@ export async function $larafetch<T, R extends ResponseType = "json">(
     }: LarafetchOptions<R> = {}
 ) {
     const backendUrl = process.env.BACKEND_URL;
-
-    const frontendUrl = process.env.FRONTEND_URL;
 
 
     await initCsrf(backendUrl);

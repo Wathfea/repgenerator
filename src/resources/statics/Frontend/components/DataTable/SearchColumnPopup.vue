@@ -51,10 +51,10 @@ import '@vuepic/vue-datepicker/dist/main.css'
 import Datepicker from '@vuepic/vue-datepicker';
 import * as heroIcons from "@heroicons/vue/solid";
 import { XIcon } from '@heroicons/vue/outline'
-import Button from "../Button";
+import Button from "../Button.vue";
 const emit = defineEmits(['close', 'search']);
 import { hu } from 'date-fns/locale';
-import ApiMultiselect from "../ApiMultiselect";
+import ApiMultiselect from "../ApiMultiselect.vue";
 const props = defineProps({
   data: {
     required: true,

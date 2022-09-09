@@ -24,6 +24,13 @@ All notable changes to `repgenerator` will be documented in this file
 - Mezősorrend változtatása drag & drop-al
 
 ## [Unreleased]
+
+
+## [1.5.2] - 2022-09-09
+## Fixed
+- Frontend generation errors
+
+
 ## [1.5.1] - 2022-09-09
 ## Added
 - DIRECTORY_SEPARATOR use for multi platform usage

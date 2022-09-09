@@ -4,10 +4,10 @@
   </ModelEdit>
 </template>
 <script setup>
-import ModelEdit from "../../../Abstraction/components/Model/ModelEdit";
-import {useRoute} from "nuxt/app";
+import ModelEdit from "../../../Abstraction/components/Model/ModelEdit.vue";
+import {useRoute} from "vue-router";
 import {ref} from "vue";
-import {use{{ modelNamePluralUcfirst }}} from "~/composables/use{{ modelNamePluralUcfirst }}";
+import {use{{ modelNamePluralUcfirst }}} from "~/composables/use{{ modelNamePluralUcfirst }}.ts";
 const { get{{ modelNameSingularUcfirst }}, getColumns, update{{ modelNameSingularUcfirst }} } = use{{ modelNamePluralUcfirst }}();
 const currentRoute = useRoute();
 const currentTab = ref(currentRoute.hash.length ? currentRoute.hash : '#details');
