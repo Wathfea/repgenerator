@@ -1,9 +1,0 @@
-<div>
-    <label class="block text-sm font-medium text-gray-700" for="image">Image</label>
-    <div class="mt-1">
-        <template v-for="image in {{modelNameSingularLowerCase}}.files">
-            <img  v-if="image.field == '{{field}}'" :src="image.url" :alt="image.name"
-                  style="max-width: 200px;" class="img-responsive"/>
-        </template>
-    </div>
-</div>
