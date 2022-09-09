@@ -30,4 +30,12 @@ class RepgeneratorStubService
     {
         return file_get_contents($this->stubsLocation.$name.".stub");
     }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function doesStubExist(string $name): bool {
+        return file_exists($this->stubsLocation.$name.".stub");
+    }
 }

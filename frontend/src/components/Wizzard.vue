@@ -67,12 +67,20 @@ const messages = ref([]);
 
 const generating = ref(false);
 
+const chosenMenuGroupId = ref(0);
+const newMenuGroupName = ref('');
+const newMenuGroupIcon = ref('');
+const chosenOutputFramework = ref('nuxt');
 const generate = () => {
     generating.value = true;
     let payload = {
         name: modelName.value,
         icon: icon.value,
-        columns: columns.value
+        columns: columns.value,
+        menu_group_id: chosenMenuGroupId.value,
+        new_menu_group_name: chosenMenuGroupId.value === 0 ? newMenuGroupName.value : null,
+        new_menu_group_icon: chosenMenuGroupId.value === 0 ? newMenuGroupIcon.value : null,
+        chosen_output_framework: chosenOutputFramework.value
     };
     for (let index in step1Options.value) {
         payload[index] = step1Options.value[index].enabled;
@@ -127,6 +135,22 @@ const onNameChanged = (name) => {
 
 const onIconChanged = (setIcon) => {
     icon.value = setIcon;
+}
+
+const onChosenMenuGroupChanged = (id) => {
+    chosenMenuGroupId.value = id;
+}
+
+const onNewGroupNameChanged = (name) => {
+    newMenuGroupName.value = name;
+}
+
+const onNewGroupIconChanged = (icon) => {
+    newMenuGroupIcon.value = icon;
+}
+
+const onChosenOutputFramework = (framework) => {
+    chosenOutputFramework.value = framework;
 }
 
 // 2. Columns
@@ -213,14 +237,21 @@ const onSelectOption = (data) => {
 
 // 2. Models
 const models = ref([]);
+const menuGroups = ref([]);
 
 const getTables = () => {
     axios.get(import.meta.env.VITE_API_URL + '/repgenerator/tables').then((response) => {
         models.value = response.data;
     })
 }
+const getMenuGroups = () => {
+    axios.get(import.meta.env.VITE_API_URL + '/api/v1/crud-menu-groups').then((response) => {
+        menuGroups.value = response.data.data;
+    })
+}
 
 getTables()
+getMenuGroups();
 </script>
 
 <template>
@@ -235,7 +266,22 @@ getTables()
             </ol>
         </nav>
         <div v-if="stepNumber === 1 || isOverview()">
-            <Step1 :icon="icon" :modelName="modelName"  @iconChanged="onIconChanged" @nameChanged="onNameChanged" @isValidTable="onIsValidTable"/>
+            <Step1
+                :menu-groups="menuGroups"
+                :set-menu-group-id="chosenMenuGroupId"
+                :set-new-menu-group-name="newMenuGroupName"
+                :set-new-menu-group-icon="newMenuGroupIcon"
+                :set-chosen-output-framework="chosenOutputFramework"
+                :icon="icon" :modelName="modelName"
+                @iconChanged="onIconChanged"
+                @nameChanged="onNameChanged"
+                @isValidTable="onIsValidTable"
+                @chosenMenuGroupChanged="onChosenMenuGroupChanged"
+                @newGroupNameChanged="onNewGroupNameChanged"
+                @newGroupIconChanged="onNewGroupIconChanged"
+                @chosenOutputFramework="onChosenOutputFramework"
+            />
+
             <Options :options="step1Options" @selectOption="onSelectOption"/>
         </div>
         <Step2 v-if="stepNumber === 2 || isOverview()" :columns="columns" :disableAdd="isOverview()" :models="models" :modelName="modelName"

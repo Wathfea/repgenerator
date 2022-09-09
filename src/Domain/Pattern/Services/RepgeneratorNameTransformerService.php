@@ -25,11 +25,25 @@ class RepgeneratorNameTransformerService
     public string $modelNamePluralLowerCase;
 
     /**
+     * Upper case, plural version of $modelName E.g. Dogs
+     *
+     * @var string
+     */
+    public string $modelNamePluralUcfirst;
+
+    /**
      * Lower case, singular version of $modelName E.g. dog
      *
      * @var string
      */
     public string $modelNameSingularLowerCase;
+
+    /**
+     * Upper case, singular version of $modelName E.g. Dog
+     *
+     * @var string
+     */
+    public string $modelNameSingularUcfirst;
 
     /**
      * Relation name should be no space,no special chars  E.g. something or somethingElse
@@ -68,6 +82,8 @@ class RepgeneratorNameTransformerService
         $this->modelName = $this->removeSpecialChars($this->removeSpaces(Str::ucfirst(Str::studly(Str::singular($modelName)))));
         $this->setModelNameSingularLowerCase();
         $this->setModelNamePluralLowerCase();
+        $this->setModelNameSingularUcfirst();
+        $this->setModelNamePluralUcfirst();
     }
 
     /**
@@ -96,6 +112,14 @@ class RepgeneratorNameTransformerService
         return $this->modelNamePluralLowerCase;
     }
 
+    /**
+     * @return string
+     */
+    public function getModelNamePluralUcfirst(): string
+    {
+        return $this->modelNamePluralUcfirst;
+    }
+
 
     /**
      * @return void
@@ -106,11 +130,27 @@ class RepgeneratorNameTransformerService
     }
 
     /**
+     * @return void
+     */
+    public function setModelNamePluralUcfirst(): void
+    {
+        $this->modelNamePluralUcfirst = Str::ucfirst(Str::plural($this->getModelName()));
+    }
+
+    /**
      * @return string
      */
     public function getModelNameSingularLowerCase(): string
     {
         return $this->modelNameSingularLowerCase;
+    }
+
+    /**
+     * @return string
+     */
+    public function getModelNameSingularUcfirst(): string
+    {
+        return $this->modelNameSingularUcfirst;
     }
 
 
@@ -120,6 +160,14 @@ class RepgeneratorNameTransformerService
     public function setModelNameSingularLowerCase(): void
     {
         $this->modelNameSingularLowerCase = Str::lower($this->getModelName());;
+    }
+
+    /**
+     * @return void
+     */
+    public function setModelNameSingularUcfirst(): void
+    {
+        $this->modelNameSingularUcfirst = Str::ucfirst($this->getModelName());;
     }
 
     /**

@@ -11,7 +11,7 @@ class RepgeneratorFrontendService
 {
     use Stringable;
 
-    public function __construct(protected RepgeneratorStubService $repgeneratorStubService)
+    public function __construct(protected RepgeneratorStubService $repgeneratorStubService, protected RepgeneratorNameTransformerService $nameTransformerService)
     {
 
     }
@@ -77,6 +77,131 @@ class RepgeneratorFrontendService
         }
 
         file_put_contents($path = resource_path("js/{$name}/vue/{$lowerName}.js"), $composableTemplate);
+
+        CharacterCounterStore::addFileCharacterCount($path);
+
+        return [
+            'name' => "{$name}.js",
+            'location' => $path
+        ];
+    }
+
+    /**
+     * @param string $chosenOutputFramework
+     * @param string $name
+     * @param array $columns
+     * @return array
+     */
+    public function generateComposable2(string $chosenOutputFramework, string $name, array $columns): array
+    {
+        $columns = '{}';
+
+        $stub = $this->repgeneratorStubService->getStub('Frontend/Vue/composables/useModel');
+        $frontendReplacer = app(RepgeneratorFrontendFrameworkHandlerService::class);
+        $stub = $frontendReplacer->replaceForFramework($chosenOutputFramework, $stub);
+
+        $composableTemplate = str_replace(
+            [
+                '{{ columns }}',
+                '{{ modelNamePluralUcfirst }}',
+                '{{ modelNameSingularUcfirst }}',
+                '{{ modelNamePluralLowercase }}',
+            ],
+            [
+                $columns,
+                $this->nameTransformerService->getModelNamePluralUcfirst(),
+                $this->nameTransformerService->getModelNameSingularUcfirst(),
+                $this->nameTransformerService->getModelNamePluralLowerCase(),
+            ],
+            $stub
+        );
+
+        $finalPath = "js/Domain/$name/composables/use" . $this->nameTransformerService->getModelNamePluralUcfirst() . ".ts";
+        $pathParts = explode("/", $finalPath);
+        foreach ( $pathParts as $index => $pathPart ) {
+            if ( end($pathParts) == $pathPart ) {
+                continue;
+            }
+            $partsSoFar = implode('/',array_slice($pathParts,0, $index+1));
+            if ( !is_dir(resource_path( $partsSoFar))) {
+                mkdir(resource_path($partsSoFar), 0777, true);
+            }
+        }
+
+        file_put_contents($path = resource_path($finalPath), $composableTemplate);
+
+        CharacterCounterStore::addFileCharacterCount($path);
+
+        return [
+            'name' => "{$name}.js",
+            'location' => $path
+        ];
+    }
+
+    public function generateComponents2(string $chosenOutputFramework, string $name, array $columns): array
+    {
+        $stub =  $this->repgeneratorStubService->getStub('Frontend/Vue/components/create');
+        $frontendReplacer = app(RepgeneratorFrontendFrameworkHandlerService::class);
+        $stub = $frontendReplacer->replaceForFramework($chosenOutputFramework, $stub);
+
+        $createTemplate = str_replace(
+            [
+                '{{ modelNamePluralUcfirst }}',
+                '{{ modelNameSingularUcfirst }}',
+                '{{ modelNamePluralLowercase }}',
+            ],
+            [
+                $this->nameTransformerService->getModelNamePluralUcfirst(),
+                $this->nameTransformerService->getModelNameSingularUcfirst(),
+                $this->nameTransformerService->getModelNamePluralLowerCase(),
+            ],
+            $stub
+        );
+        $editTemplate = str_replace(
+            [
+                '{{ modelNamePluralUcfirst }}',
+                '{{ modelNameSingularUcfirst }}',
+                '{{ modelNamePluralLowercase }}',
+            ],
+            [
+                $this->nameTransformerService->getModelNamePluralUcfirst(),
+                $this->nameTransformerService->getModelNameSingularUcfirst(),
+                $this->nameTransformerService->getModelNamePluralLowerCase(),
+            ],
+            $this->repgeneratorStubService->getStub('Frontend/Vue/components/edit')
+        );
+        $indexTemplate = str_replace(
+            [
+                '{{ modelNameSingularLowercase }}',
+                '{{ modelNamePluralLowercase }}',
+            ],
+            [
+                $this->nameTransformerService->getModelNameSingularLowerCase(),
+                $this->nameTransformerService->getModelNamePluralLowerCase(),
+            ],
+            $this->repgeneratorStubService->getStub('Frontend/Vue/components/index')
+        );
+
+        $files = [
+            'Create.vue' => $createTemplate,
+            'Edit.vue' => $editTemplate,
+            'Index.vue' => $indexTemplate,
+        ];
+        foreach ( $files as $file => $template ) {
+            $finalPath = "js/Domain/$name/components/" . $file;
+            $pathParts = explode("/", $finalPath);
+            foreach ( $pathParts as $index => $pathPart ) {
+                if ( end($pathParts) == $pathPart ) {
+                    continue;
+                }
+                $partsSoFar = implode('/',array_slice($pathParts,0, $index+1));
+                if ( !is_dir(resource_path( $partsSoFar))) {
+                    mkdir(resource_path($partsSoFar), 0777, true);
+                }
+            }
+            file_put_contents($path = resource_path($finalPath), $template);
+        }
+
 
         CharacterCounterStore::addFileCharacterCount($path);
 

@@ -1,0 +1,18 @@
+    /**
+     * @param CrudMenuGroupType $groupType
+     * @return CrudMenuGroup
+     */
+    public function getOrCreateByType(CrudMenuGroupType $groupType): CrudMenuGroup {
+        /** @var CrudMenuGroup|null $crudMenuGroup */
+        $crudMenuGroup = $this->getRepositoryService()->getById($groupType->value);
+        if ( !$crudMenuGroup ) {
+            /** @var CrudMenuGroup $crudGroup */
+            $crudMenuGroup = $this->getRepositoryService()->save([
+                'id' => $groupType->value,
+                'name' => $groupType->name(),
+                'icon' => $groupType->icon(),
+                'order' => $groupType->order()
+            ]);
+        }
+        return $crudMenuGroup;
+    }

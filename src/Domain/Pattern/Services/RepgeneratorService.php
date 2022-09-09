@@ -2,8 +2,8 @@
 
 namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 
-use App\Domain\CrudMenu\Providers\CrudMenuServiceProvider;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
 use Pentacom\Repgenerator\Domain\Pattern\Helpers\CharacterCounterStore;
@@ -140,7 +140,9 @@ class RepgeneratorService
         $this->createDirectories();
         $callback('Directories generated!');
 
-        $this->generateStaticFiles($callback);
+
+        $chosenOutputFramework = $requestData['chosen_output_framework'];
+        $this->generateStaticFiles($chosenOutputFramework, $callback);
 
         $this->config($this->modelName, $requestData);
         $callback('Config is ready!');
@@ -168,6 +170,8 @@ class RepgeneratorService
         $this->provider($this->modelName, false, $columns, $isGeneratedFileDomain, $fileUploadFieldsData);
         $callback('Provider is ready!');
 
+        $this->registerProvider($this->modelName);
+
         $this->resource($this->modelName, $columns, $foreigns, $isGeneratedFileDomain);
         $callback('Resource is ready!');
 
@@ -180,7 +184,7 @@ class RepgeneratorService
         $callback('API Routes is ready!');
 
 
-        !$isGenerateFrontend ?: $this->frontend($this->modelName, $columns, $callback);
+        !$isGenerateFrontend ?: $this->frontend2($chosenOutputFramework, $this->modelName, $columns, $callback);
 
         $callback("Code generation has saved you from typing at least ".CharacterCounterStore::$charsCount." characters");
         $minutes = floor((CharacterCounterStore::$charsCount / 5) / 25);
@@ -189,64 +193,102 @@ class RepgeneratorService
         $callback("If we count an average 5 char word and an average 25 WPM we saved you around {$minutes} minutes -> {$hours} hours");
 
         if ($migrationName) {
-            app()->register(CrudMenuServiceProvider::class);
+            if(file_exists(app_path("Domain".DIRECTORY_SEPARATOR."CrudMenu".DIRECTORY_SEPARATOR."Providers".DIRECTORY_SEPARATOR."CrudMenuServiceProvider.php"))) {
+
+                app()->register("App\Domain\CrudMenu\Providers\CrudMenuServiceProvider");
+
+                if(file_exists(app_path("Domain".DIRECTORY_SEPARATOR."CrudMenuGroup".DIRECTORY_SEPARATOR."Providers".DIRECTORY_SEPARATOR."CrudMenuGroupServiceProvider.php"))) {
+
+                    app()->register("App\Domain\CrudMenuGroup\Providers\CrudMenuGroupServiceProvider");
+                    if(class_exists(CrudMenuGroupService::class)) {
+                        app()->register(CrudMenuGroupService::class);
+                    }
+                }
+            }
+
             Artisan::call('migrate',
                 [
-                    '--path' => '/database/migrations/'.$migrationName,
+                    '--path' => DIRECTORY_SEPARATOR.'database'.DIRECTORY_SEPARATOR.'migrations'.DIRECTORY_SEPARATOR.$migrationName,
                     '--force' => true
                 ]);
             $callback($migrationName.' migration migrated to database!');
         }
+
+        Artisan::call('optimize');
     }
 
+    /**
+     * @param  string  $name
+     * @return void
+     */
+    private function registerProvider(string $name): void
+    {
+        $namespace = Str::replaceLast('\\', '', app()->getNamespace());
+
+        $appConfig = file_get_contents(config_path('app.php'));
+        $needles = "{$namespace}\\Domain\\$name\Providers\\{$name}ServiceProvider::class";
+        if (Str::contains($appConfig, $needles)) {
+            return;
+        }
+
+        $lineEndingCount = [
+            "\r\n" => substr_count($appConfig, "\r\n"),
+            "\r" => substr_count($appConfig, "\r"),
+            "\n" => substr_count($appConfig, "\n"),
+        ];
+
+        $eol = array_keys($lineEndingCount, max($lineEndingCount))[0];
+
+        file_put_contents(
+            config_path('app.php'),
+            str_replace(
+            "{$namespace}\\Providers\RouteServiceProvider::class,".$eol,
+            "{$namespace}\\Providers\RouteServiceProvider::class,".$eol."        $namespace\\Domain\\$name\Providers\\{$name}ServiceProvider::class,".$eol,
+            $appConfig
+        ));
+    }
     /**
      * Create static file holder directories
      */
     private function createDirectories(): void
     {
-        if (!file_exists($path = app_path("Abstraction/Controllers"))) {
-            mkdir($path, 0777, true);
-        }
+        foreach ( [
+                      "Abstraction",
+                      "Abstraction".DIRECTORY_SEPARATOR."Filter",
+                      "Abstraction".DIRECTORY_SEPARATOR."Models",
+                      "Abstraction".DIRECTORY_SEPARATOR."Repository",
+                      "Abstraction".DIRECTORY_SEPARATOR."Controllers",
+                      "Abstraction".DIRECTORY_SEPARATOR."Enums",
+                      "Abstraction".DIRECTORY_SEPARATOR."Traits",
+                      "Domain",
+                  ] as $folder ) {
+            if (!file_exists($path = app_path($folder))) {
+                mkdir($path, 0777, true);
+            }
+        };
 
-        if (!file_exists($path = app_path("Domain"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Filter"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Models"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Repository"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Controllers"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path("Abstraction/Enums"))) {
-            mkdir($path, 0777, true);
-        }
-
-        if (!file_exists($path = app_path('Abstraction/Traits'))) {
-            mkdir($path, 0777, true);
-        }
+        foreach ( [
+                    "js",
+                    "js".DIRECTORY_SEPARATOR."Abstraction",
+                    "js".DIRECTORY_SEPARATOR."Domain",
+                    "js".DIRECTORY_SEPARATOR."Abstraction".DIRECTORY_SEPARATOR."components",
+                    "js".DIRECTORY_SEPARATOR."Abstraction".DIRECTORY_SEPARATOR."composables",
+                    "js".DIRECTORY_SEPARATOR."Abstraction".DIRECTORY_SEPARATOR."utils"
+                  ] as $folder ) {
+            if (!file_exists($path = resource_path($folder))) {
+                mkdir($path, 0777, true);
+            }
+        };
     }
 
     /**
+     * @param string $frontendFramework
      * @param $callback
      */
-    private function generateStaticFiles($callback): void
+    private function generateStaticFiles(string $frontendFramework, $callback): void
     {
         $staticFiles = $this->repgeneratorStaticFilesService->copyStaticFiles();
+        $staticFiles = array_merge($staticFiles, $this->repgeneratorStaticFilesService->copyStaticFrontendFiles($frontendFramework));
         foreach ($staticFiles as $staticFile) {
             $this->generatedFiles[] = $staticFile;
             CharacterCounterStore::addFileCharacterCount($staticFile->path);
@@ -268,11 +310,11 @@ class RepgeneratorService
             $this->repgeneratorStubService->getStub('ModelPivot')
         );
 
-        if (!file_exists($path = app_path("Domain/{$name}/Models/"))) {
+        if (!file_exists($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Models".DIRECTORY_SEPARATOR))) {
             mkdir($path, 0777, true);
         }
 
-        file_put_contents($path = app_path("Domain/{$name}/Models/{$name}.php"), $modelTemplate);
+        file_put_contents($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Models".DIRECTORY_SEPARATOR."{$name}.php"), $modelTemplate);
 
         CharacterCounterStore::addFileCharacterCount($path);
 
@@ -290,20 +332,22 @@ class RepgeneratorService
         $apiRouteTemplate = str_replace(
             [
                 '{{modelName}}',
-                '{{modelNamePluralLowerCase}}'
+                '{{modelNamePluralLowerCase}}',
+                '{{modelNamePluralLowerCaseHyphenated}}'
             ],
             [
                 $name,
-                strtolower(Str::plural($name))
+                strtolower(Str::plural($name)),
+                Str::snake(Str::plural($name), '-')
             ],
             $this->repgeneratorStubService->getStub('apiRoutes')
         );
 
-        if (!file_exists($path = app_path("Domain/{$name}/Routes/"))) {
+        if (!file_exists($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Routes".DIRECTORY_SEPARATOR))) {
             mkdir($path, 0777, true);
         }
 
-        file_put_contents($path = app_path("Domain/{$name}/Routes/api.php"), $apiRouteTemplate);
+        file_put_contents($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Routes".DIRECTORY_SEPARATOR."api.php"), $apiRouteTemplate);
 
         CharacterCounterStore::addFileCharacterCount($path);
 
@@ -333,11 +377,11 @@ class RepgeneratorService
             $this->repgeneratorStubService->getStub('config')
         );
 
-        if (!file_exists($path = app_path("Domain/{$name}/"))) {
+        if (!file_exists($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR))) {
             mkdir($path, 0777, true);
         }
 
-        file_put_contents($path = app_path("Domain/{$name}/config.php"), $configTemplate);
+        file_put_contents($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."config.php"), $configTemplate);
 
         CharacterCounterStore::addFileCharacterCount($path);
 
@@ -395,7 +439,7 @@ class RepgeneratorService
                         Str::camel($relationType),
                         $relatedModel,
                         $foreign['column'],
-                        $foreign['on']
+                        $foreign['on'],
                     ],
                     $this->repgeneratorStubService->getStub('ModelRelation')
                 );
@@ -404,11 +448,15 @@ class RepgeneratorService
         }
 
         $fillableStr = [];
+        $columnConstants = [];
         foreach ($columns as $column) {
             if ($column->fileUploadLocation) {
                 continue;
             }
             $fillableStr[] = "'".$column->name."',";
+            if ( $column->name != 'id' ) {
+                $columnConstants[] = 'const ' . Str::upper($column->name) . '_COLUMN = "' . $column->name . '";';
+            }
 
             if($column->is_hashed) {
                 if(!in_array('use Illuminate\Support\Facades\Hash;', $use)) {
@@ -466,6 +514,7 @@ class RepgeneratorService
                 '{{hashedTemplate}}',
                 '{{cryptedTemplate}}',
                 '{{timestamps}}',
+                '{{columnConstants}}',
             ],
             [
                 $name,
@@ -475,16 +524,17 @@ class RepgeneratorService
                 $trait,
                 $hashedTemplate,
                 $cryptedTemplate,
-                $timestampsTemplate
+                $timestampsTemplate,
+                $this->implodeLines($columnConstants, 1)
             ],
             $this->repgeneratorStubService->getStub('Model')
         );
 
-        if (!file_exists($path = app_path("Domain/{$name}/Models/"))) {
+        if (!file_exists($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Models".DIRECTORY_SEPARATOR))) {
             mkdir($path, 0777, true);
         }
 
-        file_put_contents($path = app_path("Domain/{$name}/Models/{$name}.php"), $modelTemplate);
+        file_put_contents($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Models".DIRECTORY_SEPARATOR."{$name}.php"), $modelTemplate);
 
         CharacterCounterStore::addFileCharacterCount($path);
 
@@ -537,11 +587,11 @@ class RepgeneratorService
             $stub
         );
 
-        if (!file_exists($path = app_path("Domain/{$name}/Controllers/Api/{$version}"))) {
+        if (!file_exists($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Controllers".DIRECTORY_SEPARATOR."Api".DIRECTORY_SEPARATOR."{$version}"))) {
             mkdir($path, 0777, true);
         }
 
-        file_put_contents($path = app_path("Domain/{$name}/Controllers/Api/{$version}/{$name}ApiController.php"),
+        file_put_contents($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Controllers".DIRECTORY_SEPARATOR."Api".DIRECTORY_SEPARATOR."{$version}".DIRECTORY_SEPARATOR."{$name}ApiController.php"),
             $apiControllerTemplate);
 
         CharacterCounterStore::addFileCharacterCount($path);
@@ -571,11 +621,11 @@ class RepgeneratorService
             $this->repgeneratorStubService->getStub('Request')
         );
 
-        if (!file_exists($path = app_path("Domain/{$name}/Requests"))) {
+        if (!file_exists($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Requests"))) {
             mkdir($path, 0777, true);
         }
 
-        file_put_contents($path = app_path("Domain/{$name}/Requests/{$name}Request.php"), $requestTemplate);
+        file_put_contents($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Requests".DIRECTORY_SEPARATOR."{$name}Request.php"), $requestTemplate);
 
         CharacterCounterStore::addFileCharacterCount($path);
 
@@ -653,11 +703,11 @@ class RepgeneratorService
             $this->repgeneratorStubService->getStub('UpdateRequest')
         );
 
-        if (!file_exists($path = app_path("Domain/{$name}/Requests"))) {
+        if (!file_exists($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Requests"))) {
             mkdir($path, 0777, true);
         }
 
-        file_put_contents($path = app_path("Domain/{$name}/Requests/{$name}UpdateRequest.php"), $updateRequestTemplate);
+        file_put_contents($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Requests".DIRECTORY_SEPARATOR."{$name}UpdateRequest.php"), $updateRequestTemplate);
 
         CharacterCounterStore::addFileCharacterCount($path);
 
@@ -732,11 +782,11 @@ class RepgeneratorService
             $this->repgeneratorStubService->getStub('RepositoryService')
         );
 
-        if (!file_exists($path = app_path("Domain/{$name}/Repositories"))) {
+        if (!file_exists($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Repositories"))) {
             mkdir($path, 0777, true);
         }
 
-        file_put_contents($path = app_path("Domain/{$name}/Repositories/{$name}RepositoryService.php"),
+        file_put_contents($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Repositories".DIRECTORY_SEPARATOR."{$name}RepositoryService.php"),
             $eloquentTemplate);
 
         CharacterCounterStore::addFileCharacterCount($path);
@@ -753,27 +803,52 @@ class RepgeneratorService
      */
     private function service(string $name, bool $generatePivot): void
     {
+        $code = '';
+
+        $codeStubPath = "codes".DIRECTORY_SEPARATOR.$name."Service";
+        if ( $this->repgeneratorStubService->doesStubExist($codeStubPath) ) {
+            $code = $this->repgeneratorStubService->getStub($codeStubPath);
+        }
+
+        $uses = [];
+        if($name == 'CrudMenu') {
+            $uses[] = "use App\Domain\CrudMenuGroup\Services\CrudMenuGroupService;";
+            $uses[] = "use App\Domain\CrudMenu\Enums\CrudMenuGroupType;";
+            $uses[] = "use App\Domain\CrudMenuGroup\Models\CrudMenuGroup;";
+            $uses[] = "use App\Domain\CrudMenu\Models\CrudMenu;";
+        }
+
+        if($name == 'CrudMenuGroup') {
+            $uses[] = "use App\Domain\CrudMenuGroup\Models\CrudMenuGroup;";
+            $uses[] = "use App\Domain\CrudMenu\Enums\CrudMenuGroupType;";
+
+        }
+
         $serviceTemplate = str_replace(
             [
                 '{{modelName}}',
                 '{{modelNamePluralLowerCase}}',
                 '{{modelNameSingularLowerCase}}',
                 '{{modelType}}',
+                '{{code}}',
+                '{{uses}}',
             ],
             [
                 $name,
                 $this->modelNamePluralLowerCase,
                 $this->modelNameSingularLowerCase,
                 $generatePivot ? 'Pivot' : 'Model',
+                $code,
+                $this->implodeLines($uses, 0),
             ],
             $this->repgeneratorStubService->getStub('Service')
         );
 
-        if (!file_exists($path = app_path("Domain/{$name}/Services"))) {
+        if (!file_exists($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Services"))) {
             mkdir($path, 0777, true);
         }
 
-        file_put_contents($path = app_path("Domain/{$name}/Services/{$name}Service.php"), $serviceTemplate);
+        file_put_contents($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Services".DIRECTORY_SEPARATOR."{$name}Service.php"), $serviceTemplate);
 
         CharacterCounterStore::addFileCharacterCount($path);
 
@@ -837,11 +912,11 @@ class RepgeneratorService
             $this->repgeneratorStubService->getStub('Provider')
         );
 
-        if (!file_exists($path = app_path("Domain/{$name}/Providers"))) {
+        if (!file_exists($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Providers"))) {
             mkdir($path, 0777, true);
         }
 
-        file_put_contents($path = app_path("Domain/{$name}/Providers/{$name}ServiceProvider.php"), $providerTemplate);
+        file_put_contents($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Providers".DIRECTORY_SEPARATOR."{$name}ServiceProvider.php"), $providerTemplate);
 
         CharacterCounterStore::addFileCharacterCount($path);
 
@@ -997,11 +1072,11 @@ class RepgeneratorService
             $this->repgeneratorStubService->getStub('Resource')
         );
 
-        if (!file_exists($path = app_path("Domain/{$name}/Resources"))) {
+        if (!file_exists($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Resources"))) {
             mkdir($path, 0777, true);
         }
 
-        file_put_contents($path = app_path("Domain/{$name}/Resources/{$name}Resource.php"), $resourceTemplate);
+        file_put_contents($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Resources".DIRECTORY_SEPARATOR."{$name}Resource.php"), $resourceTemplate);
 
         CharacterCounterStore::addFileCharacterCount($path);
 
@@ -1037,6 +1112,22 @@ class RepgeneratorService
 
         $callback('Frontend components are ready!');
     }
+
+    /**
+     * @param string $chosenOutputFramework
+     * @param string $name
+     * @param array $columns
+     * @param $callback
+     */
+    private function frontend2(string $chosenOutputFramework, string $name, array $columns, $callback): void
+    {
+
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable2($chosenOutputFramework, $name, $columns);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComponents2($chosenOutputFramework, $name, $columns);
+
+        $callback('Frontend components are ready!');
+    }
+
 
     /**
      * @param  mixed  $cmd

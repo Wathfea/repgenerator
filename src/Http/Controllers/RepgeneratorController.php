@@ -26,7 +26,7 @@ use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
 class RepgeneratorController extends Controller
 {
     const CRUD_MENU_TABLE_NAME = 'crud_menu';
-    const CRUD_MENU_NAME = 'CrudMenu';
+    const CRUD_MENU_GROUP_TABLE_NAME = 'crud_menu_group';
 
     /**
      * @param  MigrationGeneratorService  $migrationGeneratorService
@@ -63,7 +63,8 @@ class RepgeneratorController extends Controller
         //Only check  if not regenerate
         if(!$regenerate) {
             //Detect if CrudMenus exists or we need to create it
-            $messages[] = $this->shouldCreateCrudMenuTable($table);
+            $messages[] = $this->shouldCreateCrudMenuTable($table, $request);
+            $messages[] = $this->shouldCreateCrudMenuGroupTable($table, $request);
             sleep(1);
         }
 
@@ -147,10 +148,11 @@ class RepgeneratorController extends Controller
 
     /**
      * @param  mixed  $table
+     * @param  GenerationRequest  $request
      * @return array
      * @throws Exception
      */
-    private function shouldCreateCrudMenuTable(mixed $table): array
+    private function shouldCreateCrudMenuTable(mixed $table, GenerationRequest $request): array
     {
         $messages = [];
         if (!DB::connection()->getDoctrineSchemaManager()->tablesExist(Str::plural(self::CRUD_MENU_TABLE_NAME))) {
@@ -162,6 +164,7 @@ class RepgeneratorController extends Controller
                 'name' => 'string',
                 'url' => 'string',
                 'icon' => 'string',
+                'crud_menu_group_id' => 'unsignedTinyInteger',
                 'created_at' => 'timestamp',
                 'updated_at' => 'timestamp',
             ];
@@ -172,10 +175,11 @@ class RepgeneratorController extends Controller
 
             $this->migrationGeneratorService->setDate(Carbon::now());
             $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], [],
-                self::CRUD_MENU_NAME, 'menu', false, false);
+                self::CRUD_MENU_TABLE_NAME, 'menu', false, false);
 
             $data = [
-                'name' => self::CRUD_MENU_NAME,
+                'name' => self::CRUD_MENU_TABLE_NAME,
+                'chosen_output_framework' => $request->chosen_output_framework
             ];
 
             $this->repgeneratorService->generate(
@@ -193,6 +197,56 @@ class RepgeneratorController extends Controller
 
         return $messages;
     }
+
+    /**
+     * @param  mixed  $table
+     * @param  GenerationRequest  $request
+     * @return array
+     * @throws Exception
+     */
+    private function shouldCreateCrudMenuGroupTable(mixed $table, GenerationRequest $request): array
+    {
+        $messages = [];
+        if (!DB::connection()->getDoctrineSchemaManager()->tablesExist(Str::plural(self::CRUD_MENU_GROUP_TABLE_NAME))) {
+            $table->setName(self::CRUD_MENU_GROUP_TABLE_NAME);
+            $columns = [];
+
+            $migrationColumns = [
+                'id' => 'id',
+                'name' => 'string',
+                'icon' => 'string',
+                'order' => 'integer'
+            ];
+
+            foreach ($migrationColumns as $name => $type) {
+                $columns[] = new RepgeneratorColumnAdapter($name, $type);
+            }
+
+            $this->migrationGeneratorService->setDate(Carbon::now());
+            $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], [],
+                self::CRUD_MENU_GROUP_TABLE_NAME, 'MenuIcon', false, false);
+
+            $data = [
+                'name' => self::CRUD_MENU_GROUP_TABLE_NAME,
+                'chosen_output_framework' => $request->chosen_output_framework
+            ];
+
+            $this->repgeneratorService->generate(
+                $data,
+                $columns,
+                [],
+                function ($msg) use (&$messages) {
+                    $messages[] = null;
+                },
+                null,
+                $migrationName,
+                false
+            );
+        }
+
+        return $messages;
+    }
+
 
     /**
      * @param  Table  $table
@@ -220,6 +274,7 @@ class RepgeneratorController extends Controller
         //Only create migration if not regenerate
         $migrationName = null;
         if(!$regenerate) {
+
             $this->migrationGeneratorService->setDate(Carbon::now());
             $migrationName = $this->migrationGeneratorService->generateMigrationFiles(
                 $table,
@@ -230,6 +285,9 @@ class RepgeneratorController extends Controller
                 $requestData['icon'],
                 $requestData['softDelete'],
                 $requestData['timestamps'],
+                $requestData['menu_group_id'],
+                $requestData['new_menu_group_name'],
+                $requestData['new_menu_group_icon']
             );
         }
 

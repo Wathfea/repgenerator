@@ -1,0 +1,21 @@
+<script setup lang="ts">
+import CMSDashboard from "~/components/CMSDashboard.vue";
+import UserEdit from "~/components/User/UserEdit.vue";
+import {useRoute} from "vue-router/dist/vue-router";
+const currentRoute = useRoute();
+definePageMeta({ middleware: ["auth"] });
+</script>
+
+<template>
+  <NuxtLayout name="app-layout">
+    <Head>
+      <Title>CMS</Title>
+    </Head>
+    <CMSDashboard page="{{ modelNamePlural }}" title="" :pages="[
+        {href: '/{{ modelNamePlural }}', name: '{{ modelNamePluralUppercase }}', current: false, icon: '{{ modelIcon }}'},
+        {href: '/{{ modelNamePlural }}/' + currentRoute.params.id, name: 'Edit {{ modelNameUppercase }}', current: true, icon: '{{ modelIcon }}'},
+      ]">
+      <UserEdit/>
+    </CMSDashboard>
+  </NuxtLayout>
+</template>

@@ -34,14 +34,17 @@ class MigrationGeneratorService
     }
 
     /**
-     * @param  Table  $table
-     * @param  array  $columns
-     * @param  array  $indexes
-     * @param  array  $foreigns
-     * @param  string  $modelName
-     * @param  string  $iconName
-     * @param  bool  $softDelete
-     * @param  bool  $timestamps
+     * @param Table $table
+     * @param array $columns
+     * @param array $indexes
+     * @param array $foreigns
+     * @param string $modelName
+     * @param string $iconName
+     * @param bool $softDelete
+     * @param bool $timestamps
+     * @param int|null $menuGroupId
+     * @param string|null $newMenuGroupName
+     * @param string|null $newMenuGroupIcon
      * @return string
      */
     public function generateMigrationFiles(
@@ -53,6 +56,9 @@ class MigrationGeneratorService
         string $iconName,
         bool $softDelete,
         bool $timestamps,
+        int|null $menuGroupId = null,
+        string|null $newMenuGroupName = null,
+        string|null $newMenuGroupIcon = null,
     ): string {
         $up = $this->up($table, $columns, $indexes, $foreigns, $softDelete, $timestamps);
         $down = $this->down($table, $foreigns);
@@ -61,11 +67,15 @@ class MigrationGeneratorService
         $this->migrationWriter->writeTo(
             $this->makeTablePath($table->getName()),
             $this->settings->getStubPath(),
+            $this->settings->getMenuCodeStubPath(),
             $up,
             $down,
             $modelName,
-            $table->getName(),
-            $iconName
+            str_replace('_','-', $table->getName()),
+            $iconName,
+            $menuGroupId,
+            $newMenuGroupName,
+            $newMenuGroupIcon,
         );
 
         return $this->makePathLessFilename(
@@ -252,6 +262,7 @@ class MigrationGeneratorService
         $this->settings->setTableFilename(Config::get('repgenerator.filename_pattern.table'));
         $this->settings->setForeignKeyFilename(Config::get('repgenerator.filename_pattern.foreign_key'));
         $this->settings->setStubPath(Config::get('repgenerator.migration_stub_path'));
+        $this->settings->setMenuCodeStubPath(Config::get('repgenerator.migration_menu_code_stub_path'));
     }
 
     public function setDate($date = null)
