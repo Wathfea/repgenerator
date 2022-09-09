@@ -1,3 +1,4 @@
+// @ts-ignore
 import { $fetch, FetchOptions, FetchError } from "ohmyfetch";
 
 const CSRF_COOKIE = "XSRF-TOKEN";
@@ -25,33 +26,18 @@ export async function $larafetch<T, R extends ResponseType = "json">(
         ...options
     }: LarafetchOptions<R> = {}
 ) {
-    const { backendUrl, frontendUrl } = useRuntimeConfig().public;
+    const backendUrl = process.env.BACKEND_URL;
 
-    let token = useCookie(CSRF_COOKIE).value;
 
-    // on client initiate a csrf request and get it from the cookie set by laravel
-    if (
-        process.client &&
-        ["post", "delete", "put", "patch"].includes(options?.method?.toLowerCase())
-    ) {
-        await initCsrf();
-        // cannot use nuxt composables such as useCookie after an async operation: https://github.com/nuxt/framework/issues/5238
-        token = getCookie(CSRF_COOKIE);
-    }
+    await initCsrf(backendUrl);
+    const    token = getCookie(CSRF_COOKIE);
+
 
     let headers: any = {
         ...options?.headers,
         ...(token && { [CSRF_HEADER]: token }),
         accept: "application/json",
     };
-
-    if (process.server) {
-        headers = {
-            ...headers,
-            ...useRequestHeaders(["cookie"]),
-            referer: frontendUrl,
-        };
-    }
 
     try {
         return await $fetch<T, R>(path, {
@@ -70,20 +56,18 @@ export async function $larafetch<T, R extends ResponseType = "json">(
             redirectIfNotAuthenticated &&
             [401, 419].includes(error?.response?.status)
         ) {
-            await navigateTo("/login");
+           window.location.href = "/login";
         }
 
         if (redirectIfNotVerified && [409].includes(error?.response?.status)) {
-            await navigateTo("/verify-email");
+            window.location.href = "/verify-email";
         }
 
         throw error;
     }
 }
 
-async function initCsrf() {
-    const { backendUrl } = useRuntimeConfig().public;
-
+async function initCsrf(backendUrl) {
     await $fetch("/sanctum/csrf-cookie", {
         baseURL: backendUrl,
         credentials: "include",

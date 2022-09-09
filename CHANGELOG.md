@@ -3,6 +3,7 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
+- Frontend create columns missing
 - Duplicated request validation
 - Relation type selector
 - Update request fileupload esetén a required ne kerüljön be
@@ -23,6 +24,22 @@ All notable changes to `repgenerator` will be documented in this file
 - Mezősorrend változtatása drag & drop-al
 
 ## [Unreleased]
+
+## [1.5.3] - 2022-09-09
+## Fixed
+- Clear up frontend depedency tree
+
+## [1.5.2] - 2022-09-09
+## Fixed
+- Frontend generation errors
+
+
+## [1.5.1] - 2022-09-09
+## Added
+- DIRECTORY_SEPARATOR use for multi platform usage
+- Fixed api route name generation
+- New frontend generation
+- Lot of small tweaks
 
 ## [1.5.0] - 2022-09-01
 ## Added

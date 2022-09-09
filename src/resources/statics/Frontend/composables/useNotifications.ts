@@ -1,4 +1,4 @@
-import {ref} from "vue";
+import {ref, reactive} from "vue";
 
 type Notification = {
     id: number,
@@ -6,18 +6,12 @@ type Notification = {
     description?: string;
 };
 
-
-// Value is initialized in: ~/plugins/auth.ts
-export const useNotification = () => {
-    return useState<Notification[]>("notification", () => []);
-};
-
 export const useNotifications  = () => {
-    const notifications = useNotification();
+    const notifications = reactive([])
     const id = ref(1);
     const removeNotification = (id) => {
-        for ( let index in notifications.value ) {
-            if ( notifications.value[index].id === id ) {
+        for ( let index in notifications ) {
+            if ( notifications[index].id === id ) {
                 // @ts-ignore
                 notifications.value.splice(index, 1);
                 break;
@@ -42,8 +36,9 @@ export const useNotifications  = () => {
             type: type,
             title: title,
             description: description,
-        }
-        notifications.value.push(notificationObject);
+        } as Notification
+
+        notifications.push(notificationObject);
         setTimeout(() => {
             removeNotification(setId);
         }, seconds * 1000)

@@ -20,7 +20,7 @@
 <script setup>
 import { SortAscendingIcon, SortDescendingIcon, XIcon, SearchCircleIcon } from '@heroicons/vue/solid'
 import { SearchCircleIcon as SearchCircleOutlineIcon }  from '@heroicons/vue/outline'
-import Button from "../Button";
+import Button from "../Button.vue";
 const emit = defineEmits(["toggleSort", "openSearch", "clearSortAndSearch"]);
 let props = defineProps({
   data : {

@@ -19,10 +19,11 @@ php artisan pattern:init http://yoursite.com
 
 
 ```bash
-npm i nuxt ohmyfetch ts-loader typescript
+npm i @headlessui/vue @heroicons/vue@v1 @vitejs/plugin-vue @vueform/multiselect @vuepic/vue-datepicker date-fns ohmyfetch vue vue-router tailwindcss postcss autoprefixer ts-loader typescript
 ```
 
-```
+
+```bash
 php artisan vendor:publish --provider="Pentacom\Repgenerator\Domain\Pattern\Providers\RepgeneratorServiceProvider" --tag="migrations"
 ```
 

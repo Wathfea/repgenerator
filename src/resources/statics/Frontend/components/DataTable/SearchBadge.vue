@@ -13,7 +13,7 @@
   </span>
 </template>
 <script setup>
-  import Button from "../Button";
+  import Button from "../Button.vue";
   import { SearchCircleIcon, XIcon } from '@heroicons/vue/solid'
   import {computed} from "vue";
   const emit = defineEmits(['onRemove', 'openSearch'])

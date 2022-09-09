@@ -4,6 +4,7 @@ namespace Pentacom\Repgenerator\Domain\Pattern\Providers;
 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
+use Pentacom\Repgenerator\Console\ClearFiles;
 use Pentacom\Repgenerator\Console\MigrationGenerator;
 use Pentacom\Repgenerator\Console\PatternGenerator;
 use Pentacom\Repgenerator\Console\PatternGeneratorInit;
@@ -33,6 +34,7 @@ class RepgeneratorServiceProvider extends ServiceProvider
 
             // Registering package commands.
             $this->commands([PatternGeneratorInit::class]);
+            $this->commands([ClearFiles::class]);
         }
 
 
@@ -89,14 +91,5 @@ class RepgeneratorServiceProvider extends ServiceProvider
     {
         // Automatically apply the package configuration
         $this->mergeConfigFrom(__DIR__.'/../../../../config/config.php', 'repgenerator');
-
-        $directories = array_filter(glob(app_path('Domain').'/*'), 'is_dir');
-
-        foreach ($directories as $directory) {
-            if (file_exists($directory.'/config.php')) {
-                $config = include($directory."/config.php");
-                $this->app->register($config['provider']);
-            }
-        }
     }
 }
