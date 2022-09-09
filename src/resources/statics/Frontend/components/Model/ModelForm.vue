@@ -33,12 +33,12 @@
 <script setup>
 import {ref} from "vue";
 import { Switch } from '@headlessui/vue'
-import Button from "../Button";
-import PhotoUpload from "../PhotoUpload";
-import {useRoute} from "nuxt/app";
-import FileUpload from "../FileUpload";
-import FileManagerInput from "../FileManagerInput";
-import ApiMultiselect from "../ApiMultiselect";
+import Button from "../Button.vue";
+import PhotoUpload from "../PhotoUpload.vue";
+import {useRoute} from "vue-router";
+import FileUpload from "../FileUpload.vue";
+import FileManagerInput from "../FileManagerInput.vue";
+import ApiMultiselect from "../ApiMultiselect.vue";
 const emit = defineEmits(['submit']);
 const props = defineProps({
     id : {

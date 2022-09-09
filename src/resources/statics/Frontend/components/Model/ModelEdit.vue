@@ -7,12 +7,12 @@
     </div>
 </template>
 <script setup>
-import ModelForm from "./ModelForm";
-import ModelTabs from "./ModelTabs";
+import ModelForm from "./ModelForm.vue";
+import ModelTabs from "./ModelTabs.vue";
 import {ref} from "vue";
 import {DatabaseIcon} from '@heroicons/vue/solid'
-import {useRoute} from "nuxt/app";
-import {useNotifications} from "../../composables/useNotifications";
+import {useRoute} from "vue-router";
+import {useNotifications} from "../../composables/useNotifications.ts";
 import {useRouter} from "vue-router";
 
 const emit = defineEmits(['currentTabChanged']);
