@@ -25,6 +25,9 @@ All notable changes to `repgenerator` will be documented in this file
 
 ## [Unreleased]
 
+## [1.5.3] - 2022-09-09
+## Fixed
+- Clear up frontend depedency tree
 
 ## [1.5.2] - 2022-09-09
 ## Fixed
