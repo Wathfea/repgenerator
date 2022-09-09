@@ -3,7 +3,7 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
-- DIRECTORY_SEPARATOR használat bevezetése
+
 - Duplicated request validation
 - Relation type selector
 - Update request fileupload esetén a required ne kerüljön be
@@ -24,6 +24,12 @@ All notable changes to `repgenerator` will be documented in this file
 - Mezősorrend változtatása drag & drop-al
 
 ## [Unreleased]
+## [1.5.1] - 2022-09-09
+## Added
+- DIRECTORY_SEPARATOR use for multi platform usage
+- Fixed api route name generation
+- New frontend generation
+- Lot of small tweaks
 
 ## [1.5.0] - 2022-09-01
 ## Added
