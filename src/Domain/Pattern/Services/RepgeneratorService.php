@@ -1106,9 +1106,9 @@ class RepgeneratorService
      */
     private function frontend(string $chosenOutputFramework, string $name, array $columns, $callback): void
     {
-
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable($chosenOutputFramework, $name, $columns);
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComponents($chosenOutputFramework, $name, $columns);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateLarafetch();
 
         $callback('Frontend components are ready!');
     }

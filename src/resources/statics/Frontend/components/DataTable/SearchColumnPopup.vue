@@ -27,7 +27,7 @@
                       <component v-if="icon" :is="heroIcons[icon]" class="mr-4 flex-shrink-0 h-6 w-6 text-gray-300" aria-hidden="true" />
                     </div>
                     <ApiMultiselect class="column-multiselect" v-if="data.valuesGetter" :set-data="data" :value="search" @change="onSearchChange"/>
-                    <input v-else autocomplete="off" v-model="search" type="email" name="email" id="email" class="focus:ring-vagheggi-500 focus:border-vagheggi-500 block w-full pl-10 sm:text-sm border-gray-300"/>
+                    <input v-else autocomplete="off" v-model="search" type="email" name="email" id="email" class="focus:ring-repgenerator-500 focus:border-repgenerator-500 block w-full pl-10 sm:text-sm border-gray-300"/>
                   </div>
                 </div>
               </div>

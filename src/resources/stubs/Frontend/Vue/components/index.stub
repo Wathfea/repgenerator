@@ -12,9 +12,6 @@ const getFixedFilters = () => {
   return fixedFilters;
 }
 const setColumns = {
-  'id': {
-    name: 'ID',
-    isSorting: true
-  }
+  {{ columns }}
 }
 </script>
