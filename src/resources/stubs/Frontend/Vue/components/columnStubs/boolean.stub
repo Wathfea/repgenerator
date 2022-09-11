@@ -1,0 +1,3 @@
+cellGetter: (model) => {
+  return model.{{ column }} == 1 ? 'Active' : 'Inactive';
+},

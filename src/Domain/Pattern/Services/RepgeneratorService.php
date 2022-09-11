@@ -1108,9 +1108,11 @@ class RepgeneratorService
      */
     private function frontend(string $chosenOutputFramework, string $icon, string $name, array $columns, $callback): void
     {
-
-        $this->repgeneratorFrontendService->generateComposable($chosenOutputFramework, $name, $columns);
-        $this->repgeneratorFrontendService->generateComponents($chosenOutputFramework, $name, $columns);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable($chosenOutputFramework, $name, $columns);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComponents($chosenOutputFramework, $name, $columns);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateLarafetch();
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateRoutesImports($name);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateRoutesBlock();
         if ( $chosenOutputFramework == 'nuxt' ) {
             $this->repgeneratorFrontendService->generatePages($name, $icon);
         }

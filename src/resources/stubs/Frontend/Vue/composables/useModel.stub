@@ -1,4 +1,4 @@
-import useModel from "../../../Abstraction/composables/model";
+import useModel from "../../../Abstraction/composables/model.js";
 
 export const use{{ modelNamePluralUcfirst }}  = () => {
     const getColumns = () => {

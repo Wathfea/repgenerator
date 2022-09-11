@@ -34,7 +34,7 @@ class RepgeneratorStaticFilesService
             "components/FileUpload.vue",
             "composables/model.js",
             "composables/useNotifications.ts",
-            'utils/$larafetch.ts',
+            "router/router.js"
         ];
 
         $generatedFiles = [];
