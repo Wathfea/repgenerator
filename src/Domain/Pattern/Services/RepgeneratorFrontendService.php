@@ -29,7 +29,21 @@ class RepgeneratorFrontendService
      */
     #[ArrayShape(['name' => "string", 'location' => "mixed"])] public function generateComposable(string $chosenOutputFramework, string $name, array $columns): array
     {
-        $columns = '{}';
+        $columnsConfig = [];
+        /** @var RepgeneratorColumnAdapter $column */
+        foreach ( $columns as $column ) {
+            if ( $column->name == 'id' ) {
+                continue;
+            }
+            $columnProperties = [
+                'name' => ucfirst($column->name),
+                'required' => $column->nullable != true,
+            ];
+            if ( $column->type == 'boolean' ) {
+                $columnProperties['isCheckbox'] = true;
+            }
+            $columnsConfig[] = $columnProperties;
+        }
 
         $stub = $this->repgeneratorStubService->getStub('Frontend/Vue/composables/useModel');
         $frontendReplacer = app(RepgeneratorFrontendFrameworkHandlerService::class);
@@ -43,7 +57,7 @@ class RepgeneratorFrontendService
                 '{{ modelNamePluralLowercase }}',
             ],
             [
-                $columns,
+                json_encode($columnsConfig),
                 $this->nameTransformerService->getModelNamePluralUcfirst(),
                 $this->nameTransformerService->getModelNameSingularUcfirst(),
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
