@@ -1,0 +1,17 @@
+<script setup lang="ts">
+import CMSDashboard from "~/components/CMSDashboard.vue";
+import {{modelNameSingularUcfirst}}Index from "~/src/Domain/{{modelNameSingularUcfirst}}/components/{{modelNameSingularUcfirst}}Index.vue";
+
+definePageMeta({ middleware: ["auth"] });
+</script>
+
+<template>
+  <NuxtLayout name="app-layout">
+    <Head>
+      <Title>CMS</Title>
+    </Head>
+    <CMSDashboard page="{{modelNamePluralLowerCaseHyphenated}}" title="{{modelNamePluralUcfirst}}" :pages="[{href: '/{{modelNamePluralLowerCaseHyphenated}}', name: '{{modelNamePluralUcfirst}}', current: true, icon: '{{modelIcon}}'}]">
+      <{{modelNameSingularUcfirst}}Index/>
+    </CMSDashboard>
+  </NuxtLayout>
+</template>
