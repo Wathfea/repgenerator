@@ -172,11 +172,13 @@ class RepgeneratorFrontendService
 
         $indexTemplate = str_replace(
             [
+                '{{ modelNamePluralLowerCaseHyphenated }}',
                 '{{ modelNameSingularLowercase }}',
                 '{{ modelNamePluralLowercase }}',
                 '{{ columns }}'
             ],
             [
+                Str::snake(Str::plural($name), '-'),
                 $this->nameTransformerService->getModelNameSingularLowerCase(),
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
                 $this->implodeLines($columnsTemplate, 2)
@@ -184,10 +186,11 @@ class RepgeneratorFrontendService
             $this->repgeneratorStubService->getStub('Frontend/Vue/components/index')
         );
 
+        $modelNameSingularUcfirst = $this->nameTransformerService->getModelNameSingularUcfirst();
         $files = [
-            'Create.vue' => $createTemplate,
-            'Edit.vue' => $editTemplate,
-            'Index.vue' => $indexTemplate,
+            $modelNameSingularUcfirst . 'Create.vue' => $createTemplate,
+            $modelNameSingularUcfirst. 'Edit.vue' => $editTemplate,
+            $modelNameSingularUcfirst. 'Index.vue' => $indexTemplate,
         ];
 
         foreach ( $files as $file => $template ) {
