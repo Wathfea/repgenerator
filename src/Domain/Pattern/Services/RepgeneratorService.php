@@ -1109,6 +1109,9 @@ class RepgeneratorService
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable($chosenOutputFramework, $name, $columns);
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComponents($chosenOutputFramework, $name, $columns);
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateLarafetch();
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateRoutesImports($name);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateRoutesBlock();
+
 
         $callback('Frontend components are ready!');
     }

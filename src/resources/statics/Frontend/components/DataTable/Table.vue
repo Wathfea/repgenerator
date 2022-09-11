@@ -3,9 +3,9 @@
     <div class="flex flex-col">
       <div class="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
         <div class="mb-4 flex justify-end" v-if="!disableCreate">
-          <RouterLink :to="`/${route}/create` + getCreateFilters()">
+          <NuxtLink :to="`/${route}/create` + getCreateFilters()">
             <Button>Új {{ modelReadableName }}</Button>
-          </RouterLink>
+          </NuxtLink>
         </div>
         <div class="shadow-sm bg-gray-50 rounded">
           <div class="p-3">
@@ -72,12 +72,12 @@
                   </slot>
                 </td>
                 <td class="flex justify-end relative whitespace-nowrap py-4 px-3 text-sm font-medium sm:pr-6 lg:pr-8">
-                  <RouterLink :to="`/${route}/${model.id}`" class="text-repgenerator-600 hover:text-repgenerator-900">
+                  <NuxtLink :to="`/${route}/${model.id}`" class="text-vagheggi-600 hover:text-vagheggi-900">
                     <PencilIcon class="h-6 w-6" aria-hidden="true" />
-                  </RouterLink>
-                  <RouterLink v-if="!disableDestroy" @click="deleteModel(model.id)" class="text-repgenerator-600 hover:text-repgenerator-900 ml-2 cursor-pointer">
+                  </NuxtLink>
+                  <a v-if="!disableDestroy" @click="deleteModel(model.id)" class="text-vagheggi-600 hover:text-vagheggi-900 ml-2 cursor-pointer">
                     <TrashIcon class="h-6 w-6" aria-hidden="true" />
-                  </RouterLink>
+                  </a>
                   <slot name="actions" :value="model"/>
                 </td>
               </tr>

@@ -33,7 +33,8 @@ class RepgeneratorStaticFilesService
             "components/FileManagerInput.vue",
             "components/FileUpload.vue",
             "composables/model.js",
-            "composables/useNotifications.ts"
+            "composables/useNotifications.ts",
+            "router/router.js"
         ];
 
         $generatedFiles = [];

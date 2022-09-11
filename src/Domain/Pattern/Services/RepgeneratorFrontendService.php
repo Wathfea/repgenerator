@@ -230,4 +230,79 @@ class RepgeneratorFrontendService
             'location' => $path
         ];
     }
+
+    #[ArrayShape(['name' => "string", 'location' => "false|string"])] public function generateRoutesImports(string $name): array
+    {
+        $imports = [];
+        $actions = ['Index', 'Create', 'Edit'];
+        foreach ($actions as $action) {
+            $imports[] = "import {$this->nameTransformerService->getModelNamePluralUcfirst()}{$action} from '../Domain/{$name}/components/{$action}.vue'";
+        }
+
+        $router = file_get_contents(resource_path("js".DIRECTORY_SEPARATOR."Abstraction".DIRECTORY_SEPARATOR."router".DIRECTORY_SEPARATOR."router.js"));
+
+        $lineEndingCount = [
+            "\r\n" => substr_count($router, "\r\n"),
+            "\r" => substr_count($router, "\r"),
+            "\n" => substr_count($router, "\n"),
+        ];
+
+        $eol = array_keys($lineEndingCount, max($lineEndingCount))[0];
+
+        foreach ($imports as $import) {
+            file_put_contents(
+                resource_path('js'.DIRECTORY_SEPARATOR.'Abstraction'.DIRECTORY_SEPARATOR.'router'.DIRECTORY_SEPARATOR.'router.js'),
+                str_replace(
+                    '//DO NOT REMOVE - IMPORTS SECTION'.$eol,
+                    '//DO NOT REMOVE - IMPORTS SECTION'.$eol."        $import".$eol,
+                    $router
+                ));
+        }
+
+        return [
+            'name' => "router.js",
+            'location' => "resources/js/Abstraction/router"
+        ];
+    }
+
+    /**
+     * @return string[]
+     */
+    #[ArrayShape(['name' => "string", 'location' => "string"])] public function generateRoutesBlock(): array
+    {
+        $routeBlockTemplate = str_replace(
+            [
+                '{{modelNamePluralLowerCase}}',
+                '{{modelNamePluralUcfirst}}',
+            ],
+            [
+                $this->nameTransformerService->getModelNamePluralLowerCase(),
+                $this->nameTransformerService->getModelNamePluralUcfirst(),
+            ],
+            $this->repgeneratorStubService->getStub('Frontend/routeBlock')
+        );
+
+        $router = file_get_contents(resource_path("js".DIRECTORY_SEPARATOR."Abstraction".DIRECTORY_SEPARATOR."router".DIRECTORY_SEPARATOR."router.js"));
+
+        $lineEndingCount = [
+            "\r\n" => substr_count($router, "\r\n"),
+            "\r" => substr_count($router, "\r"),
+            "\n" => substr_count($router, "\n"),
+        ];
+
+        $eol = array_keys($lineEndingCount, max($lineEndingCount))[0];
+
+        file_put_contents(
+            resource_path('js'.DIRECTORY_SEPARATOR.'Abstraction'.DIRECTORY_SEPARATOR.'router'.DIRECTORY_SEPARATOR.'router.js'),
+            str_replace(
+                '//DO NOT REMOVE - ROUTE SECTION'.$eol,
+                '//DO NOT REMOVE - ROUTE SECTION'.$eol."        $routeBlockTemplate".$eol,
+                $router
+            ));
+
+        return [
+            'name' => "router.js",
+            'location' => "resources/js/Abstraction/router"
+        ];
+    }
 }
