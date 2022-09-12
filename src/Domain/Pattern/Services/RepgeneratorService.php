@@ -105,7 +105,6 @@ class RepgeneratorService
         bool $isGenerateFrontend = true,
         bool $isGeneratedFileDomain = false,
     ): void {
-        Log::info('Service name ', ['name' => $requestData['name']]);
         //Setup names
         $this->nameTransformerService->setModelName($requestData['name']);
         $this->modelName = $this->nameTransformerService->getModelName();

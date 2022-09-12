@@ -30,8 +30,7 @@ class RepgeneratorFrontendService
      */
     #[ArrayShape(['name' => "string", 'location' => "mixed"])] public function generateComposable(string $chosenOutputFramework, string $name, array $columns): array
     {
-        $this->nameTransformerService->setModelName($name); //TODO: Tomi, szerinted itt miért kell újrasetteljem a nevet a helyes generáláshoz?
-        Log::info('Name ', ['name' => $this->nameTransformerService->getModelName()]);
+        $this->nameTransformerService->setModelName($name);
         $columnsConfig = [];
         /** @var RepgeneratorColumnAdapter $column */
         foreach ( $columns as $column ) {
@@ -45,7 +44,7 @@ class RepgeneratorFrontendService
             if ( $column->type == 'boolean' ) {
                 $columnProperties['isCheckbox'] = true;
             }
-            $columnsConfig[] = $columnProperties;
+            $columnsConfig[$column->name] = $columnProperties;
         }
 
         $stub = $this->repgeneratorStubService->getStub('Frontend/Vue/composables/useModel');
