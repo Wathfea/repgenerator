@@ -170,7 +170,13 @@ class RepgeneratorController extends Controller
             ];
 
             foreach ($migrationColumns as $name => $type) {
-                $columns[] = new RepgeneratorColumnAdapter($name, $type);
+                if($name == 'crud_menu_group_id') {
+                    $reference = ['name' => 'crud_menu_group'];
+                    $columns[] = new RepgeneratorColumnAdapter($name, $type, false, false, false, null, null, null, null, false, null, null, null, null, $reference);
+                } else {
+                    $columns[] = new RepgeneratorColumnAdapter($name, $type);
+                }
+
             }
 
             $foreigns[] = [
@@ -192,7 +198,8 @@ class RepgeneratorController extends Controller
 
             $data = [
                 'name' => self::CRUD_MENU_TABLE_NAME,
-                'chosen_output_framework' => $request->chosen_output_framework
+                'chosen_output_framework' => $request->chosen_output_framework,
+                'icon' => $request->icon,
             ];
 
             $this->repgeneratorService->generate(
@@ -204,7 +211,7 @@ class RepgeneratorController extends Controller
                 },
                 null,
                 $migrationName,
-                false
+                true
             );
         }
 
@@ -241,7 +248,8 @@ class RepgeneratorController extends Controller
 
             $data = [
                 'name' => self::CRUD_MENU_GROUP_TABLE_NAME,
-                'chosen_output_framework' => $request->chosen_output_framework
+                'chosen_output_framework' => $request->chosen_output_framework,
+                'icon' => $request->icon,
             ];
 
             $this->repgeneratorService->generate(
@@ -253,7 +261,7 @@ class RepgeneratorController extends Controller
                 },
                 null,
                 $migrationName,
-                false
+                true
             );
         }
 
@@ -399,7 +407,8 @@ class RepgeneratorController extends Controller
         }
 
         $data = [
-            'name' => $requestData['name'].'Files'
+            'name' => $requestData['name'].'Files',
+            'chosen_output_framework' => $requestData['chosen_output_framework']
         ];
 
         $this->repgeneratorService->generate(

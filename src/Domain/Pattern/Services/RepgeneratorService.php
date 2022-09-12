@@ -105,6 +105,7 @@ class RepgeneratorService
         bool $isGenerateFrontend = true,
         bool $isGeneratedFileDomain = false,
     ): void {
+        Log::info('Service name ', ['name' => $requestData['name']]);
         //Setup names
         $this->nameTransformerService->setModelName($requestData['name']);
         $this->modelName = $this->nameTransformerService->getModelName();
@@ -154,7 +155,7 @@ class RepgeneratorService
         }
         $callback('Model is ready!');
 
-        $this->apiController('v1', $this->modelName, $isReadOnly, $isGeneratedFileDomain, $fileUploadFieldsData);
+        $this->apiController('v1', $this->modelName, $foreigns, $isReadOnly, $isGeneratedFileDomain, $fileUploadFieldsData);
         $callback('API Controller is ready!');
 
         $this->request($this->modelName, $columns, $foreigns);
@@ -548,14 +549,16 @@ class RepgeneratorService
     /**
      * @param  string  $version
      * @param  string  $name
+     * @param  array  $foreigns
      * @param  bool  $isReadOnly
      * @param  bool  $isGeneratedFileDomain
      * @param  array|null  $fileUploadFieldsData
      */
-    private function apiController(string $version, string $name, bool $isReadOnly, bool $isGeneratedFileDomain, array $fileUploadFieldsData = null): void
+    private function apiController(string $version, string $name, array $foreigns, bool $isReadOnly, bool $isGeneratedFileDomain, array $fileUploadFieldsData = null): void
     {
+
         $use = [];
-        $filesRelation = [];
+        $withRelationTemplate = '';
 
         if ($isReadOnly) {
             $stub = $this->repgeneratorStubService->getStub('ApiControllerReadOnly');
@@ -563,11 +566,40 @@ class RepgeneratorService
             $stub = $this->repgeneratorStubService->getStub('ApiControllerReadWrite');
         }
 
+        $relations = [];
+        if(!empty($foreigns)) {
+            foreach ($foreigns as $foreign) {
+                $relations[] = "'".$foreign['relation_name']."'";
+            }
+        }
+
         if (!empty($fileUploadFieldsData) && !$isGeneratedFileDomain) {
             $use[] = "use Illuminate\Http\JsonResponse;\n";
             $use[] = "use Illuminate\Http\Request;\n";
+            $relations[] = "'files'";
 
-            $filesRelation[] = $this->repgeneratorStubService->getStub('withFilesRelation');
+            $withRelationTemplate = str_replace(
+                [
+                    '{{relations}}',
+                ],
+                [
+                    $this->implodeLines($relations, 0),
+                ],
+                $this->repgeneratorStubService->getStub('withRelation')
+            );
+        } elseif (empty($fileUploadFieldsData) && !empty($foreigns)) {
+            $use[] = "use Illuminate\Http\JsonResponse;\n";
+            $use[] = "use Illuminate\Http\Request;\n";
+
+            $withRelationTemplate = str_replace(
+                [
+                    '{{relations}}',
+                ],
+                [
+                    $this->implodeLines($relations, 0),
+                ],
+                $this->repgeneratorStubService->getStub('withRelation')
+            );
         }
 
         $apiControllerTemplate = str_replace(
@@ -583,7 +615,7 @@ class RepgeneratorService
                 $this->modelNamePluralLowerCase,
                 $this->modelNameSingularLowerCase,
                 $this->implodeLines($use, 2),
-                $this->implodeLines($filesRelation, 2),
+                $withRelationTemplate,
             ],
             $stub
         );
@@ -982,7 +1014,8 @@ class RepgeneratorService
                         $referenceName,
                         'make'
                     ], $this->repgeneratorStubService->getStub('resourceElementRelation'));
-            } elseif ($column->fileUploadLocation) {
+            }
+            elseif ($column->fileUploadLocation) {
                 if(!in_array("use App\Domain\\".$name."File\\Resources\\".$name."FileResource;\n", $uses)) {
                     $uses[] = "use App\Domain\\".$name."File\\Resources\\".$name."FileResource;\n";
 
@@ -1139,21 +1172,29 @@ class RepgeneratorService
 
         /**
          * @var  $column
-         * @var  RepgeneratorColumnAdapter $data
+         * @var  RepgeneratorColumnAdapter $column
          */
-        foreach ($columns as $data) {
-            if ( $data->name == 'id' ) {
+        foreach ($columns as $column) {
+            if ( $column->name == 'id' ) {
                 continue;
             }
-            switch($data->type) {
-                case 'string':
-                    $fakerValue = 'word';
-                    break;
-                default:
-                    $fakerValue = '';
-                    break;
+
+            $fakerValue = match ($column->type) {
+                'binary', 'char', 'geometryCollection', 'geometry', 'ipAddress', 'rememberToken', 'set', 'softDeletes', 'uuidMorphs', 'uuid', 'text', 'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumText', 'multiLineString', 'multiPoint', 'multiPolygon', 'point', 'polygon', 'tinyText', 'string' => 'word',
+                'enum' => 'randomElement',
+                'boolean' => 'boolean',
+                'id', 'integer', 'bigIncrements', 'bigInteger', 'double', 'float', 'decimal', 'increments', 'mediumIncrements', 'mediumInteger', 'smallIncrements', 'smallInteger', 'tinyIncrements', 'tinyInteger', 'unsignedBigInteger', 'unsignedDecimal',
+                'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger', 'unsignedTinyInteger' => 'randomNumber',
+                'time', 'timestamp', 'timestamps', 'dateTime', 'date', 'year', 'nullableTimestamps' => 'date',
+                'softDeletesTz', 'dateTimeTz', 'timeTz', 'timestampTz', 'timestampsTz' => 'timezone'
+            };
+
+            $value = '';
+            if($column->type === 'enum') {
+                $value = "[".implode(', ', $column->values)."]";
             }
-            $columnFactories[] .= '"' . $data->name. '" => $this->faker->' . $fakerValue . '(),';
+
+            $columnFactories[] .= '"' . $column->name. '" => $this->faker->' . $fakerValue . '('.$value.'),';
         }
 
         $factoryTemplate = str_replace(

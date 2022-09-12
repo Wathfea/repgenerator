@@ -2,6 +2,7 @@
 
 namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use JetBrains\PhpStorm\ArrayShape;
 use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
@@ -29,6 +30,8 @@ class RepgeneratorFrontendService
      */
     #[ArrayShape(['name' => "string", 'location' => "mixed"])] public function generateComposable(string $chosenOutputFramework, string $name, array $columns): array
     {
+        $this->nameTransformerService->setModelName($name); //TODO: Tomi, szerinted itt miért kell újrasetteljem a nevet a helyes generáláshoz?
+        Log::info('Name ', ['name' => $this->nameTransformerService->getModelName()]);
         $columnsConfig = [];
         /** @var RepgeneratorColumnAdapter $column */
         foreach ( $columns as $column ) {
@@ -51,12 +54,14 @@ class RepgeneratorFrontendService
 
         $composableTemplate = str_replace(
             [
+                '{{ modelNamePluralLowerCaseHyphenated }}',
                 '{{ columns }}',
                 '{{ modelNamePluralUcfirst }}',
                 '{{ modelNameSingularUcfirst }}',
                 '{{ modelNamePluralLowercase }}',
             ],
             [
+                Str::snake(Str::plural($name), '-'),
                 json_encode($columnsConfig),
                 $this->nameTransformerService->getModelNamePluralUcfirst(),
                 $this->nameTransformerService->getModelNameSingularUcfirst(),
@@ -346,10 +351,11 @@ class RepgeneratorFrontendService
         $imports = [];
         $actions = ['Index', 'Create', 'Edit'];
         foreach ($actions as $action) {
-            $imports[] = "import {$this->nameTransformerService->getModelNamePluralUcfirst()}{$action} from '../Domain/{$name}/components/{$action}.vue'";
+            $imports[] = "import {$this->nameTransformerService->getModelNameSingularUcfirst()}{$action} from '../../Domain/{$name}/components/{$name}{$action}.vue'";
         }
 
-        $router = file_get_contents(resource_path("js".DIRECTORY_SEPARATOR."Abstraction".DIRECTORY_SEPARATOR."router".DIRECTORY_SEPARATOR."router.js"));
+        $routerPath = resource_path('js'.DIRECTORY_SEPARATOR.'Abstraction'.DIRECTORY_SEPARATOR.'router'.DIRECTORY_SEPARATOR.'router.js');
+        $router = file_get_contents($routerPath);
 
         $lineEndingCount = [
             "\r\n" => substr_count($router, "\r\n"),
@@ -360,13 +366,15 @@ class RepgeneratorFrontendService
         $eol = array_keys($lineEndingCount, max($lineEndingCount))[0];
 
         foreach ($imports as $import) {
+            $router = file_get_contents($routerPath);
+
             file_put_contents(
-                resource_path('js'.DIRECTORY_SEPARATOR.'Abstraction'.DIRECTORY_SEPARATOR.'router'.DIRECTORY_SEPARATOR.'router.js'),
+                $routerPath,
                 str_replace(
-                    '//DO NOT REMOVE - IMPORTS SECTION'.$eol,
-                    '//DO NOT REMOVE - IMPORTS SECTION'.$eol."        $import".$eol,
+                    '//DO NOT REMOVE THIS COMMENT BLOCK!! - IMPORTS SECTION'.$eol,
+                    '//DO NOT REMOVE THIS COMMENT BLOCK!! - IMPORTS SECTION'.$eol."        $import".$eol,
                     $router
-                ));
+                ), LOCK_EX);
         }
 
         return [
@@ -383,16 +391,17 @@ class RepgeneratorFrontendService
         $routeBlockTemplate = str_replace(
             [
                 '{{modelNamePluralLowerCase}}',
-                '{{modelNamePluralUcfirst}}',
+                '{{modelNameSingularUcfirst}}',
             ],
             [
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
-                $this->nameTransformerService->getModelNamePluralUcfirst(),
+                $this->nameTransformerService->getModelNameSingularUcfirst(),
             ],
             $this->repgeneratorStubService->getStub('Frontend/routeBlock')
         );
 
-        $router = file_get_contents(resource_path("js".DIRECTORY_SEPARATOR."Abstraction".DIRECTORY_SEPARATOR."router".DIRECTORY_SEPARATOR."router.js"));
+        $routerPath = resource_path('js'.DIRECTORY_SEPARATOR.'Abstraction'.DIRECTORY_SEPARATOR.'router'.DIRECTORY_SEPARATOR.'router.js');
+        $router = file_get_contents($routerPath);
 
         $lineEndingCount = [
             "\r\n" => substr_count($router, "\r\n"),
@@ -403,12 +412,12 @@ class RepgeneratorFrontendService
         $eol = array_keys($lineEndingCount, max($lineEndingCount))[0];
 
         file_put_contents(
-            resource_path('js'.DIRECTORY_SEPARATOR.'Abstraction'.DIRECTORY_SEPARATOR.'router'.DIRECTORY_SEPARATOR.'router.js'),
+            $routerPath,
             str_replace(
-                '//DO NOT REMOVE - ROUTE SECTION'.$eol,
-                '//DO NOT REMOVE - ROUTE SECTION'.$eol."        $routeBlockTemplate".$eol,
+                '//DO NOT REMOVE THIS COMMENT BLOCK!! - ROUTE SECTION'.$eol,
+                '//DO NOT REMOVE THIS COMMENT BLOCK!! - ROUTE SECTION'.$eol."        $routeBlockTemplate".$eol,
                 $router
-            ));
+            ), LOCK_EX);
 
         return [
             'name' => "router.js",

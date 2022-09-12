@@ -5,7 +5,7 @@
      */
     public function index(Request $request, array $relationships = []): JsonResponse
     {
-        return parent::index($request, ['files']);
+        return parent::index($request, [{{relations}}]);
     }
 
     /**
@@ -16,5 +16,5 @@
      */
     public function show(Request $request, int $id, array $relationships = []): JsonResponse
     {
-        return parent::show($request, $id, ['files']);
+        return parent::show($request, $id, [{{relations}}]);
     }
