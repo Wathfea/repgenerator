@@ -55,11 +55,10 @@ class RepgeneratorStaticFilesService
             $frontendReplacer = app(RepgeneratorFrontendFrameworkHandlerService::class);
             $file = $frontendReplacer->replaceForFramework($framework, $file);
 
-            //if (!file_exists($path = app_path($fileOriginal))) {
-            $path = resource_path($folderPath. $fileOriginal);
+            if (!file_exists($path = resource_path($folderPath. $fileOriginal))) {
             file_put_contents($path, $file);
             $generatedFiles[] = new RepgeneratorStaticFileAdapter($nameWithExtension, $path);
-            //}
+            }
         }
         return $generatedFiles;
     }
@@ -98,12 +97,11 @@ class RepgeneratorStaticFilesService
             $name = explode('.', $nameWithExtension)[0];
             $file = $this->getStatic($name);
 
-            //if (!file_exists($path = app_path($fileOriginal))) {
-                $path = app_path($fileOriginal);
+            if (!file_exists($path = app_path($fileOriginal))) {
                 file_put_contents($path, $file);
 
                 $generatedFiles[] = new RepgeneratorStaticFileAdapter($nameWithExtension, $path);
-            //}
+            }
         }
         return $generatedFiles;
     }

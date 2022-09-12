@@ -252,10 +252,23 @@ class RepgeneratorController extends Controller
                 'icon' => $request->icon,
             ];
 
+            $foreigns[] = [
+                'relation_type' => 'HasMany',
+                'related_model' => 'CrudMenu',
+                'relation_name' => 'crudMenus',
+                'column' => 'crud_menu_group_id',
+                'reference' => [
+                    'name' => 'crud_menus'
+                ],
+                'on' => 'id',
+                'onUpdate' => null,
+                'onDelete' => null
+            ];
+
             $this->repgeneratorService->generate(
                 $data,
                 $columns,
-                [],
+                $foreigns,
                 function ($msg) use (&$messages) {
                     $messages[] = null;
                 },

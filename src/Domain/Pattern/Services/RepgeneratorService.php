@@ -555,9 +555,9 @@ class RepgeneratorService
      */
     private function apiController(string $version, string $name, array $foreigns, bool $isReadOnly, bool $isGeneratedFileDomain, array $fileUploadFieldsData = null): void
     {
-
         $use = [];
         $withRelationTemplate = '';
+        $relations = [];
 
         if ($isReadOnly) {
             $stub = $this->repgeneratorStubService->getStub('ApiControllerReadOnly');
@@ -565,7 +565,6 @@ class RepgeneratorService
             $stub = $this->repgeneratorStubService->getStub('ApiControllerReadWrite');
         }
 
-        $relations = [];
         if(!empty($foreigns)) {
             foreach ($foreigns as $foreign) {
                 $relations[] = "'".$foreign['relation_name']."'";
@@ -575,7 +574,7 @@ class RepgeneratorService
         if (!empty($fileUploadFieldsData) && !$isGeneratedFileDomain) {
             $use[] = "use Illuminate\Http\JsonResponse;\n";
             $use[] = "use Illuminate\Http\Request;\n";
-            $relations[] = "'files'";
+            $relations[] = "'files',";
 
             $withRelationTemplate = str_replace(
                 [
@@ -992,8 +991,10 @@ class RepgeneratorService
         $lines[] = "],";
 
         $uses = [];
+
+
         foreach ($columns as $column) {
-            $resourceElementTemplate = "";
+            $resourceElementTemplate = '';
 
             if ($column->references) {
                 $referenceSingular = Str::lcfirst(Str::studly(Str::singular($column->references['name'])));

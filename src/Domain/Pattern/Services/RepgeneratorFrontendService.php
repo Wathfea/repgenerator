@@ -44,6 +44,12 @@ class RepgeneratorFrontendService
             if ( $column->type == 'boolean' ) {
                 $columnProperties['isCheckbox'] = true;
             }
+            if ($column->is_file) {
+                $columnProperties['isFileManager'] = true;
+            }
+            if ($column->is_picture) {
+                $columnProperties['isUpload'] = true;
+            }
             $columnsConfig[$column->name] = $columnProperties;
         }
 
