@@ -149,7 +149,7 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
                 await router.push({path: '/' + route });
                 addSuccess('Sikeresen mentve', response.message);
             } else {
-                addWarning('Sikertelen mentés', response.failed);
+                addWarning('Sikertelen mentés', response.message);
             }
         } catch (e) {
             if (e.response ) {
