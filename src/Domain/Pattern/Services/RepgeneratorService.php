@@ -175,8 +175,8 @@ class RepgeneratorService
         $this->resource($this->modelName, $columns, $foreigns, $isGeneratedFileDomain);
         $callback('Resource is ready!');
 
-        //$this->factory($name, $columns);
-        //$callback('Factory is ready!');
+        $this->factory($this->modelName, $columns);
+        $callback('Factory is ready!');
 
         $this->filters($this->modelName, $columns, $foreigns, $callback);
 
@@ -184,7 +184,7 @@ class RepgeneratorService
         $callback('API Routes is ready!');
 
 
-        !$isGenerateFrontend ?: $this->frontend($chosenOutputFramework, $this->modelName, $columns, $callback);
+        !$isGenerateFrontend ?: $this->frontend($chosenOutputFramework, $requestData['icon'], $this->modelName, $columns, $callback);
 
         $callback("Code generation has saved you from typing at least ".CharacterCounterStore::$charsCount." characters");
         $minutes = floor((CharacterCounterStore::$charsCount / 5) / 25);
@@ -453,9 +453,10 @@ class RepgeneratorService
             if ($column->fileUploadLocation) {
                 continue;
             }
-            $fillableStr[] = "'".$column->name."',";
             if ( $column->name != 'id' ) {
-                $columnConstants[] = 'const ' . Str::upper($column->name) . '_COLUMN = "' . $column->name . '";';
+                $constantName = Str::upper($column->name) . '_COLUMN';
+                $columnConstants[] = 'const ' . $constantName . ' = "' . $column->name .'";';
+                $fillableStr[] = "self::".$constantName.",";
             }
 
             if($column->is_hashed) {
@@ -1100,18 +1101,21 @@ class RepgeneratorService
 
     /**
      * @param string $chosenOutputFramework
+     * @param string $icon
      * @param string $name
      * @param array $columns
      * @param $callback
      */
-    private function frontend(string $chosenOutputFramework, string $name, array $columns, $callback): void
+    private function frontend(string $chosenOutputFramework, string $icon, string $name, array $columns, $callback): void
     {
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable($chosenOutputFramework, $name, $columns);
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComponents($chosenOutputFramework, $name, $columns);
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateLarafetch();
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateRoutesImports($name);
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateRoutesBlock();
-
+        if ( $chosenOutputFramework == 'nuxt' ) {
+            $this->repgeneratorFrontendService->generatePages($name, $icon);
+        }
 
         $callback('Frontend components are ready!');
     }
@@ -1131,27 +1135,52 @@ class RepgeneratorService
      */
     private function factory(string $name, array $columns): void
     {
-        $columnFactoriesString = '';
+        $columnFactories = [];
 
         /**
          * @var  $column
          * @var  RepgeneratorColumnAdapter $data
          */
         foreach ($columns as $data) {
-            $columnFactoriesString .= $data->name.' => $this->faker->';
+            if ( $data->name == 'id' ) {
+                continue;
+            }
+            switch($data->type) {
+                case 'string':
+                    $fakerValue = 'word';
+                    break;
+                default:
+                    $fakerValue = '';
+                    break;
+            }
+            $columnFactories[] .= '"' . $data->name. '" => $this->faker->' . $fakerValue . '(),';
         }
 
         $factoryTemplate = str_replace(
             [
                 '{{modelName}}',
                 '{{modelColumnFactories}}',
+                '{{uses}}',
             ],
             [
                 $name,
-                $columnFactoriesString
+                $this->implodeLines($columnFactories, 0),
+                ''
             ],
             $this->repgeneratorStubService->getStub('Factory')
         );
 
+        if (!file_exists($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Factories"))) {
+            mkdir($path, 0777, true);
+        }
+
+        file_put_contents($path = app_path("Domain".DIRECTORY_SEPARATOR."{$name}".DIRECTORY_SEPARATOR."Factories".DIRECTORY_SEPARATOR."{$name}Factory.php"), $factoryTemplate);
+
+        CharacterCounterStore::addFileCharacterCount($path);
+
+        $this->generatedFiles[] = [
+            'name' => "{$name}Factory.php",
+            'location' => $path
+        ];
     }
 }

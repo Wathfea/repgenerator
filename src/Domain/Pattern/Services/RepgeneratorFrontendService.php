@@ -29,7 +29,21 @@ class RepgeneratorFrontendService
      */
     #[ArrayShape(['name' => "string", 'location' => "mixed"])] public function generateComposable(string $chosenOutputFramework, string $name, array $columns): array
     {
-        $columns = '{}';
+        $columnsConfig = [];
+        /** @var RepgeneratorColumnAdapter $column */
+        foreach ( $columns as $column ) {
+            if ( $column->name == 'id' ) {
+                continue;
+            }
+            $columnProperties = [
+                'name' => ucfirst($column->name),
+                'required' => $column->nullable != true,
+            ];
+            if ( $column->type == 'boolean' ) {
+                $columnProperties['isCheckbox'] = true;
+            }
+            $columnsConfig[] = $columnProperties;
+        }
 
         $stub = $this->repgeneratorStubService->getStub('Frontend/Vue/composables/useModel');
         $frontendReplacer = app(RepgeneratorFrontendFrameworkHandlerService::class);
@@ -43,7 +57,7 @@ class RepgeneratorFrontendService
                 '{{ modelNamePluralLowercase }}',
             ],
             [
-                $columns,
+                json_encode($columnsConfig),
                 $this->nameTransformerService->getModelNamePluralUcfirst(),
                 $this->nameTransformerService->getModelNameSingularUcfirst(),
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
@@ -158,11 +172,13 @@ class RepgeneratorFrontendService
 
         $indexTemplate = str_replace(
             [
+                '{{ modelNamePluralLowerCaseHyphenated }}',
                 '{{ modelNameSingularLowercase }}',
                 '{{ modelNamePluralLowercase }}',
                 '{{ columns }}'
             ],
             [
+                Str::snake(Str::plural($name), '-'),
                 $this->nameTransformerService->getModelNameSingularLowerCase(),
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
                 $this->implodeLines($columnsTemplate, 2)
@@ -170,10 +186,11 @@ class RepgeneratorFrontendService
             $this->repgeneratorStubService->getStub('Frontend/Vue/components/index')
         );
 
+        $modelNameSingularUcfirst = $this->nameTransformerService->getModelNameSingularUcfirst();
         $files = [
-            'Create.vue' => $createTemplate,
-            'Edit.vue' => $editTemplate,
-            'Index.vue' => $indexTemplate,
+            $modelNameSingularUcfirst . 'Create.vue' => $createTemplate,
+            $modelNameSingularUcfirst. 'Edit.vue' => $editTemplate,
+            $modelNameSingularUcfirst. 'Index.vue' => $indexTemplate,
         ];
 
         foreach ( $files as $file => $template ) {
@@ -184,6 +201,99 @@ class RepgeneratorFrontendService
                     continue;
                 }
                 $partsSoFar = implode(DIRECTORY_SEPARATOR , array_slice($pathParts,0, $index+1));
+                if ( !is_dir(resource_path( $partsSoFar))) {
+                    mkdir(resource_path($partsSoFar), 0777, true);
+                }
+            }
+            file_put_contents($path = resource_path($finalPath), $template);
+        }
+
+
+        CharacterCounterStore::addFileCharacterCount($path);
+
+        return [
+            'name' => "{$name}.js",
+            'location' => $path
+        ];
+    }
+
+
+    /**
+     * @param string $name
+     * @param string $icon
+     * @return array
+     */
+    #[ArrayShape(['name' => "string", 'location' => "mixed"])] public function generatePages(string $name, string $icon): array
+    {
+        $createTemplate = str_replace(
+            [
+                '{{modelNamePluralUcfirst}}',
+                '{{modelNameSingularUcfirst}}',
+                '{{modelNamePluralLowercase}}',
+                '{{modelNameSingularLowercase}}',
+                '{{modelNamePluralLowerCaseHyphenated}}',
+                '{{modelIcon}}',
+            ],
+            [
+                $this->nameTransformerService->getModelNamePluralUcfirst(),
+                $this->nameTransformerService->getModelNameSingularUcfirst(),
+                $this->nameTransformerService->getModelNamePluralLowerCase(),
+                $this->nameTransformerService->getModelNameSingularLowerCase(),
+                Str::snake(Str::plural($name), '-'),
+                $icon
+            ],
+            $this->repgeneratorStubService->getStub('Frontend/Vue/pages/create')
+        );
+        $editTemplate = str_replace(
+            [
+                '{{modelNamePluralUcfirst}}',
+                '{{modelNameSingularUcfirst}}',
+                '{{modelNamePluralLowercase}}',
+                '{{modelNamePluralLowerCaseHyphenated}}',
+                '{{modelIcon}}',
+            ],
+            [
+                $this->nameTransformerService->getModelNamePluralUcfirst(),
+                $this->nameTransformerService->getModelNameSingularUcfirst(),
+                $this->nameTransformerService->getModelNamePluralLowerCase(),
+                Str::snake(Str::plural($name), '-'),
+                $icon
+            ],
+            $this->repgeneratorStubService->getStub('Frontend/Vue/pages/[id]')
+        );
+        $indexTemplate = str_replace(
+            [
+                '{{modelNamePluralUcfirst}}',
+                '{{modelNameSingularLowercase}}',
+                '{{modelNameSingularUcfirst}}',
+                '{{modelNamePluralLowercase}}',
+                '{{modelNamePluralLowerCaseHyphenated}}',
+                '{{modelIcon}}',
+            ],
+            [
+                $this->nameTransformerService->getModelNamePluralUcfirst(),
+                $this->nameTransformerService->getModelNameSingularLowerCase(),
+                $this->nameTransformerService->getModelNameSingularUcfirst(),
+                $this->nameTransformerService->getModelNamePluralLowerCase(),
+                Str::snake(Str::plural($name), '-'),
+                $icon
+            ],
+            $this->repgeneratorStubService->getStub('Frontend/Vue/pages/index')
+        );
+
+        $files = [
+            'create.vue' => $createTemplate,
+            '[id].vue' => $editTemplate,
+            'index.vue' => $indexTemplate,
+        ];
+        foreach ( $files as $file => $template ) {
+            $finalPath = "js/Domain/$name/pages/" . $file;
+            $pathParts = explode("/", $finalPath);
+            foreach ( $pathParts as $index => $pathPart ) {
+                if ( end($pathParts) == $pathPart ) {
+                    continue;
+                }
+                $partsSoFar = implode('/',array_slice($pathParts,0, $index+1));
                 if ( !is_dir(resource_path( $partsSoFar))) {
                     mkdir(resource_path($partsSoFar), 0777, true);
                 }
