@@ -10,13 +10,14 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Pentacom\Repgenerator\Domain\Gradient\GradientService;
 use Pentacom\Repgenerator\Domain\Migration\Blueprint\Table;
 use Pentacom\Repgenerator\Domain\Migration\MigrationGeneratorService;
 use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorService;
 use Pentacom\Repgenerator\Http\Requests\GenerationFromTableRequest;
 use Pentacom\Repgenerator\Http\Requests\GenerationRequest;
-use Pentacom\Repgenerator\Models\RepgeneratorDomain;
+use Pentacom\Repgenerator\Http\Requests\GradientRequest;
 use RecursiveIteratorIterator;
 use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
 
@@ -31,10 +32,12 @@ class RepgeneratorController extends Controller
     /**
      * @param  MigrationGeneratorService  $migrationGeneratorService
      * @param  RepgeneratorService  $repgeneratorService
+     * @param  GradientService  $gradientService
      */
     public function __construct(
         private MigrationGeneratorService $migrationGeneratorService,
-        private RepgeneratorService $repgeneratorService
+        private RepgeneratorService $repgeneratorService,
+        private GradientService $gradientService
     ) {
     }
 
@@ -525,5 +528,15 @@ class RepgeneratorController extends Controller
 
             $this->generate(new GenerationRequest(), true, $domainData);
         }
+    }
+
+    /**
+     * @param  GradientRequest  $request
+     * @return JsonResponse
+     */
+    public function generateGradient(GradientRequest $request): JsonResponse
+    {
+        $colors = $this->gradientService->generateGradients($request->get('hexFrom'), $request->get('hexTo'), 8);
+        return response()->json($colors);
     }
 }
