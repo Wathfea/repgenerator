@@ -2,7 +2,6 @@
 
 namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use JetBrains\PhpStorm\ArrayShape;
 use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
@@ -45,10 +44,10 @@ class RepgeneratorFrontendService
                 $columnProperties['isCheckbox'] = true;
             }
             if ($column->is_file) {
-                $columnProperties['isFileManager'] = true;
+                $columnProperties['isFileUpload'] = true;
             }
             if ($column->is_picture) {
-                $columnProperties['isUpload'] = true;
+                $columnProperties['isPictureUpload'] = true;
             }
             $columnsConfig[$column->name] = $columnProperties;
         }

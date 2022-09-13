@@ -14,6 +14,34 @@ class RepgeneratorStaticFilesService
 
     }
 
+    public function copyFilesToGivenLocation(array $files, string $framework, string $folderPath  = 'js/Abstraction/'): array
+    {
+        $generatedFiles = [];
+        foreach ($files as $fileOriginal) {
+            $fileParts = explode('/', $fileOriginal);
+            foreach ( $fileParts as $index => $filePart ) {
+                if ( end($fileParts) ==  $filePart ) {
+                    continue;
+                }
+                $partsSoFar = implode('/',array_slice($fileParts,0, $index+1));
+                if ( !is_dir(resource_path($folderPath . $partsSoFar))) {
+                    mkdir(resource_path($folderPath . $partsSoFar), 0777, true);
+                }
+            }
+            $nameWithExtension = end($fileParts);
+            $file = $this->getFrontendStatic($fileOriginal);
+
+            $frontendReplacer = app(RepgeneratorFrontendFrameworkHandlerService::class);
+            $file = $frontendReplacer->replaceForFramework($framework, $file);
+
+            if (!file_exists($path = resource_path($folderPath. $fileOriginal))) {
+                file_put_contents($path, $file);
+                $generatedFiles[] = new RepgeneratorStaticFileAdapter($nameWithExtension, $path);
+            }
+        }
+        return $generatedFiles;
+    }
+
     public function copyStaticFrontendFiles(string $framework, string $folderPath = 'js/Abstraction/'): array {
         $files = [
             "components/DataTable/ColumnHeader.vue",
