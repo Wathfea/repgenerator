@@ -510,7 +510,7 @@ class RepgeneratorController extends Controller
         foreach ($request->get('domains') as $domainMeta) {
             $domainData = json_decode($domainMeta, true);
             //Delete frontend resources
-            $dir = base_path().'/resources/js/'.$domainData['name'];
+            $dir = base_path().DIRECTORY_SEPARATOR."resources".DIRECTORY_SEPARATOR."js".DIRECTORY_SEPARATOR."Domain".DIRECTORY_SEPARATOR.$domainData['name'];
 
             if(is_dir( $dir )) {
                 $it = new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS);
