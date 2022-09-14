@@ -15,20 +15,17 @@ All notable changes to `repgenerator` will be documented in this file
 
 ## [Unreleased]
 
-## [1.5.4] - 2022-09-14
+## [1.5.3] - 2022-09-14
 ## Added
 - Fully refactored frontend ui
 - Gradient generator for tailwind config
 - Factory generation for the CRUD
 ## Fixed
+- Clear up frontend depedency tree
 - Duplicated request validation
 - Removed file field require from update request
 - In the file relation domain layer resource the badly generated relation name now points the correct relation
 
-
-## [1.5.3] - 2022-09-09
-## Fixed
-- Clear up frontend depedency tree
 
 ## [1.5.2] - 2022-09-09
 ## Fixed
