@@ -13,7 +13,7 @@ export const useNotifications  = () => {
         for ( let index in notifications ) {
             if ( notifications[index].id === id ) {
                 // @ts-ignore
-                notifications.value.splice(index, 1);
+                notifications.splice(index, 1);
                 break;
             }
         }

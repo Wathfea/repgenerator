@@ -3,27 +3,28 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
-
-- Duplicated request validation
 - Relation type selector
-- Update request fileupload esetén a required ne kerüljön be
-- File relation domain resourceban  'url' => asset(app(LifeAwardWinnerFileRepositoryService::class)->getDocumentStoragePath($this->resource->life_award_winner, //HIBA lifeAwardWinner kéne legyen
-  $this->resource->field, $this->resource)),
-
-- Újra generálás DB nélkül
 - Default gate és policy
 - public vagy nem public file választó
-- kép típusnál képeket engedjen csak
-- file típusnál fileokat csak
 - Relation párok beírása
 - CSV import
-- Factory and seeder generation for CRUD
 - Composite index generation
 - How it works section
 - Hero icon választó listából, ne kézi beírás. Esetleg más icon csomag? FontAwsome vagy Material?
 - Mezősorrend változtatása drag & drop-al
 
 ## [Unreleased]
+
+## [1.5.3] - 2022-09-14
+## Added
+- Fully refactored frontend ui
+- Gradient generator for tailwind config
+- Factory generation for the CRUD
+## Fixed
+- Clear up frontend depedency tree
+- Duplicated request validation
+- Removed file field require from update request
+- In the file relation domain layer resource the badly generated relation name now points the correct relation
 
 
 ## [1.5.2] - 2022-09-09

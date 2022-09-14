@@ -4,6 +4,7 @@ namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 
 use Illuminate\Support\Str;
 use JetBrains\PhpStorm\ArrayShape;
+use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
 use Pentacom\Repgenerator\Domain\Pattern\Helpers\CharacterCounterStore;
 use Pentacom\Repgenerator\Traits\Stringable;
 
@@ -28,7 +29,28 @@ class RepgeneratorFrontendService
      */
     #[ArrayShape(['name' => "string", 'location' => "mixed"])] public function generateComposable(string $chosenOutputFramework, string $name, array $columns): array
     {
-        $columns = '{}';
+        $this->nameTransformerService->setModelName($name);
+        $columnsConfig = [];
+        /** @var RepgeneratorColumnAdapter $column */
+        foreach ( $columns as $column ) {
+            if ( $column->name == 'id' ) {
+                continue;
+            }
+            $columnProperties = [
+                'name' => ucfirst($column->name),
+                'required' => $column->nullable != true,
+            ];
+            if ( $column->type == 'boolean' ) {
+                $columnProperties['isCheckbox'] = true;
+            }
+            if ($column->is_file) {
+                $columnProperties['isFileUpload'] = true;
+            }
+            if ($column->is_picture) {
+                $columnProperties['isPictureUpload'] = true;
+            }
+            $columnsConfig[$column->name] = $columnProperties;
+        }
 
         $stub = $this->repgeneratorStubService->getStub('Frontend/Vue/composables/useModel');
         $frontendReplacer = app(RepgeneratorFrontendFrameworkHandlerService::class);
@@ -36,13 +58,15 @@ class RepgeneratorFrontendService
 
         $composableTemplate = str_replace(
             [
+                '{{ modelNamePluralLowerCaseHyphenated }}',
                 '{{ columns }}',
                 '{{ modelNamePluralUcfirst }}',
                 '{{ modelNameSingularUcfirst }}',
                 '{{ modelNamePluralLowercase }}',
             ],
             [
-                $columns,
+                Str::snake(Str::plural($name), '-'),
+                json_encode($columnsConfig),
                 $this->nameTransformerService->getModelNamePluralUcfirst(),
                 $this->nameTransformerService->getModelNameSingularUcfirst(),
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
@@ -50,13 +74,13 @@ class RepgeneratorFrontendService
             $stub
         );
 
-        $finalPath = "js/Domain/$name/composables/use" . $this->nameTransformerService->getModelNamePluralUcfirst() . ".ts";
-        $pathParts = explode("/", $finalPath);
+        $finalPath = "js".DIRECTORY_SEPARATOR."Domain".DIRECTORY_SEPARATOR."$name".DIRECTORY_SEPARATOR."composables".DIRECTORY_SEPARATOR."use" . $this->nameTransformerService->getModelNamePluralUcfirst() . ".ts";
+        $pathParts = explode(DIRECTORY_SEPARATOR, $finalPath);
         foreach ( $pathParts as $index => $pathPart ) {
             if ( end($pathParts) == $pathPart ) {
                 continue;
             }
-            $partsSoFar = implode('/',array_slice($pathParts,0, $index+1));
+            $partsSoFar = implode(DIRECTORY_SEPARATOR ,array_slice($pathParts,0, $index+1));
             if ( !is_dir(resource_path( $partsSoFar))) {
                 mkdir(resource_path($partsSoFar), 0777, true);
             }
@@ -97,6 +121,7 @@ class RepgeneratorFrontendService
             ],
             $stub
         );
+
         $editTemplate = str_replace(
             [
                 '{{ modelNamePluralUcfirst }}',
@@ -110,25 +135,168 @@ class RepgeneratorFrontendService
             ],
             $this->repgeneratorStubService->getStub('Frontend/Vue/components/edit')
         );
+
+        //Column handling for Index.vue
+        $columnsTemplate = [];
+        /** @var RepgeneratorColumnAdapter $column */
+        foreach ($columns as $column) {
+            if($column->showOnTable) {
+                $nameParts = explode('_', $column->name);
+                foreach ($nameParts as $index => $namePart) {
+                    $nameParts[$index] = ucfirst(strtolower($namePart));
+                }
+                $field = implode(' ', $nameParts);
+
+                $booleanTemplate = '';
+                if($column->type === 'boolean') {
+                    $booleanTemplate = str_replace(
+                        ['{{ column }}'], [$column->name],
+                        $this->repgeneratorStubService->getStub('Frontend/Vue/components/columnStubs/boolean')
+                    );
+                }
+
+                $dateTemplate = match ($column->type) {
+                    'dateTime', 'dateTimeTz', 'date', 'softDeletes', 'softDeletesTz' =>  $this->repgeneratorStubService->getStub('Frontend/Vue/components/columnStubs/date'),
+                    default => ''
+                };
+
+                $columnsTemplate[] = str_replace(
+                    [
+                        '{{ column }}',
+                        '{{ field }}',
+                        '{{ booleanColumn }}',
+                        '{{ dateColumn }}',
+                    ],
+                    [
+                        $column->name,
+                        $field,
+                        $booleanTemplate,
+                        $dateTemplate,
+                    ],
+                    $this->repgeneratorStubService->getStub('Frontend/Vue/components/columnStubs/column')
+                );
+            }
+        }
+
+
         $indexTemplate = str_replace(
             [
+                '{{ modelNamePluralLowerCaseHyphenated }}',
                 '{{ modelNameSingularLowercase }}',
                 '{{ modelNamePluralLowercase }}',
+                '{{ columns }}'
             ],
             [
+                Str::snake(Str::plural($name), '-'),
                 $this->nameTransformerService->getModelNameSingularLowerCase(),
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
+                $this->implodeLines($columnsTemplate, 2)
             ],
             $this->repgeneratorStubService->getStub('Frontend/Vue/components/index')
         );
 
+        $modelNameSingularUcfirst = $this->nameTransformerService->getModelNameSingularUcfirst();
         $files = [
-            'Create.vue' => $createTemplate,
-            'Edit.vue' => $editTemplate,
-            'Index.vue' => $indexTemplate,
+            $modelNameSingularUcfirst . 'Create.vue' => $createTemplate,
+            $modelNameSingularUcfirst. 'Edit.vue' => $editTemplate,
+            $modelNameSingularUcfirst. 'Index.vue' => $indexTemplate,
+        ];
+
+        foreach ( $files as $file => $template ) {
+            $finalPath = "js".DIRECTORY_SEPARATOR."Domain".DIRECTORY_SEPARATOR."$name".DIRECTORY_SEPARATOR."components".DIRECTORY_SEPARATOR. $file;
+            $pathParts = explode(DIRECTORY_SEPARATOR, $finalPath);
+            foreach ( $pathParts as $index => $pathPart ) {
+                if ( end($pathParts) == $pathPart ) {
+                    continue;
+                }
+                $partsSoFar = implode(DIRECTORY_SEPARATOR , array_slice($pathParts,0, $index+1));
+                if ( !is_dir(resource_path( $partsSoFar))) {
+                    mkdir(resource_path($partsSoFar), 0777, true);
+                }
+            }
+            file_put_contents($path = resource_path($finalPath), $template);
+        }
+
+
+        CharacterCounterStore::addFileCharacterCount($path);
+
+        return [
+            'name' => "{$name}.js",
+            'location' => $path
+        ];
+    }
+
+
+    /**
+     * @param string $name
+     * @param string $icon
+     * @return array
+     */
+    #[ArrayShape(['name' => "string", 'location' => "mixed"])] public function generatePages(string $name, string $icon): array
+    {
+        $createTemplate = str_replace(
+            [
+                '{{modelNamePluralUcfirst}}',
+                '{{modelNameSingularUcfirst}}',
+                '{{modelNamePluralLowercase}}',
+                '{{modelNameSingularLowercase}}',
+                '{{modelNamePluralLowerCaseHyphenated}}',
+                '{{modelIcon}}',
+            ],
+            [
+                $this->nameTransformerService->getModelNamePluralUcfirst(),
+                $this->nameTransformerService->getModelNameSingularUcfirst(),
+                $this->nameTransformerService->getModelNamePluralLowerCase(),
+                $this->nameTransformerService->getModelNameSingularLowerCase(),
+                Str::snake(Str::plural($name), '-'),
+                $icon
+            ],
+            $this->repgeneratorStubService->getStub('Frontend/Vue/pages/create')
+        );
+        $editTemplate = str_replace(
+            [
+                '{{modelNamePluralUcfirst}}',
+                '{{modelNameSingularUcfirst}}',
+                '{{modelNamePluralLowercase}}',
+                '{{modelNamePluralLowerCaseHyphenated}}',
+                '{{modelIcon}}',
+            ],
+            [
+                $this->nameTransformerService->getModelNamePluralUcfirst(),
+                $this->nameTransformerService->getModelNameSingularUcfirst(),
+                $this->nameTransformerService->getModelNamePluralLowerCase(),
+                Str::snake(Str::plural($name), '-'),
+                $icon
+            ],
+            $this->repgeneratorStubService->getStub('Frontend/Vue/pages/[id]')
+        );
+        $indexTemplate = str_replace(
+            [
+                '{{modelNamePluralUcfirst}}',
+                '{{modelNameSingularLowercase}}',
+                '{{modelNameSingularUcfirst}}',
+                '{{modelNamePluralLowercase}}',
+                '{{modelNamePluralLowerCaseHyphenated}}',
+                '{{modelIcon}}',
+            ],
+            [
+                $this->nameTransformerService->getModelNamePluralUcfirst(),
+                $this->nameTransformerService->getModelNameSingularLowerCase(),
+                $this->nameTransformerService->getModelNameSingularUcfirst(),
+                $this->nameTransformerService->getModelNamePluralLowerCase(),
+                Str::snake(Str::plural($name), '-'),
+                $icon
+            ],
+            $this->repgeneratorStubService->getStub('Frontend/Vue/pages/index')
+        );
+
+        $files = [
+            'create.vue' => $createTemplate,
+            '[id].vue' => $editTemplate,
+            'index.vue' => $indexTemplate,
         ];
         foreach ( $files as $file => $template ) {
-            $finalPath = "js/Domain/$name/components/" . $file;
+            $finalPath = "js/Domain/$name/pages/" . $file;
             $pathParts = explode("/", $finalPath);
             foreach ( $pathParts as $index => $pathPart ) {
                 if ( end($pathParts) == $pathPart ) {
@@ -148,6 +316,116 @@ class RepgeneratorFrontendService
         return [
             'name' => "{$name}.js",
             'location' => $path
+        ];
+    }
+
+
+    /**
+     * @return array
+     */
+    #[ArrayShape(['name' => "string", 'location' => "string"])] public function generateLarafetch(): array {
+        $larafetchTemplate = str_replace(
+            [
+                '{{ backendUrl }}',
+            ],
+            [
+                config('app.url'),
+            ],
+            $this->repgeneratorStubService->getStub('Frontend/Vue/utils/larafetch')
+        );
+
+        if (!file_exists($path = resource_path("js".DIRECTORY_SEPARATOR."Abstraction".DIRECTORY_SEPARATOR."utils".DIRECTORY_SEPARATOR))) {
+            mkdir($path, 0777, true);
+        }
+
+        file_put_contents($path = resource_path("js".DIRECTORY_SEPARATOR."Abstraction".DIRECTORY_SEPARATOR."utils".DIRECTORY_SEPARATOR."\$larafetch.ts"),
+            $larafetchTemplate);
+
+
+        CharacterCounterStore::addFileCharacterCount($path);
+
+        return [
+            'name' => "\$larafetch.ts",
+            'location' => $path
+        ];
+    }
+
+    #[ArrayShape(['name' => "string", 'location' => "false|string"])] public function generateRoutesImports(string $name): array
+    {
+        $imports = [];
+        $actions = ['Index', 'Create', 'Edit'];
+        foreach ($actions as $action) {
+            $imports[] = "import {$this->nameTransformerService->getModelNameSingularUcfirst()}{$action} from '../../Domain/{$name}/components/{$name}{$action}.vue'";
+        }
+
+        $routerPath = resource_path('js'.DIRECTORY_SEPARATOR.'Abstraction'.DIRECTORY_SEPARATOR.'router'.DIRECTORY_SEPARATOR.'router.js');
+        $router = file_get_contents($routerPath);
+
+        $lineEndingCount = [
+            "\r\n" => substr_count($router, "\r\n"),
+            "\r" => substr_count($router, "\r"),
+            "\n" => substr_count($router, "\n"),
+        ];
+
+        $eol = array_keys($lineEndingCount, max($lineEndingCount))[0];
+
+        foreach ($imports as $import) {
+            $router = file_get_contents($routerPath);
+
+            file_put_contents(
+                $routerPath,
+                str_replace(
+                    '//DO NOT REMOVE THIS COMMENT BLOCK!! - IMPORTS SECTION'.$eol,
+                    '//DO NOT REMOVE THIS COMMENT BLOCK!! - IMPORTS SECTION'.$eol."        $import".$eol,
+                    $router
+                ), LOCK_EX);
+        }
+
+        return [
+            'name' => "router.js",
+            'location' => "resources/js/Abstraction/router"
+        ];
+    }
+
+    /**
+     * @return string[]
+     */
+    #[ArrayShape(['name' => "string", 'location' => "string"])] public function generateRoutesBlock(): array
+    {
+        $routeBlockTemplate = str_replace(
+            [
+                '{{modelNamePluralLowerCase}}',
+                '{{modelNameSingularUcfirst}}',
+            ],
+            [
+                $this->nameTransformerService->getModelNamePluralLowerCase(),
+                $this->nameTransformerService->getModelNameSingularUcfirst(),
+            ],
+            $this->repgeneratorStubService->getStub('Frontend/routeBlock')
+        );
+
+        $routerPath = resource_path('js'.DIRECTORY_SEPARATOR.'Abstraction'.DIRECTORY_SEPARATOR.'router'.DIRECTORY_SEPARATOR.'router.js');
+        $router = file_get_contents($routerPath);
+
+        $lineEndingCount = [
+            "\r\n" => substr_count($router, "\r\n"),
+            "\r" => substr_count($router, "\r"),
+            "\n" => substr_count($router, "\n"),
+        ];
+
+        $eol = array_keys($lineEndingCount, max($lineEndingCount))[0];
+
+        file_put_contents(
+            $routerPath,
+            str_replace(
+                '//DO NOT REMOVE THIS COMMENT BLOCK!! - ROUTE SECTION'.$eol,
+                '//DO NOT REMOVE THIS COMMENT BLOCK!! - ROUTE SECTION'.$eol."        $routeBlockTemplate".$eol,
+                $router
+            ), LOCK_EX);
+
+        return [
+            'name' => "router.js",
+            'location' => "resources/js/Abstraction/router"
         ];
     }
 }

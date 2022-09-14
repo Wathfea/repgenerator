@@ -1,10 +1,10 @@
-import useModel from "../../../Abstraction/composables/model";
+import useModel from "../../../Abstraction/composables/model.js";
 
 export const use{{ modelNamePluralUcfirst }}  = () => {
     const getColumns = () => {
         return {{ columns }}
     }
-    const { getModels: get{{ modelNamePluralUcfirst }}, getModel: get{{ modelNameSingularUcfirst }}, storeModel: store{{ modelNameSingularUcfirst }}, updateModel: update{{ modelNameSingularUcfirst }} } = useModel('{{ modelNamePluralLowercase }}', false);
+    const { getModels: get{{ modelNamePluralUcfirst }}, getModel: get{{ modelNameSingularUcfirst }}, storeModel: store{{ modelNameSingularUcfirst }}, updateModel: update{{ modelNameSingularUcfirst }} } = useModel('{{ modelNamePluralLowerCaseHyphenated }}', false);
     return {
         getColumns,
         get{{ modelNamePluralUcfirst }},

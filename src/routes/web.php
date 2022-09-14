@@ -8,3 +8,4 @@ Route::get('repgenerator/validateTable/{table}', [RepgeneratorController::class,
 Route::get('repgenerator/getGeneratedDomains', [RepgeneratorController::class, 'getGeneratedDomains'])->name('repgenerator.get-domains');
 Route::post('repgenerator/generate', [RepgeneratorController::class, 'generate'])->name('repgenerator.generate');
 Route::post('repgenerator/reGenerate', [RepgeneratorController::class, 'reGenerate'])->name('repgenerator.re-generate');
+Route::post('repgenerator/generateGradient', [RepgeneratorController::class, 'generateGradient'])->name('repgenerator.generate-gradient');

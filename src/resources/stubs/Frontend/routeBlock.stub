@@ -1,0 +1,3 @@
+    {path: '/{{modelNamePluralLowerCase}}', name: '{{modelNamePluralLowerCase}}', component: {{modelNameSingularUcfirst}}Index},
+    {path: '/{{modelNamePluralLowerCase}}/create', name: '{{modelNamePluralLowerCase}}.create', component: {{modelNameSingularUcfirst}}Create},
+    {path: '/{{modelNamePluralLowerCase}}/:id', name: '{{modelNamePluralLowerCase}}.edit', component: {{modelNameSingularUcfirst}}Edit},

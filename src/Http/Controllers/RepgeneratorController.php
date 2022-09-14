@@ -10,13 +10,14 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Pentacom\Repgenerator\Domain\Gradient\GradientService;
 use Pentacom\Repgenerator\Domain\Migration\Blueprint\Table;
 use Pentacom\Repgenerator\Domain\Migration\MigrationGeneratorService;
 use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
 use Pentacom\Repgenerator\Domain\Pattern\Services\RepgeneratorService;
 use Pentacom\Repgenerator\Http\Requests\GenerationFromTableRequest;
 use Pentacom\Repgenerator\Http\Requests\GenerationRequest;
-use Pentacom\Repgenerator\Models\RepgeneratorDomain;
+use Pentacom\Repgenerator\Http\Requests\GradientRequest;
 use RecursiveIteratorIterator;
 use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
 
@@ -31,10 +32,12 @@ class RepgeneratorController extends Controller
     /**
      * @param  MigrationGeneratorService  $migrationGeneratorService
      * @param  RepgeneratorService  $repgeneratorService
+     * @param  GradientService  $gradientService
      */
     public function __construct(
         private MigrationGeneratorService $migrationGeneratorService,
-        private RepgeneratorService $repgeneratorService
+        private RepgeneratorService $repgeneratorService,
+        private GradientService $gradientService
     ) {
     }
 
@@ -63,8 +66,8 @@ class RepgeneratorController extends Controller
         //Only check  if not regenerate
         if(!$regenerate) {
             //Detect if CrudMenus exists or we need to create it
-            $messages[] = $this->shouldCreateCrudMenuTable($table, $request);
             $messages[] = $this->shouldCreateCrudMenuGroupTable($table, $request);
+            $messages[] = $this->shouldCreateCrudMenuTable($table, $request);
             sleep(1);
         }
 
@@ -170,28 +173,48 @@ class RepgeneratorController extends Controller
             ];
 
             foreach ($migrationColumns as $name => $type) {
-                $columns[] = new RepgeneratorColumnAdapter($name, $type);
+                if($name == 'crud_menu_group_id') {
+                    $reference = ['name' => 'crud_menu_group'];
+                    $columns[] = new RepgeneratorColumnAdapter($name, $type, false, false, false, null, null, null, null, false, null, null, null, null, $reference);
+                } else {
+                    $columns[] = new RepgeneratorColumnAdapter($name, $type);
+                }
+
             }
 
+            $foreigns[] = [
+                'relation_type' => 'BelongsTo',
+                'related_model' => 'CrudMenuGroup',
+                'relation_name' => '',
+                'column' => 'crud_menu_group_id',
+                'reference' => [
+                    'name' => 'crud_menu_groups'
+                ],
+                'on' => 'id',
+                'onUpdate' => null,
+                'onDelete' => null
+            ];
+
             $this->migrationGeneratorService->setDate(Carbon::now());
-            $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], [],
+            $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], $foreigns,
                 self::CRUD_MENU_TABLE_NAME, 'menu', false, false);
 
             $data = [
                 'name' => self::CRUD_MENU_TABLE_NAME,
-                'chosen_output_framework' => $request->chosen_output_framework
+                'chosen_output_framework' => $request->chosen_output_framework,
+                'icon' => $request->icon,
             ];
 
             $this->repgeneratorService->generate(
                 $data,
                 $columns,
-                [],
+                $foreigns,
                 function ($msg) use (&$messages) {
                     $messages[] = null;
                 },
                 null,
                 $migrationName,
-                false
+                true
             );
         }
 
@@ -228,19 +251,33 @@ class RepgeneratorController extends Controller
 
             $data = [
                 'name' => self::CRUD_MENU_GROUP_TABLE_NAME,
-                'chosen_output_framework' => $request->chosen_output_framework
+                'chosen_output_framework' => $request->chosen_output_framework,
+                'icon' => $request->icon,
+            ];
+
+            $foreigns[] = [
+                'relation_type' => 'HasMany',
+                'related_model' => 'CrudMenu',
+                'relation_name' => 'crudMenus',
+                'column' => 'crud_menu_group_id',
+                'reference' => [
+                    'name' => 'crud_menus'
+                ],
+                'on' => 'id',
+                'onUpdate' => null,
+                'onDelete' => null
             ];
 
             $this->repgeneratorService->generate(
                 $data,
                 $columns,
-                [],
+                $foreigns,
                 function ($msg) use (&$messages) {
                     $messages[] = null;
                 },
                 null,
                 $migrationName,
-                false
+                true
             );
         }
 
@@ -386,7 +423,8 @@ class RepgeneratorController extends Controller
         }
 
         $data = [
-            'name' => $requestData['name'].'Files'
+            'name' => $requestData['name'].'Files',
+            'chosen_output_framework' => $requestData['chosen_output_framework']
         ];
 
         $this->repgeneratorService->generate(
@@ -472,7 +510,7 @@ class RepgeneratorController extends Controller
         foreach ($request->get('domains') as $domainMeta) {
             $domainData = json_decode($domainMeta, true);
             //Delete frontend resources
-            $dir = base_path().'/resources/js/'.$domainData['name'];
+            $dir = base_path().DIRECTORY_SEPARATOR."resources".DIRECTORY_SEPARATOR."js".DIRECTORY_SEPARATOR."Domain".DIRECTORY_SEPARATOR.$domainData['name'];
 
             if(is_dir( $dir )) {
                 $it = new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS);
@@ -490,5 +528,15 @@ class RepgeneratorController extends Controller
 
             $this->generate(new GenerationRequest(), true, $domainData);
         }
+    }
+
+    /**
+     * @param  GradientRequest  $request
+     * @return JsonResponse
+     */
+    public function generateGradient(GradientRequest $request): JsonResponse
+    {
+        $colors = $this->gradientService->generateGradients($request->get('hexFrom'), $request->get('hexTo'), 8);
+        return response()->json($colors);
     }
 }

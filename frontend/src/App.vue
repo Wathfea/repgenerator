@@ -4,21 +4,27 @@ import RebuildFrontend from "./components/RebuildFrontend.vue";
 
 import {ref} from "vue";
 import imgUrl from './assets/banner.png'
+import GenerateGradient from "@/components/GenerateGradient.vue";
 
 const develop = ref(false);
 const choosing = ref(true);
 
 const usingWizzard = ref(false);
 const usingRebuildFrontend = ref(false);
+const usingGenerateGradient = ref(false);
 
 const chooseWizzard = () => {
     usingWizzard.value = true;
     choosing.value = false;
 }
 
-
 const chooseRebuildFrontend = () => {
     usingRebuildFrontend.value = true;
+    choosing.value = false;
+}
+
+const chooseGenerateGradient = () => {
+    usingGenerateGradient.value = true;
     choosing.value = false;
 }
 </script>
@@ -58,6 +64,14 @@ const chooseRebuildFrontend = () => {
                                 <span class="text-white">,</span>
                             </a>
 
+                            <a class="code-link relative my-2 block rounded border-none pl-4 text-left text-blue hover:bg-blue hover:text-white" style="margin-left: 10px; width: calc(100% - 10px);" href="#" @click="chooseGenerateGradient">
+                                <div class="text-[.7rem] font-normal text-white/50">// need some colors</div>
+                                <span class="font-bold text-[#E6DB74]">"painter" </span>
+                                <span class="font-bold text-[#F92672]">=&gt;</span>
+                                <span class="font-bold text-[#E6DB74]">"Gradient Please"</span>
+                                <span class="text-white">,</span>
+                            </a>
+
                             <a class="code-link relative my-2 block rounded border-none pl-4 text-left text-blue hover:bg-blue hover:text-white" style="margin-left: 10px; width: calc(100% - 10px);" href="#">
                                 <div class="text-[.7rem] font-normal text-white/50">// read and learn</div>
                                 <span class="font-bold text-[#E6DB74]">"help" </span>
@@ -72,9 +86,9 @@ const chooseRebuildFrontend = () => {
             </div>
         </div>
         <div v-else>
-            <Wizzard v-if="usingWizzard"
-                     class="bg-white p-10 shadow max-w-screen-2xl mx-auto py-12 px-4 sm:px-6 lg:px-8"/>
+            <Wizzard v-if="usingWizzard" class="bg-white p-10 shadow max-w-screen-2xl mx-auto py-12 px-4 sm:px-6 lg:px-8"/>
             <RebuildFrontend v-else-if="usingRebuildFrontend" class="bg-white p-10 shadow max-w-screen-2xl mx-auto py-12 px-4 sm:px-6 lg:px-8" />
+            <GenerateGradient v-else-if="usingGenerateGradient" class="bg-white p-10 shadow max-w-screen-2xl mx-auto py-12 px-4 sm:px-6 lg:px-8" />
         </div>
     </div>
 </template>

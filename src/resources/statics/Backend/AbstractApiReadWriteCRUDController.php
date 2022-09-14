@@ -80,7 +80,7 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
             return Response::json(
                 [
                     'success' => false,
-                    'failed' => $exception->getMessage(),
+                    'message' => $exception->getMessage(),
                 ], 202);
         }
     }
@@ -113,7 +113,7 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
             return Response::json(
                 [
                     'success' => false,
-                    'failed' => $exception->getMessage(),
+                    'message' => $exception->getMessage(),
                 ], 202);
         }
     }
@@ -139,7 +139,7 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
             return Response::json(
                 [
                     'success' => false,
-                    'failed' => $exception->getMessage(),
+                    'message' => $exception->getMessage(),
                 ], 202);
         }
     }

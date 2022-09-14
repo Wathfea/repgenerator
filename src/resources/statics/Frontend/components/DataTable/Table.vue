@@ -3,9 +3,9 @@
     <div class="flex flex-col">
       <div class="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
         <div class="mb-4 flex justify-end" v-if="!disableCreate">
-          <RouterLink :to="`/${route}/create` + getCreateFilters()">
+          <NuxtLink :to="`/${route}/create` + getCreateFilters()">
             <Button>Új {{ modelReadableName }}</Button>
-          </RouterLink>
+          </NuxtLink>
         </div>
         <div class="shadow-sm bg-gray-50 rounded">
           <div class="p-3">
@@ -15,10 +15,10 @@
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <SearchIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
                 </div>
-                <input type="text" v-model="searchInput" v-on:keyup="onSearchAll" class="block w-full rounded-none rounded-l-md pl-10 sm:text-sm border-gray-300 focus:border-vagheggi-800 focus:shadow-vagheggi-800 focus:ring-0" placeholder="Keresés az összes oszlopban" />
+                <input type="text" v-model="searchInput" v-on:keyup="onSearchAll" class="block w-full rounded-none rounded-l-md pl-10 sm:text-sm border-gray-300 focus:border-repgenerator-800 focus:shadow-repgenerator-800 focus:ring-0" placeholder="Keresés az összes oszlopban" />
               </div>
               <Button :disabled="!searchInput.length" @click="onSearchAllCleared" type="button" class="-ml-px relative inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-r-md text-gray-700 bg-gray-50 hover:bg-gray-100">
-                <XIcon :class="`h-5 w-5 text-${ searchInput.length ? 'vagheggi-800' : 'gray-400'}`" aria-hidden="true" />
+                <XIcon :class="`h-5 w-5 text-${ searchInput.length ? 'repgenerator-800' : 'gray-400'}`" aria-hidden="true" />
               </Button>
             </div>
             <div class="mt-3">
@@ -72,12 +72,12 @@
                   </slot>
                 </td>
                 <td class="flex justify-end relative whitespace-nowrap py-4 px-3 text-sm font-medium sm:pr-6 lg:pr-8">
-                  <RouterLink :to="`/${route}/${model.id}`" class="text-vagheggi-600 hover:text-vagheggi-900">
+                  <NuxtLink :to="`/${route}/${model.id}`" class="text-vagheggi-600 hover:text-vagheggi-900">
                     <PencilIcon class="h-6 w-6" aria-hidden="true" />
-                  </RouterLink>
-                  <RouterLink v-if="!disableDestroy" @click="deleteModel(model.id)" class="text-vagheggi-600 hover:text-vagheggi-900 ml-2 cursor-pointer">
+                  </NuxtLink>
+                  <a v-if="!disableDestroy" @click="deleteModel(model.id)" class="text-vagheggi-600 hover:text-vagheggi-900 ml-2 cursor-pointer">
                     <TrashIcon class="h-6 w-6" aria-hidden="true" />
-                  </RouterLink>
+                  </a>
                   <slot name="actions" :value="model"/>
                 </td>
               </tr>
