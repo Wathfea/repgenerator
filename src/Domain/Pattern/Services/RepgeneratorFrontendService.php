@@ -65,7 +65,7 @@ class RepgeneratorFrontendService
                 '{{ modelNamePluralLowercase }}',
             ],
             [
-                Str::snake(Str::plural($name), '-'),
+                $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated(),
                 json_encode($columnsConfig),
                 $this->nameTransformerService->getModelNamePluralUcfirst(),
                 $this->nameTransformerService->getModelNameSingularUcfirst(),
@@ -187,7 +187,7 @@ class RepgeneratorFrontendService
                 '{{ columns }}'
             ],
             [
-                Str::snake(Str::plural($name), '-'),
+                $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated(),
                 $this->nameTransformerService->getModelNameSingularLowerCase(),
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
                 $this->implodeLines($columnsTemplate, 2)
@@ -248,7 +248,7 @@ class RepgeneratorFrontendService
                 $this->nameTransformerService->getModelNameSingularUcfirst(),
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
                 $this->nameTransformerService->getModelNameSingularLowerCase(),
-                Str::snake(Str::plural($name), '-'),
+                $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated(),
                 $icon
             ],
             $this->repgeneratorStubService->getStub('Frontend/Vue/pages/create')
@@ -265,7 +265,7 @@ class RepgeneratorFrontendService
                 $this->nameTransformerService->getModelNamePluralUcfirst(),
                 $this->nameTransformerService->getModelNameSingularUcfirst(),
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
-                Str::snake(Str::plural($name), '-'),
+                $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated(),
                 $icon
             ],
             $this->repgeneratorStubService->getStub('Frontend/Vue/pages/[id]')
@@ -284,7 +284,7 @@ class RepgeneratorFrontendService
                 $this->nameTransformerService->getModelNameSingularLowerCase(),
                 $this->nameTransformerService->getModelNameSingularUcfirst(),
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
-                Str::snake(Str::plural($name), '-'),
+                $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated(),
                 $icon
             ],
             $this->repgeneratorStubService->getStub('Frontend/Vue/pages/index')
@@ -394,10 +394,12 @@ class RepgeneratorFrontendService
     {
         $routeBlockTemplate = str_replace(
             [
+                '{{modelNamePluralLowerCaseHyphenated}}',
                 '{{modelNamePluralLowerCase}}',
                 '{{modelNameSingularUcfirst}}',
             ],
             [
+                $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated(),
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
                 $this->nameTransformerService->getModelNameSingularUcfirst(),
             ],

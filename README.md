@@ -22,11 +22,6 @@ php artisan pattern:init http://yoursite.com
 npm i @headlessui/vue @heroicons/vue@v1 @vitejs/plugin-vue @vueform/multiselect @vuepic/vue-datepicker date-fns ohmyfetch vue vue-router tailwindcss postcss autoprefixer ts-loader typescript
 ```
 
-
-```bash
-php artisan vendor:publish --provider="Pentacom\Repgenerator\Domain\Pattern\Providers\RepgeneratorServiceProvider" --tag="migrations"
-```
-
 ## Usage
 
 Navigate in your browser to http://yoursite.com/wizzard and follow the wizzard steps.

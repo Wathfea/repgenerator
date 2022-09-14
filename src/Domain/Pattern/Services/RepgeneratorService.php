@@ -316,7 +316,7 @@ class RepgeneratorService
             [
                 $name,
                 strtolower(Str::plural($name)),
-                Str::snake(Str::plural($name), '-')
+                $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated()
             ],
             $this->repgeneratorStubService->getStub('apiRoutes')
         );

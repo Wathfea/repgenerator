@@ -15,6 +15,13 @@ All notable changes to `repgenerator` will be documented in this file
 
 ## [Unreleased]
 
+## [1.5.4] - 2022-09-14
+## Fixed
+- router js path generation fixed
+- 
+
+
+
 ## [1.5.3] - 2022-09-14
 ## Added
 - Fully refactored frontend ui
