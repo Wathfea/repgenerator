@@ -649,9 +649,10 @@ class RepgeneratorService
     /**
      * @param  array  $columns
      * @param  array  $foreigns
+     * @param  bool  $isUpdateRequest
      * @return array
      */
-    private function rulesByColumns(array $columns, array $foreigns): array
+    private function rulesByColumns(array $columns, array $foreigns, bool $isUpdateRequest = false): array
     {
         $rules = [];
             foreach ($columns as $column) {
@@ -676,7 +677,7 @@ class RepgeneratorService
                         $rule .= '|';
                     }
 
-                    if (!$column->nullable) {
+                    if (!$column->nullable && !$isUpdateRequest) {
                         $rule .= 'required';
                     } else {
                         $rule .= 'nullable';
@@ -709,7 +710,7 @@ class RepgeneratorService
             ],
             [
                 $name,
-                $this->implodeLines($this->rulesByColumns($columns, $foreigns), 2)
+                $this->implodeLines($this->rulesByColumns($columns, $foreigns, true), 2)
             ],
             $this->repgeneratorStubService->getStub('UpdateRequest')
         );
@@ -1061,7 +1062,7 @@ class RepgeneratorService
             $uses[] = "use App\\Domain\\".$name."\\Repositories\\".$name."RepositoryService;\n";
             $fileRepositoryClass = $name."RepositoryService::class";
 
-            $relatedTableName = strtolower(Str::singular($foreigns[0]['reference']['name']));
+            $relatedTableName = $foreigns[0]['relation_name'];
             $resourceElementFileUrlTemplate = str_replace(
                 [
                     '{{fileRepositoryClass}}',
