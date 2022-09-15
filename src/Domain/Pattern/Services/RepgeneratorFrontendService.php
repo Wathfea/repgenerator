@@ -391,20 +391,28 @@ class RepgeneratorFrontendService
         ];
     }
 
+
     /**
+     * @param  string  $name
+     * @param  string  $crudUrlPrefix
      * @return string[]
      */
-    #[ArrayShape(['name' => "string", 'location' => "string"])] public function generateRoutesBlock(string $name): array
+    #[ArrayShape(['name' => "string", 'location' => "string"])] public function generateRoutesBlock(string $name, string $crudUrlPrefix): array
     {
         $this->nameTransformerService->setModelName($name);
+
+        $crudUrlPrefix = $crudUrlPrefix === '/' ? '' : $crudUrlPrefix;
+
         $routeBlockTemplate = str_replace(
             [
                 '{{modelNamePluralLowerCase}}',
                 '{{modelNameSingularUcfirst}}',
+                '{{urlPrefix}}',
             ],
             [
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
                 $this->nameTransformerService->getModelNameSingularUcfirst(),
+                $crudUrlPrefix
             ],
             $this->repgeneratorStubService->getStub('Frontend/routeBlock')
         );

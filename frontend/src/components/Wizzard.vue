@@ -76,11 +76,13 @@ const chosenMenuGroupId = ref(0);
 const newMenuGroupName = ref('');
 const newMenuGroupIcon = ref('');
 const chosenOutputFramework = ref('nuxt');
+
 const generate = () => {
     generating.value = true;
     let payload = {
         name: modelName.value,
         icon: icon.value,
+        crudUrlPrefix: urlPrefix.value,
         columns: columns.value,
         menu_group_id: chosenMenuGroupId.value,
         new_menu_group_name: chosenMenuGroupId.value === 0 ? newMenuGroupName.value : null,
@@ -134,12 +136,18 @@ const modelName = ref('');
 
 const icon = ref('');
 
+const urlPrefix = ref('/');
+
 const onNameChanged = (name) => {
     modelName.value = name;
 }
 
 const onIconChanged = (setIcon) => {
     icon.value = setIcon;
+}
+
+const onUrlPrefixChanged = (setPrefix) => {
+    urlPrefix.value = setPrefix;
 }
 
 const onChosenMenuGroupChanged = (id) => {
@@ -277,9 +285,12 @@ getMenuGroups();
                 :set-new-menu-group-name="newMenuGroupName"
                 :set-new-menu-group-icon="newMenuGroupIcon"
                 :set-chosen-output-framework="chosenOutputFramework"
-                :icon="icon" :modelName="modelName"
+                :icon="icon"
+                :modelName="modelName"
+                :urlPrefix="urlPrefix"
                 @iconChanged="onIconChanged"
                 @nameChanged="onNameChanged"
+                @urlPrefixChanged="onUrlPrefixChanged"
                 @isValidTable="onIsValidTable"
                 @chosenMenuGroupChanged="onChosenMenuGroupChanged"
                 @newGroupNameChanged="onNewGroupNameChanged"

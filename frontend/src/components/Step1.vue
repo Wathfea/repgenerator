@@ -2,7 +2,8 @@
 import {defineEmits, ref, computed} from 'vue'
 import axios from "axios";
 
-const emit = defineEmits(['nameChanged', 'iconChanged', 'isValidTable', 'newGroupNameChanged', 'newGroupIconChanged', 'chosenMenuGroupChanged', 'chosenOutputFramework'])
+const emit = defineEmits(['nameChanged', 'iconChanged', 'urlPrefixChanged', 'isValidTable', 'newGroupNameChanged', 'newGroupIconChanged', 'chosenMenuGroupChanged', 'chosenOutputFramework'])
+
 const props = defineProps({
     modelName: {
         type: String,
@@ -10,6 +11,11 @@ const props = defineProps({
         default: null
     },
     icon: {
+        type: String,
+        required: false,
+        default: null
+    },
+    urlPrefix: {
         type: String,
         required: false,
         default: null
@@ -42,8 +48,10 @@ const props = defineProps({
         default: null
     },
 })
+
 let name = ref(props.modelName);
 let icon = ref(props.icon);
+let prefix = ref(props.urlPrefix);
 
 const isValidTable = ref(true);
 
@@ -83,12 +91,14 @@ const chosenOutputFramework = ref(props.setChosenOutputFramework);
                 <div class="mt-1">
                     <input id="model-name" v-focus v-model="ucfirstName" class="shadow-sm block w-full sm:text-sm  rounded-md" :class="tableExists ? 'border-red-300 text-red-900 placeholder-red-300 focus:outline-none focus:ring-red-500 focus:border-red-500' : 'border-gray-300' " required type="text" @change="checkTable">
                 </div>
+
                 <label class="block text-sm font-medium text-gray-700 mt-1" for="model-name">
                     Hero icon <a target="_blank" href="https://heroicons.com/">https://heroicons.com/</a>
                 </label>
                 <div class="mt-1">
                     <input id="icon-name" v-model="icon" class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md" required type="text" @change="emit('iconChanged',icon)">
                 </div>
+
                 <label class="block text-sm font-medium text-gray-700 mt-1" for="model-name">
                     Menu group
                 </label>
@@ -98,6 +108,7 @@ const chosenOutputFramework = ref(props.setChosenOutputFramework);
                         <option :value="0">-= New menu group =-</option>
                     </select>
                 </div>
+
                 <div v-if="chosenMenuGroup === 0">
                     <label class="block text-sm font-medium text-gray-700 mt-1" for="model-name">
                         New menu group name
@@ -112,6 +123,7 @@ const chosenOutputFramework = ref(props.setChosenOutputFramework);
                         <input id="group-icon" v-model="newMenuGroupIcon" class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md" required type="text" @change="emit('newGroupIconChanged',newMenuGroupIcon)">
                     </div>
                 </div>
+
                 <label class="block text-sm font-medium text-gray-700 mt-1" for="model-name">
                     Output framewwork
                 </label>
@@ -120,6 +132,13 @@ const chosenOutputFramework = ref(props.setChosenOutputFramework);
                         <option value="nuxt">Nuxt3</option>
                         <option value="vue">Vue3</option>
                     </select>
+                </div>
+
+                <label class="block text-sm font-medium text-gray-700" for="url-prefix">
+                    CRUD Page url prefix
+                </label>
+                <div class="mt-1">
+                    <input id="url-prefix"  v-model="prefix" class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md" type="text" @change="emit('urlPrefixChanged',prefix)">
                 </div>
             </div>
         </div>

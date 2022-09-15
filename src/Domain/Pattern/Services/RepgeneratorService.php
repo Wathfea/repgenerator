@@ -159,7 +159,7 @@ class RepgeneratorService
         $callback('API Routes is ready!');
 
 
-        !$isGenerateFrontend ?: $this->frontend($chosenOutputFramework, $requestData['icon'], $this->modelName, $columns, $callback);
+        !$isGenerateFrontend ?: $this->frontend($chosenOutputFramework, $requestData['icon'], $this->modelName, $requestData['crudUrlPrefix'], $columns, $callback);
 
         $callback("Code generation has saved you from typing at least ".CharacterCounterStore::$charsCount." characters");
         $minutes = floor((CharacterCounterStore::$charsCount / 5) / 25);
@@ -1122,19 +1122,20 @@ class RepgeneratorService
     }
 
     /**
-     * @param string $chosenOutputFramework
-     * @param string $icon
-     * @param string $name
-     * @param array $columns
+     * @param  string  $chosenOutputFramework
+     * @param  string  $icon
+     * @param  string  $name
+     * @param  string  $crudUrlPrefix
+     * @param  array  $columns
      * @param $callback
      */
-    private function frontend(string $chosenOutputFramework, string $icon, string $name, array $columns, $callback): void
+    private function frontend(string $chosenOutputFramework, string $icon, string $name, string $crudUrlPrefix, array $columns, $callback): void
     {
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComposable($chosenOutputFramework, $name, $columns);
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComponents($chosenOutputFramework, $name, $columns);
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateLarafetch();
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateRoutesImports($name);
-        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateRoutesBlock($name);
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateRoutesBlock($name, $crudUrlPrefix);
         if ( $chosenOutputFramework == 'nuxt' ) {
             $this->repgeneratorFrontendService->generatePages($name, $icon);
         }

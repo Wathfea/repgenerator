@@ -15,6 +15,11 @@ All notable changes to `repgenerator` will be documented in this file
 - Mezősorrend változtatása drag & drop-al
 
 ## [Unreleased]
+
+## [1.5.5] - 2022-09-15
+## Added
+- CRUD Url prefix
+
 ## [1.5.4] - 2022-09-15
 ## Added
 - Generate frontend option selector

@@ -20,6 +20,7 @@ php artisan pattern:init http://yoursite.com
 
 ```bash
 npm i @headlessui/vue @heroicons/vue@v1 @vitejs/plugin-vue @vueform/multiselect @vuepic/vue-datepicker date-fns ohmyfetch vue vue-router tailwindcss postcss autoprefixer ts-loader typescript
+buffer
 ```
 
 
