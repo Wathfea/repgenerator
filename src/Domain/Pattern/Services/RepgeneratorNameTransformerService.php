@@ -44,21 +44,24 @@ class RepgeneratorNameTransformerService
      * @var string
      */
     public string $modelNameSingularUcfirst;
-
+    /**
+     * Lower case, plural version and hyphenated of $modelName E.g. dog-owners
+     *
+     * @var string
+     */
+    public string $modelNamePluralLowerCaseHyphenated;
     /**
      * Relation name should be no space,no special chars  E.g. something or somethingElse
      *
      * @var string
      */
     public string $relationName;
-
     /**
      * Should be start with lower case, remove space and start capital  the next word, singular E.g. dogOwner
      *
      * @var string
      */
     public string $relationMethodNameSingular;
-
     /**
      * Should be start with lower case, remove space and start capital  the next word, plural E.g. dogOwners
      *
@@ -84,6 +87,7 @@ class RepgeneratorNameTransformerService
         $this->setModelNamePluralLowerCase();
         $this->setModelNameSingularUcfirst();
         $this->setModelNamePluralUcfirst();
+        $this->setModelNamePluralLowerCaseHyphenated();
     }
 
     /**
@@ -113,20 +117,35 @@ class RepgeneratorNameTransformerService
     }
 
     /**
-     * @return string
-     */
-    public function getModelNamePluralUcfirst(): string
-    {
-        return $this->modelNamePluralUcfirst;
-    }
-
-
-    /**
      * @return void
      */
     public function setModelNamePluralLowerCase(): void
     {
         $this->modelNamePluralLowerCase = Str::plural(Str::lower($this->getModelName()));
+    }
+
+    /**
+     * @return string
+     */
+    public function getModelNamePluralLowerCaseHyphenated(): string
+    {
+        return $this->modelNamePluralLowerCaseHyphenated;
+    }
+
+    /**
+     * @return void
+     */
+    public function setModelNamePluralLowerCaseHyphenated(): void
+    {
+        $this->modelNamePluralLowerCaseHyphenated = Str::snake(Str::plural($this->getModelName()), '-');
+    }
+
+    /**
+     * @return string
+     */
+    public function getModelNamePluralUcfirst(): string
+    {
+        return $this->modelNamePluralUcfirst;
     }
 
     /**
@@ -146,20 +165,19 @@ class RepgeneratorNameTransformerService
     }
 
     /**
-     * @return string
-     */
-    public function getModelNameSingularUcfirst(): string
-    {
-        return $this->modelNameSingularUcfirst;
-    }
-
-
-    /**
      * @return void
      */
     public function setModelNameSingularLowerCase(): void
     {
         $this->modelNameSingularLowerCase = Str::lower($this->getModelName());;
+    }
+
+    /**
+     * @return string
+     */
+    public function getModelNameSingularUcfirst(): string
+    {
+        return $this->modelNameSingularUcfirst;
     }
 
     /**
@@ -199,7 +217,7 @@ class RepgeneratorNameTransformerService
      */
     public function setRelationMethodNameSingular(): void
     {
-        $this->relationMethodNameSingular =  Str::singular($this->getRelationName());;
+        $this->relationMethodNameSingular = Str::singular($this->getRelationName());;
     }
 
     /**

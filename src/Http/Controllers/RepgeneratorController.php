@@ -356,6 +356,7 @@ class RepgeneratorController extends Controller
             },
             $fileUploadFieldsData,
             $migrationName,
+            $requestData['generateFrontend']
         );
         return $messages;
     }

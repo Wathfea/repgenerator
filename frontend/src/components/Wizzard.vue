@@ -27,6 +27,11 @@ const steps = [
 ];
 
 const step1Options = ref({
+    'generateFrontend': {
+        label: 'Frontend',
+        enabled: true,
+        text: 'Should we generate frontend?'
+    },
     'pivot': {
         label: 'Pivot',
         enabled: false,
