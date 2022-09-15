@@ -129,7 +129,7 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
      * @param  array  $load
      * @return Builder
      */
-    public function getBaseBuilder(array $load = []): Builder
+    protected function getBaseBuilder(array $load = []): Builder
     {
         /** @var Builder $qb */
         $qb = app($this->model)::query();

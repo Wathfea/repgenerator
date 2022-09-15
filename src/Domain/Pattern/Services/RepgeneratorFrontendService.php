@@ -65,7 +65,7 @@ class RepgeneratorFrontendService
                 '{{ modelNamePluralLowercase }}',
             ],
             [
-                Str::snake(Str::plural($name), '-'),
+                $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated(),
                 json_encode($columnsConfig),
                 $this->nameTransformerService->getModelNamePluralUcfirst(),
                 $this->nameTransformerService->getModelNameSingularUcfirst(),
@@ -104,6 +104,7 @@ class RepgeneratorFrontendService
      */
     #[ArrayShape(['name' => "string", 'location' => "mixed"])] public function generateComponents(string $chosenOutputFramework, string $name, array $columns): array
     {
+        $this->nameTransformerService->setModelName($name);
         $stub =  $this->repgeneratorStubService->getStub('Frontend/Vue/components/create');
         $frontendReplacer = app(RepgeneratorFrontendFrameworkHandlerService::class);
         $stub = $frontendReplacer->replaceForFramework($chosenOutputFramework, $stub);
@@ -187,7 +188,7 @@ class RepgeneratorFrontendService
                 '{{ columns }}'
             ],
             [
-                Str::snake(Str::plural($name), '-'),
+                $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated(),
                 $this->nameTransformerService->getModelNameSingularLowerCase(),
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
                 $this->implodeLines($columnsTemplate, 2)
@@ -234,6 +235,8 @@ class RepgeneratorFrontendService
      */
     #[ArrayShape(['name' => "string", 'location' => "mixed"])] public function generatePages(string $name, string $icon): array
     {
+        $this->nameTransformerService->setModelName($name);
+
         $createTemplate = str_replace(
             [
                 '{{modelNamePluralUcfirst}}',
@@ -248,7 +251,7 @@ class RepgeneratorFrontendService
                 $this->nameTransformerService->getModelNameSingularUcfirst(),
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
                 $this->nameTransformerService->getModelNameSingularLowerCase(),
-                Str::snake(Str::plural($name), '-'),
+                $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated(),
                 $icon
             ],
             $this->repgeneratorStubService->getStub('Frontend/Vue/pages/create')
@@ -265,7 +268,7 @@ class RepgeneratorFrontendService
                 $this->nameTransformerService->getModelNamePluralUcfirst(),
                 $this->nameTransformerService->getModelNameSingularUcfirst(),
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
-                Str::snake(Str::plural($name), '-'),
+                $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated(),
                 $icon
             ],
             $this->repgeneratorStubService->getStub('Frontend/Vue/pages/[id]')
@@ -284,7 +287,7 @@ class RepgeneratorFrontendService
                 $this->nameTransformerService->getModelNameSingularLowerCase(),
                 $this->nameTransformerService->getModelNameSingularUcfirst(),
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
-                Str::snake(Str::plural($name), '-'),
+                $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated(),
                 $icon
             ],
             $this->repgeneratorStubService->getStub('Frontend/Vue/pages/index')
@@ -352,6 +355,7 @@ class RepgeneratorFrontendService
 
     #[ArrayShape(['name' => "string", 'location' => "false|string"])] public function generateRoutesImports(string $name): array
     {
+        $this->nameTransformerService->setModelName($name);
         $imports = [];
         $actions = ['Index', 'Create', 'Edit'];
         foreach ($actions as $action) {
@@ -390,8 +394,9 @@ class RepgeneratorFrontendService
     /**
      * @return string[]
      */
-    #[ArrayShape(['name' => "string", 'location' => "string"])] public function generateRoutesBlock(): array
+    #[ArrayShape(['name' => "string", 'location' => "string"])] public function generateRoutesBlock(string $name): array
     {
+        $this->nameTransformerService->setModelName($name);
         $routeBlockTemplate = str_replace(
             [
                 '{{modelNamePluralLowerCase}}',

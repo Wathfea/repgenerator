@@ -53,12 +53,6 @@ interface ModelRepositoryServiceInterface extends RepositoryServiceInterface
     public function getAll(array $load = [], int $perPage = null): Collection|LengthAwarePaginator;
 
     /**
-     * @param  array  $load
-     * @return Builder
-     */
-    public function getBaseBuilder(array $load = []): Builder;
-
-    /**
      * @param  BaseQueryFilter  $filter
      * @param  array  $load
      * @param  int|null  $perPage

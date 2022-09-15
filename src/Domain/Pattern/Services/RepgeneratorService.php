@@ -307,6 +307,8 @@ class RepgeneratorService
      */
     private function apiRoutes(string $name): void
     {
+        $this->nameTransformerService->setModelName($name);
+
         $apiRouteTemplate = str_replace(
             [
                 '{{modelName}}',
@@ -316,7 +318,7 @@ class RepgeneratorService
             [
                 $name,
                 strtolower(Str::plural($name)),
-                Str::snake(Str::plural($name), '-')
+                $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated()
             ],
             $this->repgeneratorStubService->getStub('apiRoutes')
         );
@@ -1132,7 +1134,7 @@ class RepgeneratorService
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateComponents($chosenOutputFramework, $name, $columns);
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateLarafetch();
         $this->generatedFiles[] = $this->repgeneratorFrontendService->generateRoutesImports($name);
-        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateRoutesBlock();
+        $this->generatedFiles[] = $this->repgeneratorFrontendService->generateRoutesBlock($name);
         if ( $chosenOutputFramework == 'nuxt' ) {
             $this->repgeneratorFrontendService->generatePages($name, $icon);
         }

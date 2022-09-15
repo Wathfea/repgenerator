@@ -3,6 +3,7 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
+- Generate frontend boolean választó
 - Relation type selector
 - Default gate és policy
 - public vagy nem public file választó
@@ -14,6 +15,9 @@ All notable changes to `repgenerator` will be documented in this file
 - Mezősorrend változtatása drag & drop-al
 
 ## [Unreleased]
+## [1.5.4] - 2022-09-15
+## Added
+- Generate frontend option selector
 
 ## [1.5.3] - 2022-09-14
 ## Added
