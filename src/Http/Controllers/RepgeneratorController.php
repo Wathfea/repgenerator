@@ -324,7 +324,8 @@ class RepgeneratorController extends Controller
                 $requestData['timestamps'],
                 $requestData['menu_group_id'],
                 $requestData['new_menu_group_name'],
-                $requestData['new_menu_group_icon']
+                $requestData['new_menu_group_icon'],
+                $requestData['crudUrlPrefix'],
             );
         }
 

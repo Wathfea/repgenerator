@@ -59,10 +59,14 @@ class MigrationGeneratorService
         int|null $menuGroupId = null,
         string|null $newMenuGroupName = null,
         string|null $newMenuGroupIcon = null,
+        string|null $crudUrlPrefix = null,
     ): string {
         $up = $this->up($table, $columns, $indexes, $foreigns, $softDelete, $timestamps);
         $down = $this->down($table, $foreigns);
 
+        if($crudUrlPrefix && !str_ends_with($crudUrlPrefix, '/')) {
+            $crudUrlPrefix = $crudUrlPrefix.'/';
+        }
 
         $this->migrationWriter->writeTo(
             $this->makeTablePath($table->getName()),
@@ -71,7 +75,7 @@ class MigrationGeneratorService
             $up,
             $down,
             $modelName,
-            str_replace('_','-', $table->getName()),
+            $crudUrlPrefix.str_replace('_','-', $table->getName()),
             $iconName,
             $menuGroupId,
             $newMenuGroupName,

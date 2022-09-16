@@ -3,7 +3,11 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
-- Generate frontend boolean választó
+- Ha valaminek nincs FE generálva ne tegye be a menus táblába
+- Api route generálásnál kötőjel használata a resourceban
+- routes.js-ben kötőjel használata
+- Table.vue-ba be kell kötni az url prefixet az új és edit gombra
+
 - Relation type selector
 - Default gate és policy
 - public vagy nem public file választó
@@ -11,7 +15,6 @@ All notable changes to `repgenerator` will be documented in this file
 - CSV import
 - Composite index generation
 - How it works section
-- Hero icon választó listából, ne kézi beírás. Esetleg más icon csomag? FontAwsome vagy Material?
 - Mezősorrend változtatása drag & drop-al
 
 ## [Unreleased]
