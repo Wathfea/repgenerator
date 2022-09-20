@@ -1,3 +1,3 @@
-    {path: '{{urlPrefix}}/{{modelNamePluralLowerCase}}', name: '{{modelNamePluralLowerCase}}', component: {{modelNameSingularUcfirst}}Index},
-    {path: '{{urlPrefix}}/{{modelNamePluralLowerCase}}/create', name: '{{modelNamePluralLowerCase}}.create', component: {{modelNameSingularUcfirst}}Create},
-    {path: '{{urlPrefix}}/{{modelNamePluralLowerCase}}/:id', name: '{{modelNamePluralLowerCase}}.edit', component: {{modelNameSingularUcfirst}}Edit},
+    {path: '{{urlPrefix}}/{{modelNamePluralLowerCaseHyphenated}}', name: '{{modelNamePluralLowerCase}}', component: {{modelNameSingularUcfirst}}Index},
+    {path: '{{urlPrefix}}/{{modelNamePluralLowerCaseHyphenated}}/create', name: '{{modelNamePluralLowerCase}}.create', component: {{modelNameSingularUcfirst}}Create},
+    {path: '{{urlPrefix}}/{{modelNamePluralLowerCaseHyphenated}}/:id', name: '{{modelNamePluralLowerCase}}.edit', component: {{modelNameSingularUcfirst}}Edit},

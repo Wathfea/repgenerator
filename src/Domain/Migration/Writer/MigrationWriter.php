@@ -21,17 +21,18 @@ class MigrationWriter
     /**
      * Writes migration to destination.
      *
-     * @param string $path Migration file destination path.
-     * @param string $stubPath Migration stub file path.
-     * @param string $menuCodeStubPath
-     * @param ToStringInterface $up migration up method
-     * @param ToStringInterface $down migration down method
-     * @param string $name
-     * @param string $url
-     * @param string $iconName
-     * @param int|null $menuGroupId
-     * @param string|null $newMenuGroupName
-     * @param string|null $newMenuGroupIcon
+     * @param  string  $path  Migration file destination path.
+     * @param  string  $stubPath  Migration stub file path.
+     * @param  string  $menuCodeStubPath
+     * @param  ToStringInterface  $up  migration up method
+     * @param  ToStringInterface  $down  migration down method
+     * @param  string  $name
+     * @param  string  $url
+     * @param  string  $iconName
+     * @param  bool  $isGenerateFrontend
+     * @param  int|null  $menuGroupId
+     * @param  string|null  $newMenuGroupName
+     * @param  string|null  $newMenuGroupIcon
      */
     public function writeTo(
         string $path,
@@ -42,6 +43,7 @@ class MigrationWriter
         string $name,
         string $url,
         string $iconName,
+        bool $isGenerateFrontend,
         int|null $menuGroupId = null,
         string|null $newMenuGroupName = null,
         string|null $newMenuGroupIcon = null
@@ -58,7 +60,7 @@ class MigrationWriter
         ]);
 
 
-        File::put($path, $this->migrationStub->populateStub($stub, $menuCodeStub, $use, $up->toString(), $down->toString(), $name, $url, $iconName, $menuGroupId, $newMenuGroupName, $newMenuGroupIcon));
+        File::put($path, $this->migrationStub->populateStub($stub, $menuCodeStub, $use, $up->toString(), $down->toString(), $name, $url, $iconName, $isGenerateFrontend, $menuGroupId, $newMenuGroupName, $newMenuGroupIcon));
 
     }
 }

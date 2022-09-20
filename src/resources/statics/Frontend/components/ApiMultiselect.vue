@@ -1,5 +1,14 @@
 <template>
     <Multiselect
+        :classes="{
+        containerActive: 'ring ring-repgenerator-500 ring-opacity-30',
+        tag: 'bg-repgenerator-500 text-white text-sm font-semibold py-0.5 pl-2 rounded mr-1 mb-1 flex items-center whitespace-nowrap rtl:pl-0 rtl:pr-2 rtl:mr-0 rtl:ml-1',
+        groupLabelSelected: 'bg-repgenerator-600 text-white',
+        groupLabelSelectedPointed: 'bg-repgenerator-600 text-white opacity-90',
+        groupLabelSelectedDisabled: 'text-repgenerator-100 bg-repgenerator-600 bg-opacity-50 cursor-not-allowed',
+        optionSelected: 'text-white bg-repgenerator-500',
+        optionSelectedPointed: 'text-white bg-repgenerator-500 opacity-90',
+        optionSelectedDisabled: 'text-repgenerator-100 bg-repgenerator-500 bg-opacity-50 cursor-not-allowed',}"
         @change="onChange"
         @search-change="onSearchChange"
         :value="value"

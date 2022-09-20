@@ -40,6 +40,7 @@ class MigrationGeneratorService
      * @param array $foreigns
      * @param string $modelName
      * @param string $iconName
+     * @param bool $iconName
      * @param bool $softDelete
      * @param bool $timestamps
      * @param int|null $menuGroupId
@@ -54,6 +55,7 @@ class MigrationGeneratorService
         array $foreigns,
         string $modelName,
         string $iconName,
+        bool $isGenerateFrontend,
         bool $softDelete,
         bool $timestamps,
         int|null $menuGroupId = null,
@@ -77,6 +79,7 @@ class MigrationGeneratorService
             $modelName,
             $crudUrlPrefix.str_replace('_','-', $table->getName()),
             $iconName,
+            $isGenerateFrontend,
             $menuGroupId,
             $newMenuGroupName,
             $newMenuGroupIcon,

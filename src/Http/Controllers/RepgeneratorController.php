@@ -197,7 +197,7 @@ class RepgeneratorController extends Controller
 
             $this->migrationGeneratorService->setDate(Carbon::now());
             $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], $foreigns,
-                self::CRUD_MENU_TABLE_NAME, 'menu', false, false);
+                self::CRUD_MENU_TABLE_NAME, 'menu', false, false, false);
 
             $data = [
                 'name' => self::CRUD_MENU_TABLE_NAME,
@@ -247,7 +247,7 @@ class RepgeneratorController extends Controller
 
             $this->migrationGeneratorService->setDate(Carbon::now());
             $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], [],
-                self::CRUD_MENU_GROUP_TABLE_NAME, 'MenuIcon', false, false);
+                self::CRUD_MENU_GROUP_TABLE_NAME, 'MenuIcon', false,false, false);
 
             $data = [
                 'name' => self::CRUD_MENU_GROUP_TABLE_NAME,
@@ -320,12 +320,13 @@ class RepgeneratorController extends Controller
                 $foreigns,
                 $requestData['name'],
                 $requestData['icon'],
+                $requestData['generateFrontend'],
                 $requestData['softDelete'],
                 $requestData['timestamps'],
                 $requestData['menu_group_id'],
                 $requestData['new_menu_group_name'],
                 $requestData['new_menu_group_icon'],
-                $requestData['crudUrlPrefix'],
+                $requestData['crudUrlPrefix']
             );
         }
 
@@ -420,6 +421,7 @@ class RepgeneratorController extends Controller
                 $requestData['name'].'Files',
                 'photograph',
                 false,
+                false,
                 false
             );
         }
@@ -476,11 +478,13 @@ class RepgeneratorController extends Controller
         $directories = array_filter(glob(app_path('Domain').'/*'), 'is_dir');
 
         foreach ($directories as $directory) {
-            $config = include($directory.'/config.php');
-            $domains[] = [
-                'model' => $config['name'],
-                'meta' => $config['meta'],
-            ];
+            if(file_exists($directory.'/config.php')){
+                $config = include($directory.'/config.php');
+                $domains[] = [
+                    'model' => $config['name'],
+                    'meta' => $config['meta'],
+                ];
+            }
         }
 
         return response()->json($domains);

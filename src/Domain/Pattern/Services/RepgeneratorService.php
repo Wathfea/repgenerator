@@ -312,15 +312,13 @@ class RepgeneratorService
         $apiRouteTemplate = str_replace(
             [
                 '{{modelName}}',
-                '{{modelNamePluralLowerCase}}',
                 '{{modelNamePluralLowerCaseHyphenated}}'
             ],
             [
                 $name,
-                strtolower(Str::plural($name)),
                 $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated()
             ],
-            $this->repgeneratorStubService->getStub('apiRoutes')
+            $this->repgeneratorStubService->getStub('apiroutes')
         );
 
         if (!file_exists($path = app_path("Domain".DIRECTORY_SEPARATOR."$name".DIRECTORY_SEPARATOR."Routes".DIRECTORY_SEPARATOR))) {
@@ -547,7 +545,7 @@ class RepgeneratorService
 
         if(!empty($foreigns)) {
             foreach ($foreigns as $foreign) {
-                $relations[] = "'".$foreign['relation_name']."'";
+                $relations[] = "'".$foreign['relation_name']."',";
             }
         }
 
@@ -668,7 +666,7 @@ class RepgeneratorService
                     if (!$column->fileUploadLocation) {
                         $rule .= match ($column->type) {
                             'binary', 'char', 'geometryCollection', 'geometry', 'ipAddress', 'rememberToken', 'set', 'softDeletes', 'uuidMorphs', 'uuid', 'text', 'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumText', 'multiLineString', 'multiPoint', 'multiPolygon', 'point', 'polygon', 'tinyText', 'string' => 'string'.$length,
-                            'enum' => 'enum',
+                            'enum' => 'string', //TODO fix it
                             'boolean' => 'boolean',
                             'id', 'integer', 'bigIncrements', 'bigInteger', 'double', 'float', 'decimal', 'increments', 'mediumIncrements', 'mediumInteger', 'smallIncrements', 'smallInteger', 'tinyIncrements', 'tinyInteger', 'unsignedBigInteger', 'unsignedDecimal',
                             'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger', 'unsignedTinyInteger' => 'integer',
@@ -679,7 +677,7 @@ class RepgeneratorService
                         $rule .= '|';
                     }
 
-                    if (!$column->nullable && !$isUpdateRequest) {
+                    if (!$column->nullable && $column->type !== 'boolean' && !$isUpdateRequest) {
                         $rule .= 'required';
                     } else {
                         $rule .= 'nullable';
@@ -949,7 +947,7 @@ class RepgeneratorService
      */
     private function resource(string $name, array $columns, array $foreigns, bool $isGeneratedFileDomain): void
     {
-        $routeName = strtolower(Str::plural($name));
+        $this->nameTransformerService->setModelName($name);
 
         $actions = ['index', 'store', 'update', 'show', 'destroy'];
 
@@ -966,7 +964,7 @@ class RepgeneratorService
                     '{{route}}', '{{routeName}}'
                 ],
                 [
-                    $route, $routeName
+                    $route, $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated()
                 ],
                 $templete
             );
@@ -1172,7 +1170,11 @@ class RepgeneratorService
 
             $value = '';
             if($column->type === 'enum') {
-                $value = "[".implode(', ', $column->values)."]";
+                $value = '[';
+                foreach (explode(',',$column->values) as $enum) {
+                    $value .= "'".$enum."',";
+                }
+                $value .= ']';
             }
 
             $columnFactories[] .= '"' . $column->name. '" => $this->faker->' . $fakerValue . '('.$value.'),';

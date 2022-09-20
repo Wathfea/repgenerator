@@ -24,17 +24,18 @@ class MigrationStub
     /**
      * Populates the place-holders in the migration stub.
      *
-     * @param string $stub File content.
-     * @param string $migrationMenuStub
-     * @param string $use
-     * @param string $upContent Content for migration `up`.
-     * @param string $downContent Content for migration `down`.
-     * @param string $name The name of the menu
-     * @param string $url The url at which the menu is found
-     * @param string $iconName
-     * @param int|null $menuGroupId
-     * @param string|null $newMenuGroupName
-     * @param string|null $newMenuGroupIcon
+     * @param  string  $stub  File content.
+     * @param  string  $migrationMenuStub
+     * @param  string  $use
+     * @param  string  $upContent  Content for migration `up`.
+     * @param  string  $downContent  Content for migration `down`.
+     * @param  string  $name  The name of the menu
+     * @param  string  $url  The url at which the menu is found
+     * @param  string  $iconName
+     * @param  bool  $isGenerateFrontend
+     * @param  int|null  $menuGroupId
+     * @param  string|null  $newMenuGroupName
+     * @param  string|null  $newMenuGroupIcon
      * @return string Migration content.
      */
     public function populateStub(
@@ -46,12 +47,14 @@ class MigrationStub
         string $name,
         string $url,
         string $iconName,
+        bool $isGenerateFrontend,
         int|null $menuGroupId = null,
         string|null $newMenuGroupName = null,
         string|null $newMenuGroupIcon = null
     ): string {
         $migrationMenuCode = '';
-        if ( !empty($menuGroupId) || ( !empty($newMenuGroupName) && !empty($newMenuGroupIcon) ) ) {
+
+        if ($isGenerateFrontend && !empty($menuGroupId) || ( !empty($newMenuGroupName) && !empty($newMenuGroupIcon) ) ) {
             $codeReplace =  [
                 '{{ url }}' => $url,
                 '{{ icon }}' => $iconName,
@@ -62,6 +65,7 @@ class MigrationStub
             ];
             $migrationMenuCode = str_replace(array_keys($codeReplace), $codeReplace, $migrationMenuStub);
         }
+
         $replace = [
             '{{ use }}' => $use,
             '{{ up }}' => $upContent,

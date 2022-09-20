@@ -407,11 +407,13 @@ class RepgeneratorFrontendService
             [
                 '{{modelNamePluralLowerCase}}',
                 '{{modelNameSingularUcfirst}}',
+                '{{modelNamePluralLowerCaseHyphenated}}',
                 '{{urlPrefix}}',
             ],
             [
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
                 $this->nameTransformerService->getModelNameSingularUcfirst(),
+                $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated(),
                 $crudUrlPrefix
             ],
             $this->repgeneratorStubService->getStub('Frontend/routeBlock')
