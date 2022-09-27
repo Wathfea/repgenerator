@@ -30,9 +30,9 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         }
         return false;
     }    /**
-     * @param  array  $uniqueIdentifiers
-     * @return RepositoryServiceInterface
-     */
+ * @param  array  $uniqueIdentifiers
+ * @return RepositoryServiceInterface
+ */
     public function setUniqueIdentifiers(array $uniqueIdentifiers): RepositoryServiceInterface
     {
         $this->uniqueIdentifiers = $uniqueIdentifiers;
@@ -47,10 +47,10 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
     {
         return false;
     }    /**
-     * @param  Model  $model
-     * @param  array  $data
-     * @return bool
-     */
+ * @param  Model  $model
+ * @param  array  $data
+ * @return bool
+ */
     public function saveOtherData(Model $model, array $data): bool
     {
         return false;
@@ -114,7 +114,6 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
     }
 
 
-
     /**
      * @param  int  $id
      * @param  array  $load
@@ -173,6 +172,102 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         return $qb->get();
     }
 
+
+    /**
+     * @param  string  $column
+     * @param  mixed  $value
+     * @param  array  $load
+     * @return array|\Illuminate\Database\Eloquent\Collection
+     */
+    public function getAllByColumn(string $column, mixed $value, array $load = []): array|\Illuminate\Database\Eloquent\Collection
+    {
+        return $this->getByColumn($column, $value, $load)->get();
+    }
+
+    /**
+     * @param  array  $columns
+     * @param  array  $load
+     * @return Builder|\Illuminate\Database\Eloquent\Collection
+     */
+    public function getAllByColumns(array $columns, array $load = []): \Illuminate\Database\Eloquent\Collection|Builder
+    {
+        return $this->getByColumns($columns, $load)->get();
+    }
+
+    /**
+     * @param  string  $column
+     * @param  mixed  $value
+     * @param  array  $load
+     * @return Model|null
+     */
+    public function getFirstByColumn(string $column, mixed $value, array $load = []): Model|null
+    {
+        return $this->getByColumn($column, $value, $load)->first();
+    }
+
+    /**
+     * @param  array  $columns
+     * @param  array  $load
+     * @return Model|null
+     */
+    public function getFirstByColumns(array $columns, array $load = []): Model|null
+    {
+        return $this->getByColumns($columns, $load)->first();
+    }
+
+    /**
+     * @param  string  $column
+     * @param  mixed  $value
+     * @param  array  $load
+     * @return Builder
+     */
+    private function getByColumn(string $column, mixed $value, array $load = []): Builder
+    {
+        return $this->findByColumn($this->getBaseBuilder($load), $column, $value);
+    }
+
+    /**
+     * @param  array  $columns
+     * @param  array  $load
+     * @return Builder
+     */
+    private function getByColumns(array $columns, array $load = []): Builder
+    {
+        $qb = $this->getBaseBuilder($load);
+        foreach ($columns as $column => $value) {
+            $qb = $this->findByColumn($qb, $column, $value);
+        }
+
+        return $qb;
+    }
+
+    /**
+     * @param  Builder  $qb
+     * @param  mixed  $column
+     * @param  mixed  $value
+     * @return Builder
+     */
+    private function findByColumn(Builder $qb, mixed $column, mixed $value): Builder
+    {
+        if (is_array($value)) {
+            return $qb->whereHas($column, function (Builder $relationBuilder) use ($value) {
+                $relationBuilder->where(function (Builder $qb) use ($value) {
+                    foreach ($value as $column => $v) {
+                        if (!is_array($column) ) {
+                            $qb->where($column, $v);
+                        } else {
+                            $this->findByColumn($qb, $column, $v);
+                        }
+                    }
+                });
+            });
+        }  else if(str_contains($value, '|')) {
+            $whereValues = explode('|', $value);
+            return $qb->whereIn($column, $whereValues);
+        } else {
+            return $qb->where($column, $value);
+        }
+    }
 
     /**
      * @param  array  $exceptIds

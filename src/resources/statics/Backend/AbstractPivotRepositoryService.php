@@ -16,21 +16,21 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
 {
     /**
      * AbstractEloquentRepository constructor.
-     * @param  string  $pivot
-     * @param  string  $parent
+     * @param  string  $pivotModel
+     * @param  string  $parentModel
      * @param  string  $parentIdColumName
      * @param  string  $relationIdColumnName
-     * @param  string  $relation
+     * @param  string  $relatedTableName
      */
     #[Pure]
     public function __construct(
-        private string $pivot,
-        private string $parent,
+        private string $pivotModel,
+        private string $parentModel,
         private string $parentIdColumName,
         private string $relationIdColumnName,
-        private string $relation
+        private string $relatedTableName
     ) {
-        parent::__construct($pivot);
+        parent::__construct($pivotModel);
     }
 
     /**
@@ -53,8 +53,8 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
     private function getRelation(int $parentModelId): BelongsToMany
     {
         /** @var Model $model */
-        $model = $this->parent->newQuery()->find($parentModelId);
-        $relation = Str::camel($this->relation);
+        $model = app($this->parentModel)->newQuery()->find($parentModelId);
+        $relation = Str::camel($this->relatedTableName);
 
         return $model->$relation();
     }
@@ -75,7 +75,7 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
      */
     public function get(int $parentModelId): Collection
     {
-        return $this->pivot->newQuery()->where($this->parentIdColumName, $parentModelId)->get();
+        return app($this->pivotModel)->newQuery()->where($this->parentIdColumName, $parentModelId)->get();
     }
 
     /**
@@ -85,7 +85,7 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
      */
     public function getSpecific(int $parentModelId, int $relationModelId): Pivot|null
     {
-        return $this->pivot->newQuery()->where($this->parentIdColumName, $parentModelId)
+        return app($this->pivotModel)->newQuery()->where($this->parentIdColumName, $parentModelId)
             ->where($this->relationIdColumnName, $relationModelId)
             ->first();
     }

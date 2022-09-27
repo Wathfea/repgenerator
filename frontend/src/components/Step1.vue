@@ -85,7 +85,7 @@ const chosenOutputFramework = ref(props.setChosenOutputFramework);
         <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
             <div class="sm:col-span-12">
                 <label class="block text-sm font-medium text-gray-700" for="model-name">
-                    Model Name (Singular - Ex. Dog )
+                    Model Name (Singular with spaces - Ex. Booked Appointment, this will be transformed by the generator to BookedAppointment)
                 </label>
                 <p v-if="!isValidTable" class="mt-2 text-sm text-red-600" id="table-error">This table name is already exists or the name is not singular</p>
                 <div class="mt-1">

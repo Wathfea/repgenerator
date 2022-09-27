@@ -3,6 +3,7 @@
 namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
 use Pentacom\Repgenerator\Domain\Pattern\Helpers\CharacterCounterStore;
@@ -80,6 +81,13 @@ class RepgeneratorService
         bool $isGenerateFrontend = true,
         bool $isGeneratedFileDomain = false,
     ): void {
+        //Generate frontend version controll file if not exists
+        if (!file_exists($path = base_path('.repgenerator'))) {
+            $versionFile = include_once (__DIR__.'/../../../../config/frontend.php');
+
+            file_put_contents($path, $versionFile['frontend_version']);
+        }
+
         //Setup names
         $this->nameTransformerService->setModelName($requestData['name']);
         $this->modelName = $this->nameTransformerService->getModelName();

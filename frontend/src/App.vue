@@ -5,6 +5,7 @@ import RebuildFrontend from "./components/RebuildFrontend.vue";
 import {ref} from "vue";
 import imgUrl from './assets/banner.png'
 import GenerateGradient from "@/components/GenerateGradient.vue";
+import axios from "axios";
 
 const develop = ref(false);
 const choosing = ref(true);
@@ -27,10 +28,28 @@ const chooseGenerateGradient = () => {
     usingGenerateGradient.value = true;
     choosing.value = false;
 }
+
+const upgradeFrontend = ref(false);
+
+const checkFrontendVersion = () => {
+    axios.get(import.meta.env.VITE_API_URL + '/repgenerator/checkFrontendVersion').then((response) => {
+        upgradeFrontend.value = response.data;
+    })
+}
+
+checkFrontendVersion()
 </script>
 <template>
     <div>
         <div v-if="choosing">
+            <header class="p-5 bg-[#f92672] text-white text-center" v-if="upgradeFrontend">
+                <h1 class="navbar-brand">
+                    New version available, please run:
+                    <code class="text-gray-700">php artisan pattern:init BASE_URL</code>
+                    for update
+                </h1>
+            </header>
+
             <header class="p-5 mb-5 bg-[#272822] text-white text-left">
                 <h1 class="navbar-brand">
                     <span class="font-bold text-[#F92672]">class</span>

@@ -3,12 +3,15 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
+- RouterLink a dashboardra
+- Default gate és policy
+- Menu kezelés újragondolása (bitmaszkolás)
+- Filterben a relation method név nem jó
+- Pivot migráció táblanév nem többesszámos
 - Pivo táblába begenerálni a mezőket + relációkat
-- Frontend index és a composable eltérő aposztrófokkal van, egységesítsük
 - Enum generálás
 - Table.vue-ba be kell kötni az url prefixet az új és edit gombra
 - Relation type selector
-- Default gate és policy
 - public vagy nem public file választó
 - Relation párok beírása
 - CSV import
@@ -17,13 +20,17 @@ All notable changes to `repgenerator` will be documented in this file
 - Mezősorrend változtatása drag & drop-al
 
 ## [Unreleased]
+- Verzió követés, ha módosul a generátor frontend akkor újrahúzni automatikusan
+- getFirstByColumn, getAllByColumn, getFirstByColumns, getAllByColumns
 - Generált factoryban az enum nincs apasztófok között
 - Regenerate ugorja át a mappákat amiben nincs config.php
-- - Api controllerben hiányzik vessző a relation generáláskor
+- Api controllerben hiányzik vessző a relation generáláskor
 - Boolean mezőre ne tegyen requiredet
 - Ha valaminek nincs FE generálva ne tegye be a menus táblába
 - Api route generálásnál kötőjel használata a resourceban
 - routes.js-ben kötőjel használata
+
+
 ## [1.5.5] - 2022-09-15
 ## Added
 - CRUD Url prefix

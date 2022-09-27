@@ -7,6 +7,7 @@ use Doctrine\DBAL\Exception;
 use FilesystemIterator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -203,6 +204,7 @@ class RepgeneratorController extends Controller
                 'name' => self::CRUD_MENU_TABLE_NAME,
                 'chosen_output_framework' => $request->chosen_output_framework,
                 'icon' => $request->icon,
+                'crudUrlPrefix' => '/',
             ];
 
             $this->repgeneratorService->generate(
@@ -253,6 +255,7 @@ class RepgeneratorController extends Controller
                 'name' => self::CRUD_MENU_GROUP_TABLE_NAME,
                 'chosen_output_framework' => $request->chosen_output_framework,
                 'icon' => $request->icon,
+                'crudUrlPrefix' => '/',
             ];
 
             $foreigns[] = [
@@ -544,5 +547,25 @@ class RepgeneratorController extends Controller
     {
         $colors = $this->gradientService->generateGradients($request->get('hexFrom'), $request->get('hexTo'), 8);
         return response()->json($colors);
+    }
+
+    public function checkFrontendVersion()
+    {
+        $upgradeFrontend = false;
+
+        if (file_exists($path = base_path('.repgenerator'))) {
+            $localVersion = (float) file_get_contents($path);
+
+            $versionFile = include_once (__DIR__.'/../../../config/frontend.php');
+            $frontendVersion = (float) $versionFile['frontend_version'];
+
+
+            if($localVersion < $frontendVersion) {
+                $upgradeFrontend = true;
+            }
+        }
+
+        return response()->json($upgradeFrontend);
+
     }
 }
