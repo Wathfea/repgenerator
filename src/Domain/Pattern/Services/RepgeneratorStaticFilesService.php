@@ -62,6 +62,7 @@ class RepgeneratorStaticFilesService
             "components/FileUpload.vue",
             "composables/model.js",
             "composables/useNotifications.ts",
+            "composables/useUtils.ts",
             "router/router.js"
         ];
 

@@ -33,7 +33,7 @@ class RepgeneratorFrontendService
         $columnsConfig = [];
         /** @var RepgeneratorColumnAdapter $column */
         foreach ( $columns as $column ) {
-            if ( $column->name == 'id' ) {
+            if ( in_array($column->name, ['id','created_at','updated_at']) ) {
                 continue;
             }
             $columnProperties = [

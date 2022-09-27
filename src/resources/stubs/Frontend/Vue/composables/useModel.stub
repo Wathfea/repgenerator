@@ -1,8 +1,30 @@
 import useModel from "../../../Abstraction/composables/model.js";
 
 export const use{{ modelNamePluralUcfirst }}  = () => {
-    const getColumns = () => {
+    const getRoute = () => {
+        return {{ modelNamePluralLowerCaseHyphenated }}
+    }
+    const getEditableColumns = () => {
         return {{ columns }}
+    }
+    const getDataTableColumns = () => {
+        const { getFilteredObject } = useUtils();
+        return  {
+            'id': {
+                name: 'ID',
+                width: '120px',
+                align: 'right',
+                isSorting: true,
+            },
+            ...getFilteredObject(getEditableColumns(), []),
+            'created_at': {
+                name: 'Created at',
+                isDate: true
+            }
+        }
+    }
+    const getColumns = () => {
+        return getEditableColumns();
     }
     const { getModels: get{{ modelNamePluralUcfirst }}, getModel: get{{ modelNameSingularUcfirst }}, storeModel: store{{ modelNameSingularUcfirst }}, updateModel: update{{ modelNameSingularUcfirst }} } = useModel('{{ modelNamePluralLowerCaseHyphenated }}', false);
     return {
