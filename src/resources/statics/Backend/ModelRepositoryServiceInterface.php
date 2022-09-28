@@ -119,34 +119,4 @@ interface ModelRepositoryServiceInterface extends RepositoryServiceInterface
      * @return bool
      */
     public function update(int $id, array $data): bool;
-
-    /**
-     * @param  array  $columns
-     * @param  array  $load
-     * @return Model|null
-     */
-    public function getFirstByColumns(array $columns, array $load = []): Model|null;
-
-    /**
-     * @param  string  $column
-     * @param  mixed  $value
-     * @param  array  $load
-     * @return Model|null
-     */
-    public function getFirstByColumn(string $column, mixed $value, array $load = []): Model|null;
-
-    /**
-     * @param  array  $columns
-     * @param  array  $load
-     * @return Builder|Collection
-     */
-    public function getAllByColumns(array $columns, array $load = []): Collection|Builder;
-
-    /**
-     * @param  string  $column
-     * @param  mixed  $value
-     * @param  array  $load
-     * @return array|Collection
-     */
-    public function getAllByColumn(string $column, mixed $value, array $load = []): array|Collection;
 }

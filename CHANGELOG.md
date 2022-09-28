@@ -3,6 +3,7 @@
 All notable changes to `repgenerator` will be documented in this file
 
 ## [TODO]
+- Nuxt frontend esetén az Editben a router nem jó helyről van származtatva
 - RouterLink a dashboardra
 - Default gate és policy
 - Menu kezelés újragondolása (bitmaszkolás)
