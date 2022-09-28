@@ -3,6 +3,9 @@
 namespace App\Abstraction\Repository;
 
 
+use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Builder;
+
 /**
  * Interface RepositoryInterface.
  */
