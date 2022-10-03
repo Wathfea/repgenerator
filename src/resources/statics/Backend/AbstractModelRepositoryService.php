@@ -59,6 +59,16 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         return false;
     }
 
+    /**
+     * @param  Model  $model
+     * @param  array  $data
+     * @return bool
+     */
+    public function beforeSaving(Model $model, array $data): bool
+    {
+        return false;
+    }
+
 
     /**
      * @return string
@@ -91,6 +101,7 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         }
         $model = $model ?: $this->getModel();
         $model->fill($data);
+        $this->beforeSaving($model, $data);
         $model->save();
         if ($model->exists) {
             $this->saveOtherData($model, $data);
@@ -109,6 +120,7 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
     {
         $model = $this->getById($id);
         if ($model) {
+            $this->beforeSaving($model, $data);
             $otherDataUpdated = $this->saveOtherData($model, $data);
             return $model->update($data) || $otherDataUpdated;
         }
