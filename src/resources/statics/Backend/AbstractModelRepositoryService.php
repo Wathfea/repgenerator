@@ -3,6 +3,7 @@
 namespace App\Abstraction\Repository;
 
 use App\Abstraction\Filter\BaseQueryFilter;
+use Faker\Provider\Base;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -139,6 +140,7 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
     }
 
 
+
     /**
      * @param  array  $load
      * @param  int|null  $perPage
@@ -155,6 +157,16 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
 
     /**
      * @param BaseQueryFilter $filter
+     * @param array $load
+     * @return mixed
+     */
+    public function getFilterQB(BaseQueryFilter $filter, array $load = []) {
+        $qb = $this->getBaseBuilder($load);
+        return $qb->filter($filter);
+    }
+
+    /**
+     * @param BaseQueryFilter $filter
      * @param  array  $load
      * @param  int|null  $perPage
      * @return Collection|LengthAwarePaginator
@@ -164,8 +176,7 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         array $load = [],
         int $perPage = null
     ): Collection|LengthAwarePaginator {
-        $qb = $this->getBaseBuilder($load);
-        $qb = $qb->filter($filter);
+        $qb = $this->getFilterQB($filter, $load);
         if ($perPage) {
             return $qb->paginate($perPage);
         }
