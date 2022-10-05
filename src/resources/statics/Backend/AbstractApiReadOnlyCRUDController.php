@@ -31,7 +31,9 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController 
         $resource = $this->getResourceClass();
         $filter = $this->getFilter($request);
         $perPage = $this->getPerPage($request);
-        $relationships = array_intersect($relationships, $request->get('load', []));
+        if ( $request->has('load') && !empty($request->get('load')) ) {
+            $relationships = array_intersect($relationships, $request->get('load'));
+        }
         return $resource::collection($this->getService()->getRepositoryService()->getByFilter($filter, $relationships,
             $perPage));
     }
