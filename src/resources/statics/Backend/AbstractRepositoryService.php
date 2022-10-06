@@ -29,13 +29,18 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
 
     /**
      * @param  array  $load
-     * @param  string  $orderBy
-     * @param  string  $orderDir
+     * @param  string|null  $orderBy
+     * @param  string|null  $orderDir
      * @return Builder
      */
-    protected function getBaseBuilder(array $load = [], string $orderBy = 'id', string $orderDir = 'asc'): Builder
+    protected function getBaseBuilder(array $load = [], string $orderBy = null, string $orderDir = null): Builder
     {
-        $qb = $this->getModel()::query()->orderBy($orderBy, $orderDir);
+        $qb = $this->getModel()::query();
+
+        if($orderBy && $orderDir) {
+            $qb = $this->getModel()::query()->orderBy($orderBy, $orderDir);
+        }
+
         if ($load) {
             $qb->with($load);
         }

@@ -233,7 +233,7 @@ class RepgeneratorNameTransformerService
      */
     public function setRelationName(string $relationName): void
     {
-        $this->relationName = $this->removeSpecialChars(Str::lcfirst(Str::studly($relationName)));
+        $this->relationName = $this->removeSpecialChars(Str::singular(Str::lcfirst(Str::studly($relationName))));
         $this->setRelationMethodNamePlural();
         $this->setRelationMethodNameSingular();
     }

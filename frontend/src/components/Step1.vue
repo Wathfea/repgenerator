@@ -2,7 +2,16 @@
 import {defineEmits, ref, computed} from 'vue'
 import axios from "axios";
 
-const emit = defineEmits(['nameChanged', 'iconChanged', 'urlPrefixChanged', 'isValidTable', 'newGroupNameChanged', 'newGroupIconChanged', 'chosenMenuGroupChanged', 'chosenOutputFramework'])
+const emit = defineEmits([
+    'nameChanged',
+    'iconChanged',
+    'urlPrefixChanged',
+    'isValidTable',
+    'newGroupNameChanged',
+    'newGroupIconChanged',
+    'chosenMenuGroupChanged',
+    'chosenOutputFramework'
+])
 
 const props = defineProps({
     modelName: {

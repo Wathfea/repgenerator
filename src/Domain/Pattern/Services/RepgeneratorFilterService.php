@@ -32,14 +32,14 @@ class RepgeneratorFilterService
         /** @var RepgeneratorColumnAdapter $column */
         foreach ($columns as $column) {
             foreach ($foreigns as $foreign) {
-                if ($column->name == $foreign['column']) {
+                if ($column->name == $foreign['parentTableColumn']) {
                     $supportedForeignColumns = [
                         'id' => 'int'
                     ];
                     foreach ($supportedForeignColumns as $supportedForeignColumnName => $supportedForeignColumnType) {
                         $stub = $this->repgeneratorStubService->getFilterStub('Relationship');
                         $replacements = [
-                            '{{foreign}}' => Str::singular($foreign['column']),
+                            '{{foreign}}' => Str::singular($foreign['parentTableColumn']),
                             '{{foreignColumnName}}' => ucfirst($supportedForeignColumnName),
                             '{{foreignColumnType}}' => $supportedForeignColumnType
                         ];

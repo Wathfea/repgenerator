@@ -7,7 +7,6 @@ use Doctrine\DBAL\Exception;
 use FilesystemIterator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -138,10 +137,16 @@ class RepgeneratorController extends Controller
             }
 
             if ($data['foreign']) {
-                $foreigns[] = [
-                    'column' => $data['name'],
-                    'reference' => $data['reference'],
-                    'on' => $data['foreign'],
+                $foreigns[]  = [
+                    'parentModel' => $requestData['name'],
+                    'parentRelationType' => $data['foreignRelationType'],
+                    'parentRelationName' => '', //Later generated from reference field ex user
+                    'targetModel' => '', //Later generated from reference field
+                    'targetRelationType' => $data['reference']['relationType'],
+                    'targetRelationName' => '', //Later generated from parentModel field ex cats
+                    'parentTableColumn' => $data['name'],
+                    'referencedTable' => $data['reference']['name'],
+                    'referencedTableColumn' => $data['foreign'],
                     'onUpdate' => $data['cascade'] ? 'cascade' : null,
                     'onDelete' => $data['cascade'] ? 'cascade' : null,
                 ];
@@ -175,7 +180,10 @@ class RepgeneratorController extends Controller
 
             foreach ($migrationColumns as $name => $type) {
                 if($name == 'crud_menu_group_id') {
-                    $reference = ['name' => 'crud_menu_group'];
+                    $reference = [
+                        'name' => 'crud_menu_group',
+                        'relationType' => 'BelongsTo'
+                    ];
                     $columns[] = new RepgeneratorColumnAdapter($name, $type, false, false, false, null, null, null, null, false, null, null, null, null, $reference);
                 } else {
                     $columns[] = new RepgeneratorColumnAdapter($name, $type);
@@ -183,21 +191,22 @@ class RepgeneratorController extends Controller
 
             }
 
-            $foreigns[] = [
-                'relation_type' => 'BelongsTo',
-                'related_model' => 'CrudMenuGroup',
-                'relation_name' => '',
-                'column' => 'crud_menu_group_id',
-                'reference' => [
-                    'name' => 'crud_menu_groups'
-                ],
-                'on' => 'id',
+            $foreigns[]  = [
+                'parentModel' => 'Crud Menu',
+                'parentRelationType' => 'BelongsTo',
+                'parentRelationName' => '', //Later generated from reference field ex user
+                'targetModel' => '', //Later generated from reference field
+                'targetRelationType' => 'HasMany',
+                'targetRelationName' => '', //Later generated from parentModel field ex cats
+                'parentTableColumn' => 'id',
+                'referencedTable' => 'crud_menu_groups',
+                'referencedTableColumn' => 'crud_menu_group_id',
                 'onUpdate' => null,
-                'onDelete' => null
+                'onDelete' => null,
             ];
 
             $this->migrationGeneratorService->setDate(Carbon::now());
-            $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], $foreigns,
+            $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], [],
                 self::CRUD_MENU_TABLE_NAME, 'menu', false, false, false);
 
             $data = [
@@ -258,23 +267,11 @@ class RepgeneratorController extends Controller
                 'crudUrlPrefix' => '/',
             ];
 
-            $foreigns[] = [
-                'relation_type' => 'HasMany',
-                'related_model' => 'CrudMenu',
-                'relation_name' => 'crudMenus',
-                'column' => 'crud_menu_group_id',
-                'reference' => [
-                    'name' => 'crud_menus'
-                ],
-                'on' => 'id',
-                'onUpdate' => null,
-                'onDelete' => null
-            ];
 
             $this->repgeneratorService->generate(
                 $data,
                 $columns,
-                $foreigns,
+                [],
                 function ($msg) use (&$messages) {
                     $messages[] = null;
                 },
@@ -333,23 +330,25 @@ class RepgeneratorController extends Controller
             );
         }
 
-
+        //TODO Ide is átvezetni az új foreign formát
         if (!empty($fileUploadFieldsData)) {
             $originalTable = $table->getName();
             $originalTableSingular = Str::singular($originalTable);
 
-            $foreigns[] = [
-                'relation_type' => 'HasMany',
-                'related_model' => $requestData['name'].'File',
-                'relation_name' => 'files',
-                'column' => $originalTableSingular.'_id',
-                'reference' => [
-                    'name' => $originalTable
-                ],
-                'on' => 'id',
+            $foreigns[]  = [
+                'parentModel' => $requestData['name'],
+                'parentRelationType' => 'HasMany',
+                'parentRelationName' => 'files', //Later generated from reference field ex user
+                'targetModel' => $requestData['name'].'File', //Later generated from reference field
+                'targetRelationType' => 'BelongsTo',
+                'targetRelationName' => '', //Later generated from parentModel field ex cats
+                'parentTableColumn' => $originalTableSingular.'_id',
+                'referencedTable' => $originalTable,
+                'referencedTableColumn' => 'id',
                 'onUpdate' => null,
-                'onDelete' => null
+                'onDelete' => null,
             ];
+
         }
 
         $this->repgeneratorService->generate(
@@ -465,6 +464,7 @@ class RepgeneratorController extends Controller
             }
             $tables[$index] = [
                 'name' => $tableName,
+                'relationType' => null,
                 'columns' => $columnData,
             ];
         }

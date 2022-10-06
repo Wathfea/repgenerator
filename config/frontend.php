@@ -5,5 +5,5 @@
  */
 return [
     // FE version
-    'frontend_version' => '1.1',
+    'frontend_version' => '1.2',
 ];

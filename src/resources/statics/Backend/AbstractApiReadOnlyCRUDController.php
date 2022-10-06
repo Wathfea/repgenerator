@@ -73,6 +73,10 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController 
      */
     protected function getPerPage(Request $request): mixed
     {
+        if(!$request->has('per_page')) {
+            return null;
+        }
+
         $perPage = $request->get('per_page');
         if ($perPage > 0) {
             return $perPage;

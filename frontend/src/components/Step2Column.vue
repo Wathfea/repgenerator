@@ -1,5 +1,5 @@
 <script setup>
-import {defineEmits} from 'vue'
+import {defineEmits, ref} from 'vue'
 
 const emit = defineEmits(['removeColumn', 'refreshTables'])
 
@@ -118,6 +118,50 @@ const onRefreshTables = () => {
     emit('refreshTables');
 }
 
+const hasOne = ['BelongsTo'];
+const hasMany = ['BelongsTo'];
+const belongsTo = ['HasOne', 'HasMany'];
+const belongsToMany = ['BelongsToMany'];
+const relationTypeTable1 = ref('')
+const relationTypeTable2 = ref('')
+const relationTypeOptions = ref([])
+const showRelationTypeSelector = ref(false)
+
+const onRelation1TypeChosen = () => {
+    props.data.foreignRelationType = relationTypeTable1.value;
+
+    switch (relationTypeTable1.value) {
+        case 'HasOne':
+            relationTypeOptions.value.length = 0;
+            for(let i=0; i < hasOne.length; i++) {
+                relationTypeOptions.value.push(hasOne[i]);
+            }
+            break;
+        case 'HasMany':
+            relationTypeOptions.value.length = 0;
+            for(let i=0; i < hasMany.length; i++) {
+                relationTypeOptions.value.push(hasMany[i]);
+            }
+            break;
+        case 'BelongsTo':
+            relationTypeOptions.value.length = 0;
+            for(let i=0; i < belongsTo.length; i++) {
+                relationTypeOptions.value.push(belongsTo[i]);
+            }
+            break;
+        case 'BelongsToMany':
+            relationTypeOptions.value.length = 0;
+            for(let i=0; i < belongsToMany.length; i++) {
+                relationTypeOptions.value.push(belongsToMany[i]);
+            }
+            break;
+    }
+}
+
+const onRelation2TypeChosen = () => {
+    props.data.reference.relationType = relationTypeTable2.value;
+}
+
 const onForeignChosen = () => {
     let setType = null;
     let foreignType = props.data.reference.columns[props.data.foreign];
@@ -141,6 +185,7 @@ const onForeignChosen = () => {
             break;
     }
     props.data.type = setType;
+    showRelationTypeSelector.value = true;
 }
 
 const onReferenceChanged = () => {
@@ -317,6 +362,28 @@ const onReferenceChanged = () => {
                         <path d="M12 2h8v2h-8z" fill="currentColor"></path>
                     </svg>
                 </button>
+            </div>
+        </div>
+        <div class="mt-3 grid grid-cols-12 gap-y-6 gap-x-4 sm:grid-cols-12" v-if="showRelationTypeSelector">
+            <div class="sm:col-span-12">
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-4">
+                        <label for="test">{{ modelName }}</label>
+                        <select v-model="relationTypeTable1"  @change="onRelation1TypeChosen" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            <option></option>
+                            <option value="HasOne">hasOne</option>
+                            <option value="HasMany">hasMany</option>
+                            <option value="BelongsTo">belongsTo</option>
+                            <option value="BelongsToMany">belongsToMany</option>
+                        </select>
+                    </div>
+                    <div class="col-span-4" v-if="relationTypeTable1">
+                        <label for="test" v-if="data.reference.name">{{ data.reference.name[0].toUpperCase() + data.reference.name.slice(1) }}</label>
+                        <select v-model="relationTypeTable2" @change="onRelation2TypeChosen" class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            <option v-for="option in relationTypeOptions">{{option}}</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="mt-3 grid grid-cols-12 gap-y-6 gap-x-4 sm:grid-cols-12 mb-3">

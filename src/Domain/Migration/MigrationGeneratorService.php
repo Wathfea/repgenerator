@@ -34,18 +34,19 @@ class MigrationGeneratorService
     }
 
     /**
-     * @param Table $table
-     * @param array $columns
-     * @param array $indexes
-     * @param array $foreigns
-     * @param string $modelName
-     * @param string $iconName
-     * @param bool $iconName
-     * @param bool $softDelete
-     * @param bool $timestamps
-     * @param int|null $menuGroupId
-     * @param string|null $newMenuGroupName
-     * @param string|null $newMenuGroupIcon
+     * @param  Table  $table
+     * @param  array  $columns
+     * @param  array  $indexes
+     * @param  array  $foreigns
+     * @param  string  $modelName
+     * @param  string  $iconName
+     * @param  bool  $isGenerateFrontend
+     * @param  bool  $softDelete
+     * @param  bool  $timestamps
+     * @param  int|null  $menuGroupId
+     * @param  string|null  $newMenuGroupName
+     * @param  string|null  $newMenuGroupIcon
+     * @param  string|null  $crudUrlPrefix
      * @return string
      */
     public function generateMigrationFiles(

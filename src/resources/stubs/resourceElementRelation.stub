@@ -1,1 +1,1 @@
-'{{referenceSingular}}' => {{referenceName}}Resource::{{resourceMethod}}($this->whenLoaded('{{referenceSingular}}')),
+'{{relationName}}' => {{relationNameUcFirstSingular}}Resource::{{resourceMethod}}($this->whenLoaded('{{relationName}}')),

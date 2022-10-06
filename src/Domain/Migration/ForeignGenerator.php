@@ -16,11 +16,11 @@ class ForeignGenerator
      */
     public function generate(array $foreign): Method
     {
-        $method = new Method('foreign', $foreign['column']);
+        $method = new Method('foreign', $foreign['parentTableColumn']);
 
-        if ($foreign['reference'] !== null && $foreign['on'] !== null) {
-            $method->chain('references', $foreign['on']);
-            $method->chain('on', $foreign['reference']['name']);
+        if ($foreign['referencedTable'] !== null && $foreign['referencedTableColumn'] !== null) {
+            $method->chain('references', $foreign['referencedTableColumn']);
+            $method->chain('on', $foreign['referencedTable']);
         }
 
         if ($foreign['onUpdate'] !== null) {
@@ -40,7 +40,7 @@ class ForeignGenerator
      */
     public function generateDrop(array $foreign, Table $table): Method
     {
-        $foreignName = $table->getName().'_'.$foreign['column'].'_foreign';
+        $foreignName = $table->getName().'_'.$foreign['parentTableColumn'].'_foreign';
 
         return new Method('dropForeign', $foreignName);
     }

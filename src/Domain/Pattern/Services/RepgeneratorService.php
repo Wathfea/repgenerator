@@ -3,7 +3,7 @@
 namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
 use Pentacom\Repgenerator\Domain\Pattern\Helpers\CharacterCounterStore;
@@ -96,19 +96,26 @@ class RepgeneratorService
 
         if (!empty($foreigns)) {
             $foreigns = collect($foreigns)->map(function ($foreign) {
-                $this->nameTransformerService->setRelationName($foreign['reference']['name']);
-                $this->nameTransformerService->setModelName($foreign['reference']['name']);
+                //For Parent
+                $this->nameTransformerService->setRelationName($foreign['referencedTable']);
+                $this->nameTransformerService->setModelName($foreign['parentModel']);
 
-                if (!array_key_exists('relation_type', $foreign)) {
-                    $foreign['relation_type'] = 'BelongsTo';
-                    $foreign['related_model'] = $this->nameTransformerService->getModelName();
-                    $foreign['relation_name'] = $this->nameTransformerService->getRelationMethodNameSingular();
+                $foreign['parentModel'] = $this->nameTransformerService->getModelName();
+                if($foreign['parentRelationName'] !== 'files') {
+                    if($foreign['parentRelationType'] == 'HasMany' || $foreign['parentRelationType'] == 'BelongsToMany') {
+                        $foreign['parentRelationName'] = $this->nameTransformerService->getRelationMethodNamePlural();
+                    } else {
+                        $foreign['parentRelationName'] = $this->nameTransformerService->getRelationMethodNameSingular();
+                    }
                 }
 
-                if($foreign['relation_name'] === '') {
-                    $foreign['relation_name'] = $this->nameTransformerService->getRelationMethodNameSingular();
-
+                $this->nameTransformerService->setModelName($foreign['referencedTable']);
+                $this->nameTransformerService->setRelationName($foreign['parentModel']);
+                if($foreign['parentRelationName'] !== 'files') {
+                    $foreign['targetModel'] = $this->nameTransformerService->getModelName();
                 }
+                $foreign['targetRelationName'] = $this->nameTransformerService->getRelationMethodNameSingular();
+
 
                 return $foreign;
             })->toArray();
@@ -130,11 +137,16 @@ class RepgeneratorService
         $this->config($this->modelName, $requestData);
         $callback('Config is ready!');
 
-        if ($isGeneratePivot) {
-            $this->modelPivot($this->modelName);
+        if($this->modelName === 'CrudMenu' || $this->modelName === 'CrudMenuGroup') {
+            $this->copyMenuModels($this->modelName);
         } else {
-            $this->model($this->modelName, $columns, $foreigns, $isSoftDelete, $isTimestamps);
+            if ($isGeneratePivot) {
+                $this->modelPivot($this->modelName);
+            } else {
+                $this->model($this->modelName, $columns, $foreigns, $isSoftDelete, $isTimestamps);
+            }
         }
+
         $callback('Model is ready!');
 
         $this->apiController('v1', $this->modelName, $foreigns, $isReadOnly, $isGeneratedFileDomain, $fileUploadFieldsData);
@@ -155,6 +167,7 @@ class RepgeneratorService
 
         $this->registerProvider($this->modelName);
 
+        //TODO foreign refaktor, beírni a párokba is + egyes szám többes szám figyelni
         $this->resource($this->modelName, $columns, $foreigns, $isGeneratedFileDomain);
         $callback('Resource is ready!');
 
@@ -198,6 +211,94 @@ class RepgeneratorService
         }
 
         Artisan::call('optimize');
+    }
+
+
+    /**
+     * @param  string  $modelName
+     * @param  array  $uses
+     * @return void
+     */
+    private function insertUsesToTargetResource(string $modelName, array $uses): void
+    {
+        list($path, $eol) = $this->getResourceInfos($modelName);
+
+        foreach ($uses as $use) {
+            $targetResourceFile = file_get_contents($path);
+
+            file_put_contents(
+                $path,
+                str_replace(
+                    "namespace App\Domain\\$modelName\Resources;".$eol,
+                    "namespace App\Domain\\$modelName\Resources;".$eol.$use.$eol,
+                    $targetResourceFile
+                )
+            );
+        }
+    }
+
+
+    /**
+     * @param  string  $modelName
+     * @param  array  $relations
+     * @return void
+     */
+    private function insertRelationsToTargetResource(string $modelName, array $relations): void
+    {
+        list($path, $eol) = $this->getResourceInfos($modelName);
+
+        foreach ($relations as $relation) {
+            $targetResourceFile = file_get_contents($path);
+
+            $closeSquareBracePos = strpos($targetResourceFile, ']');
+
+            $updatedResourceFile = substr_replace($targetResourceFile, $eol.$relation.$eol, $closeSquareBracePos+2, 0);
+
+            file_put_contents($path, $updatedResourceFile);
+        }
+    }
+
+    /**
+     * @param  string  $modelName
+     * @param  array  $uses
+     * @return void
+     */
+    private function insertUsesToTargetModel(string $modelName, array $uses): void
+    {
+        list($path, $eol) = $this->getModelInfos($modelName);
+
+        foreach ($uses as $use) {
+            $targetModelFile = file_get_contents($path);
+
+            file_put_contents(
+                $path,
+                str_replace(
+                    "namespace App\Domain\\$modelName\Models;".$eol,
+                    "namespace App\Domain\\$modelName\Models;".$eol.$use.$eol,
+                    $targetModelFile
+                )
+            );
+        }
+    }
+
+    /**
+     * @param  string  $modelName
+     * @param  array  $relations
+     * @return void
+     */
+    private function insertRelationsToTargetModel(string $modelName, array $relations): void
+    {
+        list($path, $eol) = $this->getModelInfos($modelName);
+
+        foreach ($relations as $relation) {
+            $targetModelFile = file_get_contents($path);
+
+            $closeBracePos = strpos($targetModelFile, '}');
+
+            $updatedModelFile = substr_replace($targetModelFile, $eol.$eol.$relation.$eol, $closeBracePos+1, 0);
+
+            file_put_contents($path, $updatedModelFile);
+        }
     }
 
     /**
@@ -281,6 +382,17 @@ class RepgeneratorService
         }
 
         $callback('Static files generated!');
+    }
+
+    private function copyMenuModels(string $name) {
+        if (!file_exists($path = app_path('Domain'.DIRECTORY_SEPARATOR."$name".DIRECTORY_SEPARATOR.'Models'.DIRECTORY_SEPARATOR))) {
+            mkdir($path, 0777, true);
+        }
+
+        $file = $this->repgeneratorStaticFilesService->getStatic($name);
+
+        file_put_contents($path = app_path('Domain'.DIRECTORY_SEPARATOR."$name".DIRECTORY_SEPARATOR.'Models'.DIRECTORY_SEPARATOR."$name.php"),
+            $file);
     }
 
     /**
@@ -386,16 +498,21 @@ class RepgeneratorService
      */
     private function model(string $name, array $columns, array $foreigns, bool $isSoftDelete, bool $isTimestamps): void
     {
-        $use = [];
-        $relationTemplate = [];
+        $parentUse = [];
+        $parentRelationTemplate = [];
+
+        $targetUse = [];
+        $targetRelationTemplate = [];
+
         $hashedTemplate = '';
         $cryptedTemplate = '';
 
         if (!empty($foreigns)) {
+            //For Parent
             foreach ($foreigns as $foreign) {
-                $relationType = $foreign['relation_type'];
-                $relatedModel = $foreign['related_model'];
-                $relationName = $foreign['relation_name'];
+                $relationType = $foreign['parentRelationType'];
+                $relatedModel = $foreign['targetModel'];
+                $relationName = $foreign['parentRelationName'];
 
                 $modelUse = 'use App\Domain\/'.$relatedModel.'\Models\/'.$relatedModel.';';
                 $modelUse = str_replace('/', '', $modelUse);
@@ -403,14 +520,14 @@ class RepgeneratorService
                 $relationUse = 'use Illuminate\Database\Eloquent\Relations\/'.$relationType.';';
                 $relationUse = str_replace('/', '', $relationUse);
 
-                if (!in_array($modelUse, $use)) {
-                    $use[] = $modelUse;
+                if (!in_array($modelUse, $parentUse)) {
+                    $parentUse[] = $modelUse;
                 }
-                if (!in_array($relationUse, $use)) {
-                    $use[] = $relationUse;
+                if (!in_array($relationUse, $parentUse)) {
+                    $parentUse[] = $relationUse;
                 }
 
-                $relationTemplate[] = str_replace(
+                $parentRelationTemplate[] = str_replace(
                     [
                         '{{relationType}}',
                         '{{relationName}}',
@@ -424,13 +541,66 @@ class RepgeneratorService
                         $relationName,
                         Str::camel($relationType),
                         $relatedModel,
-                        $foreign['column'],
-                        $foreign['on'],
+                        $foreign['parentTableColumn'],
+                        $foreign['referencedTableColumn'],
                     ],
                     $this->repgeneratorStubService->getStub('ModelRelation')
                 );
             }
 
+            //For Target
+            foreach ($foreigns as $foreign) {
+                $relationType = $foreign['targetRelationType'];
+                $relatedModel = $foreign['targetModel'];
+                $parentModel = $foreign['parentModel'];
+                $relationName = $foreign['targetRelationName'];
+
+                if($foreign['targetRelationType'] === 'HasMany' || $foreign['targetRelationType'] === 'BelongsToMany') {
+                    $relationName = Str::plural($foreign['targetRelationName']);
+                }
+
+                $modelUse = 'use App\Domain\/'.$parentModel.'\Models\/'.$parentModel.';';
+                $modelUse = str_replace('/', '', $modelUse);
+
+                $relationUse = 'use Illuminate\Database\Eloquent\Relations\/'.$relationType.';';
+                $relationUse = str_replace('/', '', $relationUse);
+
+                if (!in_array($modelUse, $targetUse)) {
+                    $targetUse[$relatedModel][] = $modelUse;
+                }
+                if (!in_array($relationUse, $targetUse)) {
+                    $targetUse[$relatedModel][] = $relationUse;
+                }
+
+                $targetRelationTemplate[$relatedModel][] = str_replace(
+                    [
+                        '{{relationType}}',
+                        '{{relationName}}',
+                        '{{relationMethodCall}}',
+                        '{{relatedModel}}',
+                        '{{foreignKey}}',
+                        '{{ownerKey}}',
+                    ],
+                    [
+                        $relationType,
+                        $relationName,
+                        Str::camel($relationType),
+                        $foreign['parentModel'],
+                        $foreign['referencedTableColumn'],
+                        $foreign['parentTableColumn'],
+                    ],
+                    $this->repgeneratorStubService->getStub('ModelRelation')
+                );
+            }
+
+            //Search Target Model and insert lines
+            foreach ($targetUse as $targetModel => $uses) {
+                $this->insertUsesToTargetModel($targetModel, $uses);
+            }
+
+            foreach ($targetRelationTemplate as $targetModel => $relation) {
+                $this->insertRelationsToTargetModel($targetModel, $relation);
+            }
         }
 
         $fillableStr = [];
@@ -446,8 +616,8 @@ class RepgeneratorService
             }
 
             if($column->is_hashed) {
-                if(!in_array('use Illuminate\Support\Facades\Hash;', $use)) {
-                    $use[] = 'use Illuminate\Support\Facades\Hash;';
+                if(!in_array('use Illuminate\Support\Facades\Hash;', $parentUse)) {
+                    $parentUse[] = 'use Illuminate\Support\Facades\Hash;';
                 }
                 $hashedTemplate = str_replace(
                     [
@@ -463,8 +633,8 @@ class RepgeneratorService
             }
 
             if($column->is_crypted) {
-                if(!in_array('use Illuminate\Support\Facades\Crypt;', $use)) {
-                    $use[] = 'use Illuminate\Support\Facades\Crypt;';
+                if(!in_array('use Illuminate\Support\Facades\Crypt;', $parentUse)) {
+                    $parentUse[] = 'use Illuminate\Support\Facades\Crypt;';
                 }
                 $cryptedTemplate = str_replace(
                     [
@@ -482,7 +652,7 @@ class RepgeneratorService
 
         $trait = '';
         if($isSoftDelete) {
-            $use[] = 'use Illuminate\Database\Eloquent\SoftDeletes;';
+            $parentUse[] = 'use Illuminate\Database\Eloquent\SoftDeletes;';
             $trait = ', SoftDeletes';
         }
 
@@ -505,8 +675,8 @@ class RepgeneratorService
             ],
             [
                 $name,
-                $this->implodeLines($use, 0),
-                $this->implodeLines($relationTemplate, 2),
+                $this->implodeLines($parentUse, 0),
+                $this->implodeLines($parentRelationTemplate, 0),
                 $this->implodeLines($fillableStr, 2),
                 $trait,
                 $hashedTemplate,
@@ -551,9 +721,13 @@ class RepgeneratorService
             $stub = $this->repgeneratorStubService->getStub('ApiControllerReadWrite');
         }
 
+        if($name === 'CrudMenuGroup') {
+            $relations[] = "'crudMenus',";
+        }
+
         if(!empty($foreigns)) {
             foreach ($foreigns as $foreign) {
-                $relations[] = "'".$foreign['relation_name']."',";
+                $relations[] = "'".$foreign['parentRelationName']."',";
             }
         }
 
@@ -573,7 +747,7 @@ class RepgeneratorService
                 ],
                 $this->repgeneratorStubService->getStub('withRelation')
             );
-        } elseif (empty($fileUploadFieldsData) && !empty($foreigns)) {
+        } elseif (empty($fileUploadFieldsData) && !empty($foreigns) || $name === 'CrudMenuGroup') {
             $use[] = "use Illuminate\Http\JsonResponse;\n";
             $use[] = "use Illuminate\Http\Request;\n";
 
@@ -692,8 +866,8 @@ class RepgeneratorService
                     }
 
                     foreach ($foreigns as $foreign) {
-                        if($foreign['column'] === $column->name) {
-                            $rule .= '|exists:'.$foreign['reference']['name'].','.$foreign['on'];
+                        if($foreign['parentTableColumn'] === $column->name) {
+                            $rule .= '|exists:'.$foreign['referencedTable'].','.$foreign['referencedTableColumn'];
                         }
                     }
 
@@ -982,8 +1156,11 @@ class RepgeneratorService
 
         $uses = [];
 
+        $targetUse = [];
+        $targetRelationTemplate = [];
+
         //Special case for crud_menu relation
-        if(!empty($foreigns) && $foreigns[0]['column'] === 'crud_menu_group_id' && $name === 'CrudMenuGroup') {
+        if($name === 'CrudMenuGroup') {
             $uses[] = "use App\Domain\CrudMenu\Resources\CrudMenuResource;\n";
             $lines[] = "'items' => CrudMenuResource::collection(\$this->whenLoaded('crudMenus')),";
         }
@@ -991,24 +1168,60 @@ class RepgeneratorService
         foreach ($columns as $column) {
             $resourceElementTemplate = '';
 
-            if ($column->references) {
+            if (!empty($column->references)) {
+                Log::info($name.' Model referenced column', ['references' => $column->references]);
+
                 $referenceSingular = Str::lcfirst(Str::studly(Str::singular($column->references['name'])));
                 $referenceName = ucfirst($referenceSingular);
                 $uses[] = "use App\Domain\\".$referenceName."\\Resources\\".$referenceName."Resource;\n";
 
+                $resourceMethod = 'make';
+                $relationName = $referenceSingular;
+                if($column->references['relationType'] === 'BelongsTo' || $column->references['relationType'] === 'HasOne') {
+                    $relationName = Str::plural($referenceSingular);
+                    $resourceMethod = 'collection';
+                }
+
                 $resourceElementTemplate = str_replace(
                     [
-                        '{{field}}',
-                        '{{referenceSingular}}',
-                        '{{referenceName}}',
+                        '{{relationName}}',
+                        '{{relationNameUcFirstSingular}}',
                         '{{resourceMethod}}'
                     ],
                     [
-                        $column->name,
-                        $referenceSingular,
+                        $relationName,
                         $referenceName,
-                        'make'
+                        $resourceMethod
                     ], $this->repgeneratorStubService->getStub('resourceElementRelation'));
+
+                foreach ($foreigns as $foreign) {
+                    if($foreign['referencedTable'] === $column->references['name']) {
+                        Log::info('Column '. $column->name);
+                        Log::info('References', ['references' => $column->references]);
+                        Log::info('Foreign ', ['foreign' => $foreign]);
+
+                        $targetUse[$foreign['targetModel']][] = "use App\Domain\\".$foreign['parentModel']."\\Resources\\".$foreign['parentModel']."Resource;\n";
+
+                        $resourceMethod = 'make';
+                        $relationName = $foreign['targetRelationName'];
+                        if($foreign['targetRelationType'] === 'HasMany' || $foreign['targetRelationType'] === 'BelongsToMany') {
+                            $relationName = Str::plural($foreign['targetRelationName']);
+                            $resourceMethod = 'collection';
+                        }
+
+                        $targetRelationTemplate[$foreign['targetModel']][] = str_replace(
+                            [
+                                '{{relationName}}',
+                                '{{relationNameUcFirstSingular}}',
+                                '{{resourceMethod}}'
+                            ],
+                            [
+                                $relationName,
+                                $foreign['parentModel'],
+                                $resourceMethod
+                            ], $this->repgeneratorStubService->getStub('resourceElementRelation'));
+                    }
+                }
             }
             elseif ($column->fileUploadLocation) {
                 if(!in_array("use App\Domain\\".$name."File\\Resources\\".$name."FileResource;\n", $uses)) {
@@ -1070,7 +1283,7 @@ class RepgeneratorService
             $uses[] = "use App\\Domain\\".$name."\\Repositories\\".$name."RepositoryService;\n";
             $fileRepositoryClass = $name."RepositoryService::class";
 
-            $relatedTableName = $foreigns[0]['relation_name'];
+            $relatedTableName = $foreigns[0]['parentRelationName'];
             $resourceElementFileUrlTemplate = str_replace(
                 [
                     '{{fileRepositoryClass}}',
@@ -1106,6 +1319,16 @@ class RepgeneratorService
         }
 
         file_put_contents($path = app_path("Domain".DIRECTORY_SEPARATOR."$name".DIRECTORY_SEPARATOR."Resources".DIRECTORY_SEPARATOR."{$name}Resource.php"), $resourceTemplate);
+
+
+        //Search Target Resource and insert lines
+        foreach ($targetUse as $targetModel => $uses) {
+            $this->insertUsesToTargetResource($targetModel, $uses);
+        }
+
+        foreach ($targetRelationTemplate as $targetModel => $relation) {
+            $this->insertRelationsToTargetResource($targetModel, $relation);
+        }
 
         CharacterCounterStore::addFileCharacterCount($path);
 
@@ -1214,5 +1437,43 @@ class RepgeneratorService
             'name' => "{$name}Factory.php",
             'location' => $path
         ];
+    }
+
+    /**
+     * @param  string  $modelName
+     * @return array
+     */
+    private function getModelInfos(string $modelName): array
+    {
+        $path = app_path('Domain'.DIRECTORY_SEPARATOR."$modelName".DIRECTORY_SEPARATOR.'Models'.DIRECTORY_SEPARATOR."$modelName.php");
+        $targetModelFile = file_get_contents($path);
+
+        $lineEndingCount = [
+            "\r\n" => substr_count($targetModelFile, "\r\n"),
+            "\r" => substr_count($targetModelFile, "\r"),
+            "\n" => substr_count($targetModelFile, "\n"),
+        ];
+
+        $eol = array_keys($lineEndingCount, max($lineEndingCount))[0];
+        return [$path, $eol];
+    }
+
+    /**
+     * @param  string  $modelName
+     * @return array
+     */
+    private function getResourceInfos(string $modelName): array
+    {
+        $path = app_path('Domain'.DIRECTORY_SEPARATOR."$modelName".DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.$modelName."Resource.php");
+        $targetResourceFile = file_get_contents($path);
+
+        $lineEndingCount = [
+            "\r\n" => substr_count($targetResourceFile, "\r\n"),
+            "\r" => substr_count($targetResourceFile, "\r"),
+            "\n" => substr_count($targetResourceFile, "\n"),
+        ];
+
+        $eol = array_keys($lineEndingCount, max($lineEndingCount))[0];
+        return [$path, $eol];
     }
 }
