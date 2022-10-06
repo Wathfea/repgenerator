@@ -2,7 +2,7 @@
 
 namespace App\Abstraction\Repository;
 
-
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -30,19 +30,15 @@ interface RepositoryServiceInterface
     /**
      * @param  array  $columns
      * @param  array  $load
-     * @param  string  $orderBy
-     * @param  string  $orderDir
      * @return Builder|Collection
      */
-    public function getAllByColumns(array $columns, array $load = [], string $orderBy = 'id', string $orderDir = 'asc'): Collection|Builder;
+    public function getAllByColumns(array $columns, array $load = []): Collection|Builder;
 
     /**
      * @param  string  $column
      * @param  mixed  $value
      * @param  array  $load
-     * @param  string  $orderBy
-     * @param  string  $orderDir
      * @return array|Collection
      */
-    public function getAllByColumn(string $column, mixed $value, array $load = [], string $orderBy = 'id', string $orderDir = 'asc'): array|Collection;
+    public function getAllByColumn(string $column, mixed $value, array $load = []): array|Collection;
 }

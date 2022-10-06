@@ -108,6 +108,13 @@ interface ModelRepositoryServiceInterface extends RepositoryServiceInterface
     public function saveOtherData(Model $model, array $data): bool;
 
     /**
+     * @param  Model  $model
+     * @param  array  $data
+     * @return bool
+     */
+    public function beforeSaving(Model $model, array $data): bool;
+
+    /**
      * @param  array  $uniqueIdentifiers
      * @return RepositoryServiceInterface
      */

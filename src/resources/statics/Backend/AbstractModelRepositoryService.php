@@ -3,6 +3,7 @@
 namespace App\Abstraction\Repository;
 
 use App\Abstraction\Filter\BaseQueryFilter;
+use Faker\Provider\Base;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -59,6 +60,16 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         return false;
     }
 
+    /**
+     * @param  Model  $model
+     * @param  array  $data
+     * @return bool
+     */
+    public function beforeSaving(Model $model, array $data): bool
+    {
+        return false;
+    }
+
 
     /**
      * @return string
@@ -91,6 +102,7 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         }
         $model = $model ?: $this->getModel();
         $model->fill($data);
+        $this->beforeSaving($model, $data);
         $model->save();
         if ($model->exists) {
             $this->saveOtherData($model, $data);
@@ -109,6 +121,7 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
     {
         $model = $this->getById($id);
         if ($model) {
+            $this->beforeSaving($model, $data);
             $otherDataUpdated = $this->saveOtherData($model, $data);
             return $model->update($data) || $otherDataUpdated;
         }
@@ -127,6 +140,7 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
     }
 
 
+
     /**
      * @param  array  $load
      * @param  int|null  $perPage
@@ -143,6 +157,16 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
 
     /**
      * @param BaseQueryFilter $filter
+     * @param array $load
+     * @return mixed
+     */
+    public function getFilterQB(BaseQueryFilter $filter, array $load = []) {
+        $qb = $this->getBaseBuilder($load);
+        return $qb->filter($filter);
+    }
+
+    /**
+     * @param BaseQueryFilter $filter
      * @param  array  $load
      * @param  int|null  $perPage
      * @return Collection|LengthAwarePaginator
@@ -152,8 +176,7 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         array $load = [],
         int $perPage = null
     ): Collection|LengthAwarePaginator {
-        $qb = $this->getBaseBuilder($load);
-        $qb = $qb->filter($filter);
+        $qb = $this->getFilterQB($filter, $load);
         if ($perPage) {
             return $qb->paginate($perPage);
         }

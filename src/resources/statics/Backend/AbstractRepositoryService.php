@@ -29,18 +29,11 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
 
     /**
      * @param  array  $load
-     * @param  string|null  $orderBy
-     * @param  string|null  $orderDir
      * @return Builder
      */
-    protected function getBaseBuilder(array $load = [], string $orderBy = null, string $orderDir = null): Builder
+    protected function getBaseBuilder(array $load = []): Builder
     {
         $qb = $this->getModel()::query();
-
-        if($orderBy && $orderDir) {
-            $qb = $this->getModel()::query()->orderBy($orderBy, $orderDir);
-        }
-
         if ($load) {
             $qb->with($load);
         }
@@ -51,25 +44,21 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
      * @param  string  $column
      * @param  mixed  $value
      * @param  array  $load
-     * @param  string  $orderBy
-     * @param  string  $orderDir
      * @return array|Collection
      */
-    public function getAllByColumn(string $column, mixed $value, array $load = [], string $orderBy = 'id', string $orderDir = 'asc'): array|Collection
+    public function getAllByColumn(string $column, mixed $value, array $load = []): array|Collection
     {
-        return $this->getByColumn($column, $value, $load, $orderBy, $orderDir)->get();
+        return $this->getByColumn($column, $value, $load)->get();
     }
 
     /**
      * @param  array  $columns
      * @param  array  $load
-     * @param  string  $orderBy
-     * @param  string  $orderDir
      * @return Builder|Collection
      */
-    public function getAllByColumns(array $columns, array $load = [], string $orderBy = 'id', string $orderDir = 'asc'): Collection|Builder
+    public function getAllByColumns(array $columns, array $load = []): Collection|Builder
     {
-        return $this->getByColumns($columns, $load, $orderBy, $orderDir)->get();
+        return $this->getByColumns($columns, $load)->get();
     }
 
     /**
@@ -97,25 +86,21 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
      * @param  string  $column
      * @param  mixed  $value
      * @param  array  $load
-     * @param  string  $orderBy
-     * @param  string  $orderDir
      * @return Builder
      */
-    private function getByColumn(string $column, mixed $value, array $load = [], string $orderBy = 'id', string $orderDir = 'asc'): Builder
+    private function getByColumn(string $column, mixed $value, array $load = []): Builder
     {
-        return $this->findByColumn($this->getBaseBuilder($load, $orderBy, $orderDir), $column, $value);
+        return $this->findByColumn($this->getBaseBuilder($load), $column, $value);
     }
 
     /**
      * @param  array  $columns
      * @param  array  $load
-     * @param  string  $orderBy
-     * @param  string  $orderDir
      * @return Builder
      */
-    private function getByColumns(array $columns, array $load = [], string $orderBy = 'id', string $orderDir = 'asc'): Builder
+    private function getByColumns(array $columns, array $load = []): Builder
     {
-        $qb = $this->getBaseBuilder($load, $orderBy, $orderDir);
+        $qb = $this->getBaseBuilder($load);
         foreach ($columns as $column => $value) {
             $qb = $this->findByColumn($qb, $column, $value);
         }

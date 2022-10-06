@@ -6,15 +6,37 @@ use App\Abstraction\Filter\BaseQueryFilter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController implements CRUDControllerInterface, ApiCRUDControllerReadOnlyInterface
 {
+    /**
+     * @param Request $request
+     * @return BaseQueryFilter
+     */
+    public function getFilter(Request $request): BaseQueryFilter {
+        return app($this->getFilterClass(), $request->all());
+    }
+
     /**
      * @var string
      */
     private string $resourceClass = JsonResource::class;
     private string $filterClass = BaseQueryFilter::class;
     private int $perPage = 10;
+
+    public function getIndexData(Request $request, array $relationships = []): AnonymousResourceCollection
+    {
+        /** @var JsonResource $resource */
+        $resource = $this->getResourceClass();
+        $filter = $this->getFilter($request);
+        $perPage = $this->getPerPage($request);
+        if ( $request->has('load') && !empty($request->get('load')) ) {
+            $relationships = array_intersect($relationships, $request->get('load'));
+        }
+        return $resource::collection($this->getService()->getRepositoryService()->getByFilter($filter, $relationships,
+            $perPage));
+    }
 
     /**
      * @param  Request  $request
@@ -23,12 +45,7 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController 
      */
     public function index(Request $request, array $relationships = []): JsonResponse
     {
-        /** @var JsonResource $resource */
-        $resource = $this->getResourceClass();
-        $filter = app($this->getFilterClass(), $request->all());
-        $perPage = $this->getPerPage($request);
-        return $resource::collection($this->getService()->getRepositoryService()->getByFilter($filter, $relationships,
-            $perPage))->toResponse($request);
+        return $this->getIndexData($request, $relationships)->toResponse($request);
     }
 
     /**
