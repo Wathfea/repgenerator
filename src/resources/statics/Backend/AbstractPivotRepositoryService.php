@@ -108,7 +108,7 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
      * @param  array  $data
      * @return bool
      */
-    public function update(int $parentModelId, int $relationModelId, array $data = []): bool
+    public function updateData(int $parentModelId, int $relationModelId, array $data = []): bool
     {
         return $this->getRelation($parentModelId)->updateExistingPivot($relationModelId, $data) > 0;
     }
