@@ -48,6 +48,26 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         return false;
     }
 
+    /**
+     * @param  Model  $model
+     * @param  array  $data
+     * @return bool
+     */
+    public function saveOtherData(Model $model, array $data): bool
+    {
+        return false;
+    }
+
+    /**
+     * @param  Model  $model
+     * @param  array  $data
+     * @return bool
+     */
+    public function beforeSaving(Model $model, array $data): bool
+    {
+        return false;
+    }
+
 
     /**
      * @return string
@@ -85,6 +105,23 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         if ($model->exists) {
             $this->saveOtherData($model, $data);
             return $model;
+        }
+        return false;
+    }
+
+
+    /**
+     * @param  int  $id
+     * @param  array  $data
+     * @return bool
+     */
+    public function update(int $id, array $data): bool
+    {
+        $model = $this->getById($id);
+        if ($model) {
+            $this->beforeSaving($model, $data);
+            $otherDataUpdated = $this->saveOtherData($model, $data);
+            return $model->update($data) || $otherDataUpdated;
         }
         return false;
     }

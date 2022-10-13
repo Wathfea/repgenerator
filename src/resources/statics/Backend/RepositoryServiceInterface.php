@@ -41,4 +41,11 @@ interface RepositoryServiceInterface
      * @return array|Collection
      */
     public function getAllByColumn(string $column, mixed $value, array $load = []): array|Collection;
+
+    /**
+     * @param  int  $id
+     * @param  array  $load
+     * @return Model|null
+     */
+    public function getById(int $id, array $load = []): Model|null;
 }

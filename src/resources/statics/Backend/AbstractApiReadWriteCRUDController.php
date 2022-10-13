@@ -2,6 +2,8 @@
 
 namespace App\Abstraction\Controllers;
 
+use App\Abstraction\Repository\ModelRepositoryServiceInterface;
+use App\Abstraction\Repository\PivotRepositoryServiceInterface;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -76,11 +78,12 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
                     'message' => $modelDestroyed ? trans('model.deleted') : trans('model.delete_failed'),
                 ], $modelDestroyed ? 200 : 202);
         } catch (Exception $exception) {
-            Log::error('New '.$this->getService()->getRepositoryService()->getModelName().' Save: '.$exception->getMessage());
+            Log::error('Delete '.$this->getService()->getRepositoryService()->getModelName().' Error: '.$exception->getMessage());
             return Response::json(
                 [
                     'success' => false,
-                    'message' => $exception->getMessage(),
+                    'message' => trans('model.being_used'),
+                    'error' => $exception->getMessage(),
                 ], 202);
         }
     }
@@ -94,9 +97,22 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
         if ( !empty($this->storeRequest) ) {
             $request->validate(app($this->storeRequest)->rules());
         }
-
         try {
-            $model = $this->getService()->getRepositoryService()->save($request->all());
+            $repositoryService = $this->getService()->getRepositoryService();
+            if ( $repositoryService instanceof ModelRepositoryServiceInterface ) {
+                $model = $repositoryService->save($request->all());
+            } else if ( $repositoryService instanceof PivotRepositoryServiceInterface ) {
+                $parentRequestKey = $repositoryService->getParentRequestKey();
+                $relationRequestKey = $repositoryService->getRelationRequestKey();
+                $model = $repositoryService->attach(
+                    $request->get($parentRequestKey),
+                    $request->get($relationRequestKey),
+                    $request->except([
+                        $parentRequestKey,
+                        $relationRequestKey
+                    ])
+                );
+            }
             if ($model->exists) {
                 return Response::json(
                     [
@@ -118,6 +134,8 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
         }
     }
 
+
+
     /**
      * @param  Request  $request
      * @param  int  $id
@@ -129,7 +147,21 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
             $request->validate(app($this->updateRequest)->rules());
         }
         try {
-            $modelUpdated = $this->getService()->getRepositoryService()->update($id, $request->all());
+            $repositoryService = $this->getService()->getRepositoryService();
+            if ( $repositoryService instanceof ModelRepositoryServiceInterface ) {
+                $modelUpdated = $repositoryService->update($id, $request->all());
+            } else if ( $repositoryService instanceof PivotRepositoryServiceInterface ) {
+                $parentRequestKey = $repositoryService->getParentRequestKey();
+                $relationRequestKey = $repositoryService->getRelationRequestKey();
+                $modelUpdated = $repositoryService->updateData(
+                    $request->get($parentRequestKey),
+                    $request->get($relationRequestKey),
+                    $request->except([
+                        $parentRequestKey,
+                        $relationRequestKey
+                    ])
+                );
+            }
             return Response::json(
                 [
                     'success' => $modelUpdated,

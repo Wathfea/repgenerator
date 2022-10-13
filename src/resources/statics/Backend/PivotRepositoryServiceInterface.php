@@ -14,9 +14,9 @@ interface PivotRepositoryServiceInterface extends RepositoryServiceInterface
      * @param  int  $parentModelId
      * @param  int  $relationshipModelId
      * @param  array  $data
-     * @return bool
+     * @return Pivot
      */
-    public function attach(int $parentModelId, int $relationshipModelId, array $data = []): bool;
+    public function attach(int $parentModelId, int $relationshipModelId, array $data = []): Pivot;
 
     /**
      * @param  int  $parentModelId
@@ -51,5 +51,15 @@ interface PivotRepositoryServiceInterface extends RepositoryServiceInterface
      * @param  array  $data
      * @return bool
      */
-    public function update(int $parentModelId, int $relationModelId, array $data = []): bool;
+    public function updateData(int $parentModelId, int $relationModelId, array $data = []): bool;
+
+    /**
+     * @return string
+     */
+    public function getParentRequestKey(): string;
+
+    /**
+     * @return string
+     */
+    public function getRelationRequestKey(): string;
 }
