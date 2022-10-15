@@ -39,10 +39,12 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController 
 
     /**
      * @param  array  $relations
+     * @return AbstractCrudController
      */
-    public function setRelations(array $relations): void
+    public function setRelations(array $relations): AbstractCrudController
     {
         $this->relations = $relations;
+        return $this;
     }
 
     /**

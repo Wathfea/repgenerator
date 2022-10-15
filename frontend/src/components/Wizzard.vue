@@ -257,16 +257,24 @@ const menuGroups = ref([]);
 const getTables = () => {
     axios.get(import.meta.env.VITE_API_URL + '/repgenerator/tables').then((response) => {
         models.value = response.data;
-    })
+    }).then(() => {
+        models.value.forEach(function(element) {
+            if(element.name === 'crud_menu_groups') {
+                getMenuGroups();
+            }
+        })
+        }
+    )
 }
+
 const getMenuGroups = () => {
     axios.get(import.meta.env.VITE_API_URL + '/api/v1/crud-menu-groups').then((response) => {
         menuGroups.value = response.data.data;
     })
 }
 
-getTables()
-getMenuGroups();
+getTables();
+
 </script>
 
 <template>

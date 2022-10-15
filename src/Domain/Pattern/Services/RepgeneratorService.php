@@ -1035,26 +1035,33 @@ class RepgeneratorService
         $serviceSetters = "";
         $f = [];
 
-        if($name === 'CrudMenuGroup') {
-            $relations[] = "'crudMenus',";
-        }
 
         if(!empty($foreigns)) {
             foreach ($foreigns as $foreign) {
                 $relatedModel = $foreign['targetModel'];
 
-                $relations[] = "'".$foreign['parentRelationName']."',";
-                $targetRelations[$relatedModel][] = "'".$foreign['targetRelationName']."',";
+                $relations[] = $foreign['parentRelationName'];
+                $targetRelations[$relatedModel][] = $foreign['targetRelationName'];
             }
         }
 
-        foreach ($targetRelations as $targetModel => $relation) {
-            $this->insertRelationsToTargetProvider($targetModel, $relation);
+        if ($name === 'CrudMenuGroup') {
+            $relations = [];
+            $relations[] = 'crudMenus';
         }
+
+        if ($name !== 'CrudMenuGroup') {
+            if($name !== 'CrudMenu') {
+                foreach ($targetRelations as $targetModel => $relation) {
+                    $this->insertRelationsToTargetProvider($targetModel, $relation);
+                }
+            }
+        }
+
 
         if (!empty($fileUploadFieldsData) && !$isGeneratedFileDomain) {
             if(!in_array("'files'", $relations)) {
-                $relations[] = "'files',";
+                $relations[] = "files";
             }
         }
 
@@ -1080,6 +1087,13 @@ class RepgeneratorService
         }
         $searchables .= implode(',', $s);
 
+        $relationsString = '';
+        if(!empty($relations)) {
+            $relationsString = implode(', ', array_map(function ($val) {
+                    return sprintf("'%s'", $val);
+                }, $relations)).',';
+        }
+
 
         $providerTemplate = str_replace(
             [
@@ -1098,7 +1112,7 @@ class RepgeneratorService
                 $isPivot ? 'TODO::class' : $name.'::class',
                 $serviceSetters,
                 $searchables,
-                $relations
+                $relationsString
             ],
             $this->repgeneratorStubService->getStub('Provider')
         );
