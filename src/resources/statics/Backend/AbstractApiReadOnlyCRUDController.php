@@ -6,36 +6,61 @@ use App\Abstraction\Filter\BaseQueryFilter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController implements CRUDControllerInterface, ApiCRUDControllerReadOnlyInterface
 {
     /**
-     * @param Request $request
-     * @return BaseQueryFilter
+     * @var string
      */
-    public function getFilter(Request $request): BaseQueryFilter {
-        return app($this->getFilterClass(), $request->all());
-    }
+    private string $resourceClass = JsonResource::class;
 
     /**
      * @var string
      */
-    private string $resourceClass = JsonResource::class;
     private string $filterClass = BaseQueryFilter::class;
+
+    /**
+     * @var int
+     */
     private int $perPage = 10;
 
-    public function getIndexData(Request $request, array $relationships = []): AnonymousResourceCollection
+    /**
+     * @var array
+     */
+    private array $relations = [];
+
+    /**
+     * @return array
+     */
+    public function getRelations(): array
     {
-        /** @var JsonResource $resource */
-        $resource = $this->getResourceClass();
-        $filter = $this->getFilter($request);
-        $perPage = $this->getPerPage($request);
-        if ( $request->has('load') && !empty($request->get('load')) ) {
-            $relationships = array_intersect($relationships, $request->get('load'));
-        }
-        return $resource::collection($this->getService()->getRepositoryService()->getByFilter($filter, $relationships,
-            $perPage));
+        return $this->relations;
+    }
+
+    /**
+     * @param  array  $relations
+     */
+    public function setRelations(array $relations): void
+    {
+        $this->relations = $relations;
+    }
+
+    /**
+     * @param  array  $newRelations
+     * @return void
+     */
+    public function addToRelations(array $newRelations): void
+    {
+        $this->setRelations(array_merge($this->getRelations(), $newRelations));
+    }
+
+    /**
+     * @param  array  $removableRelations
+     * @return void
+     */
+    public function removeFromRelatons(array $removableRelations): void
+    {
+        $this->setRelations(array_diff($this->getRelations(), $removableRelations));
     }
 
     /**
@@ -45,7 +70,13 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController 
      */
     public function index(Request $request, array $relationships = []): JsonResponse
     {
-        return $this->getIndexData($request, $relationships)->toResponse($request);
+        /** @var JsonResource $resource */
+        $resource = $this->getResourceClass();
+        $filter = app($this->getFilterClass(), $request->all());
+        $perPage = $this->getPerPage($request);
+        $this->addToRelations($relationships);
+        return $resource::collection($this->getService()->getRepositoryService()->getByFilter($filter, $this->getRelations(),
+            $perPage))->toResponse($request);
     }
 
     /**
@@ -121,6 +152,7 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController 
     {
         /** @var JsonResource $resource */
         $resource = $this->getResourceClass();
-        return $resource::make($this->getService()->getRepositoryService()->getById($id, $relationships))->toResponse($request);
+        $this->addToRelations($relationships);
+        return $resource::make($this->getService()->getRepositoryService()->getById($id, $this->getRelations()))->toResponse($request);
     }
 }

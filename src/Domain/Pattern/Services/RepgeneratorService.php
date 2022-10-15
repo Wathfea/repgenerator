@@ -149,7 +149,7 @@ class RepgeneratorService
 
         $callback('Model is ready!');
 
-        $this->apiController('v1', $this->modelName, $foreigns, $isReadOnly, $isGeneratedFileDomain, $fileUploadFieldsData);
+        $this->apiController('v1', $this->modelName, $isReadOnly);
         $callback('API Controller is ready!');
 
         $this->request($this->modelName, $columns, $foreigns);
@@ -162,7 +162,7 @@ class RepgeneratorService
         $this->service($this->modelName, $isGeneratePivot);
         $callback('Controller service is ready!');
 
-        $this->provider($this->modelName, false, $columns, $isGeneratedFileDomain, $fileUploadFieldsData);
+        $this->provider($this->modelName, false, $columns, $foreigns, $isGeneratedFileDomain, $fileUploadFieldsData);
         $callback('Provider is ready!');
 
         $this->registerProvider($this->modelName);
@@ -299,6 +299,25 @@ class RepgeneratorService
 
             file_put_contents($path, $updatedModelFile);
         }
+    }
+
+    /**
+     * @param  string  $modelName
+     * @param  array  $relations
+     * @return void
+     */
+    private function insertRelationsToTargetProvider(string $modelName, array $relations): void
+    {
+        $path = app_path('Domain'.DIRECTORY_SEPARATOR."$modelName".DIRECTORY_SEPARATOR.'Providers'.DIRECTORY_SEPARATOR.$modelName.'ServiceProvider.php');
+        $relationsString = implode(', ', array_map(function ($val) {
+                return sprintf("'%s'", $val);
+            }, $relations)).',';
+
+        $targetProviderFile = file_get_contents($path);
+        $setRelationsMethodsPos = strpos($targetProviderFile, '->setRelations');
+
+        $updatedProviderFile = substr_replace($targetProviderFile, $relationsString, $setRelationsMethodsPos + 16, 0);
+        file_put_contents($path, $updatedProviderFile);
     }
 
     /**
@@ -704,62 +723,14 @@ class RepgeneratorService
     /**
      * @param  string  $version
      * @param  string  $name
-     * @param  array  $foreigns
      * @param  bool  $isReadOnly
-     * @param  bool  $isGeneratedFileDomain
-     * @param  array|null  $fileUploadFieldsData
      */
-    private function apiController(string $version, string $name, array $foreigns, bool $isReadOnly, bool $isGeneratedFileDomain, array $fileUploadFieldsData = null): void
+    private function apiController(string $version, string $name, bool $isReadOnly): void
     {
-        $use = [];
-        $withRelationTemplate = '';
-        $relations = [];
-
         if ($isReadOnly) {
             $stub = $this->repgeneratorStubService->getStub('ApiControllerReadOnly');
         } else {
             $stub = $this->repgeneratorStubService->getStub('ApiControllerReadWrite');
-        }
-
-        if($name === 'CrudMenuGroup') {
-            $relations[] = "'crudMenus',";
-        }
-
-        if(!empty($foreigns)) {
-            foreach ($foreigns as $foreign) {
-                $relations[] = "'".$foreign['parentRelationName']."',";
-            }
-        }
-
-        if (!empty($fileUploadFieldsData) && !$isGeneratedFileDomain) {
-            $use[] = "use Illuminate\Http\JsonResponse;\n";
-            $use[] = "use Illuminate\Http\Request;\n";
-            if(!in_array("'files'", $relations)) {
-                $relations[] = "'files',";
-            }
-
-            $withRelationTemplate = str_replace(
-                [
-                    '{{relations}}',
-                ],
-                [
-                    $this->implodeLines($relations, 0),
-                ],
-                $this->repgeneratorStubService->getStub('withRelation')
-            );
-        } elseif (empty($fileUploadFieldsData) && !empty($foreigns) || $name === 'CrudMenuGroup') {
-            $use[] = "use Illuminate\Http\JsonResponse;\n";
-            $use[] = "use Illuminate\Http\Request;\n";
-
-            $withRelationTemplate = str_replace(
-                [
-                    '{{relations}}',
-                ],
-                [
-                    $this->implodeLines($relations, 0),
-                ],
-                $this->repgeneratorStubService->getStub('withRelation')
-            );
         }
 
         $apiControllerTemplate = str_replace(
@@ -767,15 +738,11 @@ class RepgeneratorService
                 '{{modelName}}',
                 '{{modelNamePluralLowerCase}}',
                 '{{modelNameSingularLowerCase}}',
-                '{{use}}',
-                '{{files}}',
             ],
             [
                 $name,
                 $this->modelNamePluralLowerCase,
                 $this->modelNameSingularLowerCase,
-                $this->implodeLines($use, 2),
-                $withRelationTemplate,
             ],
             $stub
         );
@@ -1057,13 +1024,40 @@ class RepgeneratorService
      * @param  string  $name
      * @param  bool  $isPivot
      * @param  array  $columns
+     * @param  array  $foreigns
      * @param  bool  $isGeneratedFileDomain
      * @param  array|null  $fileUploadFieldsData
      */
-    private function provider(string $name, bool $isPivot, array $columns, bool $isGeneratedFileDomain, array $fileUploadFieldsData = null): void
+    private function provider(string $name, bool $isPivot, array $columns, array $foreigns, bool $isGeneratedFileDomain, array $fileUploadFieldsData = null): void
     {
+        $relations = [];
+        $targetRelations = [];
         $serviceSetters = "";
         $f = [];
+
+        if($name === 'CrudMenuGroup') {
+            $relations[] = "'crudMenus',";
+        }
+
+        if(!empty($foreigns)) {
+            foreach ($foreigns as $foreign) {
+                $relatedModel = $foreign['targetModel'];
+
+                $relations[] = "'".$foreign['parentRelationName']."',";
+                $targetRelations[$relatedModel][] = "'".$foreign['targetRelationName']."',";
+            }
+        }
+
+        foreach ($targetRelations as $targetModel => $relation) {
+            $this->insertRelationsToTargetProvider($targetModel, $relation);
+        }
+
+        if (!empty($fileUploadFieldsData) && !$isGeneratedFileDomain) {
+            if(!in_array("'files'", $relations)) {
+                $relations[] = "'files',";
+            }
+        }
+
         if ($isGeneratedFileDomain) {
 
             $fieldsPath = '[';
@@ -1095,6 +1089,7 @@ class RepgeneratorService
                 '{{repoParams}}',
                 '{{serviceSetters}}',
                 '{{searchables}}',
+                '{{relations}}',
             ],
             [
                 $name,
@@ -1102,7 +1097,8 @@ class RepgeneratorService
                 $this->modelNameSingularLowerCase,
                 $isPivot ? 'TODO::class' : $name.'::class',
                 $serviceSetters,
-                $searchables
+                $searchables,
+                $relations
             ],
             $this->repgeneratorStubService->getStub('Provider')
         );
