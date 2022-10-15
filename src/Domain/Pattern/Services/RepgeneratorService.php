@@ -167,7 +167,6 @@ class RepgeneratorService
 
         $this->registerProvider($this->modelName);
 
-        //TODO foreign refaktor, beírni a párokba is + egyes szám többes szám figyelni
         $this->resource($this->modelName, $columns, $foreigns, $isGeneratedFileDomain);
         $callback('Resource is ready!');
 
@@ -628,11 +627,12 @@ class RepgeneratorService
             if ($column->fileUploadLocation) {
                 continue;
             }
-            if ( $column->name != 'id' ) {
-                $constantName = Str::upper($column->name) . '_COLUMN';
-                $columnConstants[] = 'const ' . $constantName . ' = "' . $column->name .'";';
-                $fillableStr[] = "self::".$constantName.",";
-            }
+
+
+            $constantName = Str::upper($column->name) . '_COLUMN';
+            $columnConstants[] = 'const ' . $constantName . ' = "' . $column->name .'";';
+            $fillableStr[] = "self::".$constantName.",";
+
 
             if($column->is_hashed) {
                 if(!in_array('use Illuminate\Support\Facades\Hash;', $parentUse)) {
@@ -1153,10 +1153,10 @@ class RepgeneratorService
 
             $actionRouteTemplate = str_replace(
                 [
-                    '{{route}}', '{{routeName}}'
+                    '{{route}}', '{{routeName}}', '{{modelName}}'
                 ],
                 [
-                    $route, $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated()
+                    $route, $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated(), $name
                 ],
                 $templete
             );
@@ -1164,7 +1164,7 @@ class RepgeneratorService
         }
         $lines[] = "],";
 
-        $uses = [];
+        $uses[] = "use App\\Domain\\".$name."\\Models\\".$name.";\n";
 
         $targetUse = [];
         $targetRelationTemplate = [];
@@ -1179,8 +1179,6 @@ class RepgeneratorService
             $resourceElementTemplate = '';
 
             if (!empty($column->references)) {
-                Log::info($name.' Model referenced column', ['references' => $column->references]);
-
                 $referenceSingular = Str::lcfirst(Str::studly(Str::singular($column->references['name'])));
                 $referenceName = ucfirst($referenceSingular);
                 $uses[] = "use App\Domain\\".$referenceName."\\Resources\\".$referenceName."Resource;\n";
@@ -1206,10 +1204,6 @@ class RepgeneratorService
 
                 foreach ($foreigns as $foreign) {
                     if($foreign['referencedTable'] === $column->references['name']) {
-                        Log::info('Column '. $column->name);
-                        Log::info('References', ['references' => $column->references]);
-                        Log::info('Foreign ', ['foreign' => $foreign]);
-
                         $targetUse[$foreign['targetModel']][] = "use App\Domain\\".$foreign['parentModel']."\\Resources\\".$foreign['parentModel']."Resource;\n";
 
                         $resourceMethod = 'make';
@@ -1262,10 +1256,14 @@ class RepgeneratorService
 
                 $resourceElementTemplate = str_replace(
                     [
-                        '{{field}}'
+                        '{{field}}',
+                        '{{constans}}',
+                        '{{modelName}}'
                     ],
                     [
-                        $column->name
+                        $column->name,
+                        Str::upper($column->name) . '_COLUMN',
+                        $name
                     ],
                     $this->repgeneratorStubService->getStub('resourceElement'.ucfirst($column->type)));
             } else {
@@ -1277,11 +1275,15 @@ class RepgeneratorService
                 $resourceElementTemplate = str_replace(
                     [
                         '{{field}}',
+                        '{{constans}}',
                         '{{bool}}',
+                        '{{modelName}}'
                     ],
                     [
                         $column->name,
-                        $bool
+                        Str::upper($column->name) . '_COLUMN',
+                        $bool,
+                        $name
                     ],
                     $this->repgeneratorStubService->getStub('resourceElement'));
             }

@@ -1,1 +1,1 @@
-'{{field}}' => Carbon::parse($this->{{field}})->locale(App::currentLocale())->isoFormat('LLL dddd'),
+'{{field}}' => Carbon::parse($this->getAtribute({{modelName}}::{{constans}}))->locale(App::currentLocale())->isoFormat('LLL dddd'),

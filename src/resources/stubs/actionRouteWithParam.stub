@@ -1,1 +1,1 @@
-'{{route}}' => route('api.{{routeName}}.{{route}}', $this->id),
+'{{route}}' => route('api.{{routeName}}.{{route}}', $this->getAtribute({{modelName}}::ID_COLUMN)),
