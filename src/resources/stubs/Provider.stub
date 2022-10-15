@@ -52,6 +52,8 @@ class {{modelName}}ServiceProvider extends ServiceProvider
                 ->setFilterClass({{modelName}}Filter::class)
                 ->setRelations([{{relations}}]);
         });
+
+        $this->app->register({{modelName}}EventServiceProvider::class);
     }
 
     /**

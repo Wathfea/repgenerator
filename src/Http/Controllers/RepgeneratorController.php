@@ -330,26 +330,25 @@ class RepgeneratorController extends Controller
             );
         }
 
-        //TODO Ide is átvezetni az új foreign formát
-        if (!empty($fileUploadFieldsData)) {
-            $originalTable = $table->getName();
-            $originalTableSingular = Str::singular($originalTable);
-
-            $foreigns[]  = [
-                'parentModel' => $requestData['name'],
-                'parentRelationType' => 'HasMany',
-                'parentRelationName' => 'files', //Later generated from reference field ex user
-                'targetModel' => $requestData['name'].'File', //Later generated from reference field
-                'targetRelationType' => 'BelongsTo',
-                'targetRelationName' => '', //Later generated from parentModel field ex cats
-                'parentTableColumn' => $originalTableSingular.'_id',
-                'referencedTable' => $originalTable,
-                'referencedTableColumn' => 'id',
-                'onUpdate' => null,
-                'onDelete' => null,
-            ];
-
-        }
+//        if (!empty($fileUploadFieldsData)) {
+//            $originalTable = $table->getName();
+//            $originalTableSingular = Str::singular($originalTable);
+//
+//            $foreigns[]  = [
+//                'parentModel' => $requestData['name'],
+//                'parentRelationType' => 'HasMany',
+//                'parentRelationName' => 'files', //Later generated from reference field ex user
+//                'targetModel' => $requestData['name'].'File', //Later generated from reference field
+//                'targetRelationType' => 'BelongsTo',
+//                'targetRelationName' => '', //Later generated from parentModel field ex cats
+//                'parentTableColumn' => $originalTableSingular.'_id',
+//                'referencedTable' => $originalTable,
+//                'referencedTableColumn' => 'id',
+//                'onUpdate' => null,
+//                'onDelete' => null,
+//            ];
+//
+//        }
 
         $this->repgeneratorService->generate(
             $requestData,
@@ -398,17 +397,18 @@ class RepgeneratorController extends Controller
             $columns[] = new RepgeneratorColumnAdapter($name, $type);
         }
 
-        $foreigns[] = [
-            'relation_type' => 'BelongsTo',
-            'related_model' => $requestData['name'],
-            'relation_name' => '',
-            'column' => $originalTableSingular.'_id',
-            'reference' => [
-                'name' => $originalTable
-            ],
-            'on' => 'id',
+        $foreigns[]  = [
+            'parentModel' => $requestData['name'].'File',
+            'parentRelationType' => 'BelongsTo',
+            'parentRelationName' => '', //Later generated from reference field ex user
+            'targetModel' => '', //Later generated from reference field
+            'targetRelationType' => 'HasMany',
+            'targetRelationName' => '', //Later generated from parentModel field ex cats
+            'parentTableColumn' => $originalTableSingular.'_id',
+            'referencedTable' => $originalTable,
+            'referencedTableColumn' => 'id',
             'onUpdate' => null,
-            'onDelete' => null
+            'onDelete' => null,
         ];
 
         //Only create migration if not regenerate

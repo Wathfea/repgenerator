@@ -1,1 +1,1 @@
-'{{field}}' => {{bool}} $this->getAtribute({{modelName}}::{{constans}}),
+'{{field}}' => {{bool}} $this->getAttribute({{modelName}}::{{constans}}),

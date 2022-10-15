@@ -3,7 +3,6 @@
 namespace Pentacom\Repgenerator\Domain\Pattern\Services;
 
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Pentacom\Repgenerator\Domain\Pattern\Adapters\RepgeneratorColumnAdapter;
 use Pentacom\Repgenerator\Domain\Pattern\Helpers\CharacterCounterStore;
@@ -165,6 +164,9 @@ class RepgeneratorService
         $this->provider($this->modelName, false, $columns, $foreigns, $isGeneratedFileDomain, $fileUploadFieldsData);
         $callback('Provider is ready!');
 
+        $this->eventProvider($this->modelName);
+        $callback('Provider is ready!');
+
         $this->registerProvider($this->modelName);
 
         $this->resource($this->modelName, $columns, $foreigns, $isGeneratedFileDomain);
@@ -220,7 +222,10 @@ class RepgeneratorService
      */
     private function insertUsesToTargetResource(string $modelName, array $uses): void
     {
-        list($path, $eol) = $this->getResourceInfos($modelName);
+        $resourceInfos = $this->getResourceInfos($modelName);
+        if(empty($resourceInfos)) return;
+
+        list($path, $eol) = $resourceInfos;
 
         foreach ($uses as $use) {
             $targetResourceFile = file_get_contents($path);
@@ -244,7 +249,10 @@ class RepgeneratorService
      */
     private function insertRelationsToTargetResource(string $modelName, array $relations): void
     {
-        list($path, $eol) = $this->getResourceInfos($modelName);
+        $resourceInfos = $this->getResourceInfos($modelName);
+        if(empty($resourceInfos)) return;
+
+        list($path, $eol) = $resourceInfos;
 
         foreach ($relations as $relation) {
             $targetResourceFile = file_get_contents($path);
@@ -264,7 +272,11 @@ class RepgeneratorService
      */
     private function insertUsesToTargetModel(string $modelName, array $uses): void
     {
-        list($path, $eol) = $this->getModelInfos($modelName);
+        $modelInfos = $this->getModelInfos($modelName);
+        if(empty($modelInfos)) return;
+
+        list($path, $eol) = $modelInfos;
+
 
         foreach ($uses as $use) {
             $targetModelFile = file_get_contents($path);
@@ -287,7 +299,10 @@ class RepgeneratorService
      */
     private function insertRelationsToTargetModel(string $modelName, array $relations): void
     {
-        list($path, $eol) = $this->getModelInfos($modelName);
+        $modelInfos = $this->getModelInfos($modelName);
+        if(empty($modelInfos)) return;
+
+        list($path, $eol) = $modelInfos;
 
         foreach ($relations as $relation) {
             $targetModelFile = file_get_contents($path);
@@ -308,6 +323,9 @@ class RepgeneratorService
     private function insertRelationsToTargetProvider(string $modelName, array $relations): void
     {
         $path = app_path('Domain'.DIRECTORY_SEPARATOR."$modelName".DIRECTORY_SEPARATOR.'Providers'.DIRECTORY_SEPARATOR.$modelName.'ServiceProvider.php');
+
+        if(!file_exists($path)) return;
+
         $relationsString = implode(', ', array_map(function ($val) {
                 return sprintf("'%s'", $val);
             }, $relations)).',';
@@ -1133,6 +1151,35 @@ class RepgeneratorService
 
     /**
      * @param  string  $name
+     */
+    private function eventProvider(string $name): void
+    {
+        $eventProviderTemplate = str_replace(
+            [
+                '{{modelName}}',
+            ],
+            [
+                $name,
+            ],
+            $this->repgeneratorStubService->getStub('EventServiceProvider')
+        );
+
+        if (!file_exists($path = app_path("Domain".DIRECTORY_SEPARATOR."$name".DIRECTORY_SEPARATOR."Providers"))) {
+            mkdir($path, 0777, true);
+        }
+
+        file_put_contents($path = app_path("Domain".DIRECTORY_SEPARATOR."$name".DIRECTORY_SEPARATOR."Providers".DIRECTORY_SEPARATOR."{$name}EventServiceProvider.php"), $eventProviderTemplate);
+
+        CharacterCounterStore::addFileCharacterCount($path);
+
+        $this->generatedFiles[] = [
+            'name' => "{$name}EventServiceProvider.php",
+            'location' => $path
+        ];
+    }
+
+    /**
+     * @param  string  $name
      * @param  RepgeneratorColumnAdapter[]  $columns
      * @param  array  $foreigns
      * @param  bool  $isGeneratedFileDomain
@@ -1458,6 +1505,11 @@ class RepgeneratorService
     private function getModelInfos(string $modelName): array
     {
         $path = app_path('Domain'.DIRECTORY_SEPARATOR."$modelName".DIRECTORY_SEPARATOR.'Models'.DIRECTORY_SEPARATOR."$modelName.php");
+
+        if(!file_exists($path)) {
+            return [];
+        }
+
         $targetModelFile = file_get_contents($path);
 
         $lineEndingCount = [
@@ -1477,6 +1529,11 @@ class RepgeneratorService
     private function getResourceInfos(string $modelName): array
     {
         $path = app_path('Domain'.DIRECTORY_SEPARATOR."$modelName".DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.$modelName."Resource.php");
+
+        if(!file_exists($path)) {
+            return [];
+        }
+
         $targetResourceFile = file_get_contents($path);
 
         $lineEndingCount = [
