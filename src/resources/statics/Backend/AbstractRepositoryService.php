@@ -2,8 +2,10 @@
 
 namespace App\Abstraction\Repository;
 
+use App\Abstraction\Filter\BaseQueryFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 /**
@@ -109,6 +111,16 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
     }
 
     /**
+     * @param  int  $id
+     * @param  array  $load
+     * @return Model|null
+     */
+    public function getById(int $id, array $load = []): Model|null
+    {
+        return app($this->model)::with($load)->find($id);
+    }
+
+    /**
      * @param  Builder  $qb
      * @param  mixed  $column
      * @param  mixed  $value
@@ -134,5 +146,33 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
         } else {
             return $qb->where($column, $value);
         }
+    }
+
+    /**
+     * @param BaseQueryFilter $filter
+     * @param array $load
+     * @return mixed
+     */
+    public function getFilterQB(BaseQueryFilter $filter, array $load = []) {
+        $qb = $this->getBaseBuilder($load);
+        return $qb->filter($filter);
+    }
+
+    /**
+     * @param BaseQueryFilter $filter
+     * @param  array  $load
+     * @param  int|null  $perPage
+     * @return Collection|LengthAwarePaginator
+     */
+    public function getByFilter(
+        BaseQueryFilter $filter,
+        array $load = [],
+        int $perPage = null
+    ): Collection|LengthAwarePaginator {
+        $qb = $this->getFilterQB($filter, $load);
+        if ($perPage) {
+            return $qb->paginate($perPage);
+        }
+        return $qb->get();
     }
 }

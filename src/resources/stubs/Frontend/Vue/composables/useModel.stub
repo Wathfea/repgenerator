@@ -1,8 +1,9 @@
 import useModel from "../../../Abstraction/composables/model.js";
+import {useUtils} from "../../../Abstraction/composables/useUtils";
 
 export const use{{ modelNamePluralUcfirst }}  = () => {
     const getRoute = () => {
-        return {{ modelNamePluralLowerCaseHyphenated }}
+        return '{{ modelNamePluralLowerCaseHyphenated }}'
     }
     const getEditableColumns = () => {
         return {{ columns }}
@@ -28,7 +29,9 @@ export const use{{ modelNamePluralUcfirst }}  = () => {
     }
     const { getModels: get{{ modelNamePluralUcfirst }}, getModel: get{{ modelNameSingularUcfirst }}, storeModel: store{{ modelNameSingularUcfirst }}, updateModel: update{{ modelNameSingularUcfirst }} } = useModel('{{ modelNamePluralLowerCaseHyphenated }}', false);
     return {
+        getRoute,
         getColumns,
+        getDataTableColumns,
         get{{ modelNamePluralUcfirst }},
         get{{ modelNameSingularUcfirst }},
         store{{ modelNameSingularUcfirst }},

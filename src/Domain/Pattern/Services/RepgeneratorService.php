@@ -179,7 +179,7 @@ class RepgeneratorService
         $this->apiRoutes($this->modelName);
         $callback('API Routes is ready!');
 
-
+        $requestData['crudUrlPrefix'] = !empty($requestData['crudUrlPrefix']) ? $requestData['crudUrlPrefix'] : '';
         !$isGenerateFrontend ?: $this->frontend($chosenOutputFramework, $requestData['icon'], $this->modelName, $requestData['crudUrlPrefix'], $columns, $callback);
 
         $callback("Code generation has saved you from typing at least ".CharacterCounterStore::$charsCount." characters");

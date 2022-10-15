@@ -2,8 +2,6 @@
 
 namespace App\Abstraction\Repository;
 
-use App\Abstraction\Filter\BaseQueryFilter;
-use Faker\Provider\Base;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -129,17 +127,6 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
     }
 
 
-    /**
-     * @param  int  $id
-     * @param  array  $load
-     * @return Model|null
-     */
-    public function getById(int $id, array $load = []): Model|null
-    {
-        return app($this->model)::with($load)->find($id);
-    }
-
-
 
     /**
      * @param  array  $load
@@ -149,34 +136,6 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
     public function getAll(array $load = [], int $perPage = null): Collection|LengthAwarePaginator
     {
         $qb = $this->getBaseBuilder($load);
-        if ($perPage) {
-            return $qb->paginate($perPage);
-        }
-        return $qb->get();
-    }
-
-    /**
-     * @param BaseQueryFilter $filter
-     * @param array $load
-     * @return mixed
-     */
-    public function getFilterQB(BaseQueryFilter $filter, array $load = []) {
-        $qb = $this->getBaseBuilder($load);
-        return $qb->filter($filter);
-    }
-
-    /**
-     * @param BaseQueryFilter $filter
-     * @param  array  $load
-     * @param  int|null  $perPage
-     * @return Collection|LengthAwarePaginator
-     */
-    public function getByFilter(
-        BaseQueryFilter $filter,
-        array $load = [],
-        int $perPage = null
-    ): Collection|LengthAwarePaginator {
-        $qb = $this->getFilterQB($filter, $load);
         if ($perPage) {
             return $qb->paginate($perPage);
         }

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use JetBrains\PhpStorm\Pure;
 
@@ -33,17 +34,63 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
         parent::__construct($pivotModel);
     }
 
+    public function getParentRequestKey(): string {
+        return $this->getParentModelName() . '_' . $this->parentIdColumName;
+    }
+
+    public function getRelationRequestKey(): string {
+        return Str::singular($this->relatedTableName) . '_' . $this->relationIdColumnName;
+    }
+
+    /**
+     * @param string $modelName
+     * @return string
+     */
+    private function getNameFromClass(string $modelName): string {
+        $modelClass = explode('\\', $modelName);
+        return strtolower($modelClass[count($modelClass) - 1]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getParentModelName(): string
+    {
+        return $this->getNameFromClass($this->parentModel);
+    }
+
+    /**
+     * @return string
+     */
+    public function getModelName(): string
+    {
+        return $this->getNameFromClass($this->pivotModel);
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function filterData(array $data): array {
+        return array_filter($data, function($datum, $columnName){
+            /** @var Pivot $pivotClass */
+            $pivotClass = app($this->pivotModel);
+            $fillable = $pivotClass->getFillable();
+            return in_array($columnName, $fillable);
+        }, ARRAY_FILTER_USE_BOTH);
+    }
+
     /**
      * @param  int  $parentModelId
      * @param  int  $relationshipModelId
      * @param  array  $data
-     * @return bool
+     * @return Pivot
      */
-    public function attach(int $parentModelId, int $relationshipModelId, array $data = []): bool
+    public function attach(int $parentModelId, int $relationshipModelId, array $data = []): Pivot
     {
-        $this->getRelation($parentModelId)->attach($relationshipModelId, $data);
+        $this->getRelation($parentModelId)->attach($relationshipModelId, $this->filterData($data));
 
-        return true;
+        return app($this->pivotModel)->find(DB::getPdo()->lastInsertId());
     }
 
     /**
@@ -108,8 +155,12 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
      * @param  array  $data
      * @return bool
      */
-    public function update(int $parentModelId, int $relationModelId, array $data = []): bool
+    public function updateData(int $parentModelId, int $relationModelId, array $data = []): bool
     {
-        return $this->getRelation($parentModelId)->updateExistingPivot($relationModelId, $data) > 0;
+        $data = $this->filterData($data);
+        if ( !empty($data) ) {
+            return $this->getRelation($parentModelId)->updateExistingPivot($relationModelId, $data) > 0;
+        }
+        return true;
     }
 }

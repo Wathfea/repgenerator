@@ -3,7 +3,6 @@
 namespace App\Abstraction\Repository;
 
 use App\Abstraction\Filter\BaseQueryFilter;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -65,13 +64,6 @@ interface ModelRepositoryServiceInterface extends RepositoryServiceInterface
     ): Collection|LengthAwarePaginator;
 
     /**
-     * @param  int  $id
-     * @param  array  $load
-     * @return Model|null
-     */
-    public function getById(int $id, array $load = []): Model|null;
-
-    /**
      * @return Model
      */
     public function getModel(): Model;
@@ -101,6 +93,19 @@ interface ModelRepositoryServiceInterface extends RepositoryServiceInterface
     public function save(array $data, array $uniqueIdentifiers = ['id']): Model|bool;
 
     /**
+     * @param  array  $uniqueIdentifiers
+     * @return RepositoryServiceInterface
+     */
+    public function setUniqueIdentifiers(array $uniqueIdentifiers): RepositoryServiceInterface;
+
+    /**
+     * @param  int  $id
+     * @param  array  $data
+     * @return bool
+     */
+    public function update(int $id, array $data): bool;
+
+    /**
      * @param  Model  $model
      * @param  array  $data
      * @return bool
@@ -113,17 +118,4 @@ interface ModelRepositoryServiceInterface extends RepositoryServiceInterface
      * @return bool
      */
     public function beforeSaving(Model $model, array $data): bool;
-
-    /**
-     * @param  array  $uniqueIdentifiers
-     * @return RepositoryServiceInterface
-     */
-    public function setUniqueIdentifiers(array $uniqueIdentifiers): RepositoryServiceInterface;
-
-    /**
-     * @param  int  $id
-     * @param  array  $data
-     * @return bool
-     */
-    public function update(int $id, array $data): bool;
 }
