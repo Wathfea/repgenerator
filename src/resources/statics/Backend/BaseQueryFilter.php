@@ -2,8 +2,12 @@
 
 namespace App\Abstraction\Filter;
 
+use App\Domain\Locale\Models\Locale;
+use App\Domain\Locale\Services\LocaleService;
+use App\Domain\Translation\Models\Translation;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use Kblais\QueryFilter\QueryFilter;
@@ -204,6 +208,20 @@ class BaseQueryFilter extends QueryFilter
             $columnData = explode(':', $search);
             $columnName = explode('.', $columnData[0])[0];
             $acceptedValue = $columnData[1];
+            if ( str_contains($columnName, 'translation_') ) {
+                $localeCode = explode('_', $columnName)[1];
+                /** @var LocaleService $localeService */
+                $localeService = app(LocaleService::class);
+                /** @var Locale $locale */
+                $locale = $localeService->getRepositoryService()->getByCode2($localeCode);
+                if ( $locale ) {
+                    $this->builder->whereHas('translations', function (Builder $translationBuilder) use($locale, $acceptedValue) {
+                        $translationBuilder->where(Translation::LOCALE_ID_COLUMN,$locale->getAttribute(Locale::ID_COLUMN))
+                            ->where('value', 'like', '%'. $acceptedValue .'%');
+                    });
+                }
+                continue;
+            }
             $methodName = lcfirst(str_replace('_', '', ucwords($columnName, '_')));
             if ( method_exists($this, $methodName) ) {
                 $this->$methodName($acceptedValue);
@@ -277,6 +295,22 @@ class BaseQueryFilter extends QueryFilter
         // 5. We loop through each column (or just the one)
         // e.x our user is sorting by user.first_name
         foreach ($orderColumns as $index => $orderColumn) {
+            if ( str_contains($orderColumn, 'translation_') ) {
+                $localeCode = explode('_', $orderColumn)[1];
+                /** @var LocaleService $localeService */
+                $localeService = app(LocaleService::class);
+                /** @var Locale $locale */
+                $locale = $localeService->getRepositoryService()->getByCode2($localeCode);
+                if ( $locale ) {
+                    $this->builder->leftJoin('translations', function(JoinClause $joinClause) use ( $thisTableName, $locale ) {
+                        $joinClause->on('translations.translation_key_id', '=' , $thisTableName . '.translation_key_id')
+                            ->where('translations.locale_id', '=' , $locale->getAttribute(Locale::ID_COLUMN));
+                    })->orderBy('translations.value', $orderDirections[$index]);
+                }
+                continue;
+            }
+
+
             // 5.1 We loop through each override that might exist for that column
             $foundOverride = false;
             foreach ($this->sortOverrides as $key => $sortOverride) {

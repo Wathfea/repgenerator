@@ -2,6 +2,7 @@
 
 namespace App\Abstraction\Controllers;
 
+use App\Abstraction\Models\BaseModel;
 use App\Abstraction\Repository\ModelRepositoryServiceInterface;
 use App\Abstraction\Repository\PivotRepositoryServiceInterface;
 use Exception;
@@ -113,17 +114,7 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
                     ])
                 );
             }
-            if ($model->exists) {
-                return Response::json(
-                    [
-                        'model' => $model,
-                        'success' => true,
-                    ]);
-            }
-            return Response::json(
-                [
-                    'success' => false,
-                ], 202);
+            return $this->show($request, $model->getAttribute(BaseModel::ID_COLUMN));
         } catch (Exception $exception) {
             Log::error('New '.$this->getService()->getRepositoryService()->getModelName().' Save: '.$exception->getMessage());
             return Response::json(

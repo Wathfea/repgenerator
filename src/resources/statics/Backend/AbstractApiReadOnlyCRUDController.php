@@ -5,6 +5,7 @@ namespace App\Abstraction\Controllers;
 use App\Abstraction\Filter\BaseQueryFilter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController implements CRUDControllerInterface, ApiCRUDControllerReadOnlyInterface
@@ -60,9 +61,35 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController 
      * @param  array  $removableRelations
      * @return void
      */
-    public function removeFromRelatons(array $removableRelations): void
+    public function removeFromRelations(array $removableRelations): void
     {
         $this->setRelations(array_diff($this->getRelations(), $removableRelations));
+    }
+
+    /**
+     * @param Request $request
+     * @return BaseQueryFilter
+     */
+    public function getFilter(Request $request): BaseQueryFilter {
+        return app($this->getFilterClass(), $request->all());
+    }
+
+    /**
+     * @param Request $request
+     * @param array $relationships
+     * @return AnonymousResourceCollection
+     */
+    public function getIndexData(Request $request, array $relationships = []): AnonymousResourceCollection
+    {
+        /** @var JsonResource $resource */
+        $resource = $this->getResourceClass();
+        $filter = $this->getFilter($request);
+        $perPage = $this->getPerPage($request);
+        if ( $request->has('load') && !empty($request->get('load')) ) {
+            $relationships = array_intersect($relationships, $request->get('load'));
+        }
+        return $resource::collection($this->getService()->getRepositoryService()->getByFilter($filter, $relationships,
+            $perPage));
     }
 
     /**
@@ -72,13 +99,8 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractCRUDController 
      */
     public function index(Request $request, array $relationships = []): JsonResponse
     {
-        /** @var JsonResource $resource */
-        $resource = $this->getResourceClass();
-        $filter = app($this->getFilterClass(), $request->all());
-        $perPage = $this->getPerPage($request);
         $this->addToRelations($relationships);
-        return $resource::collection($this->getService()->getRepositoryService()->getByFilter($filter, $this->getRelations(),
-            $perPage))->toResponse($request);
+        return $this->getIndexData($request, $this->getRelations())->toResponse($request);
     }
 
     /**
