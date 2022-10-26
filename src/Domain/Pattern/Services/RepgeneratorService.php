@@ -378,6 +378,8 @@ class RepgeneratorService
                       "Abstraction".DIRECTORY_SEPARATOR."Models",
                       "Abstraction".DIRECTORY_SEPARATOR."Repository",
                       "Abstraction".DIRECTORY_SEPARATOR."Controllers",
+                      "Abstraction".DIRECTORY_SEPARATOR."Controllers".DIRECTORY_SEPARATOR."CRUD",
+                      "Abstraction".DIRECTORY_SEPARATOR."Controllers".DIRECTORY_SEPARATOR."ARUD",
                       "Abstraction".DIRECTORY_SEPARATOR."Enums",
                       "Abstraction".DIRECTORY_SEPARATOR."Traits",
                       "Domain",

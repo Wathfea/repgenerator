@@ -76,9 +76,12 @@ const props = defineProps({
     required: true,
     type: String
   },
+  columns : {
+    required: false,
+  },
 });
 let setSearch = props.setSearch ? props.setSearch : ( props.data.valuesGetter ? [] : '' );
-setSearch = !Array.isArray(setSearch) && setSearch.indexOf(',') ? setSearch.split(',') : setSearch;
+setSearch = !Array.isArray(setSearch) && typeof setSearch === 'string' && setSearch.indexOf(',') ? setSearch.split(',') : setSearch;
 const search = ref(setSearch);
 const date = ref(setSearch);
 const onSearch = () => {
@@ -88,8 +91,8 @@ const onSearch = () => {
   });
   onClose();
 }
-const onSearchChange = (value) => {
-  search.value = value;
+const onSearchChange = (changeData) => {
+  search.value = changeData.value;
 }
 const onClose = () => {
   emit('close', props.column);

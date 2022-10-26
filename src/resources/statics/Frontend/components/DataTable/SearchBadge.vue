@@ -48,7 +48,7 @@
   }
   const getValue = computed(() => (value) => {
     if ( props.data.data.values ) {
-      let setValues = Array.isArray(props.search.value) ? props.search.value : props.search.value.split(',');
+      let setValues = Array.isArray(props.search.value) ? props.search.value : (props.search.value && typeof props.search.value === 'string' ? props.search.value.split(',') : [props.search.value]);
       let returnValues = [];
       for ( let key in setValues ) {
         for ( let index in props.data.data.values ) {

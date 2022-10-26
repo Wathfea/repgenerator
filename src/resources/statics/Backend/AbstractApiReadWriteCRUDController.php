@@ -1,29 +1,24 @@
 <?php
 
-namespace App\Abstraction\Controllers;
+namespace App\Abstraction\Controllers\CRUD;
 
+use App\Abstraction\Controllers\ControllerInterface;
+use App\Abstraction\Controllers\ReadWriteControllerInterface;
 use App\Abstraction\Models\BaseModel;
-use App\Abstraction\Repository\ModelRepositoryServiceInterface;
-use App\Abstraction\Repository\PivotRepositoryServiceInterface;
-use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Response;
 
-abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRUDController implements CRUDControllerInterface, ApiCRUDControllerReadWriteInterface, ApiCRUDControllerReadOnlyInterface
+abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRUDController implements ControllerInterface, ReadWriteControllerInterface, CRUDControllerInterface, ApiReadOnlyCRUDControllerInterface, ApiReadWriteCRUDControllerInterface
 {
+    /** @var string  */
+    protected string $storeRequest = '';
 
-    protected string $storeRequest;
-    protected string $updateRequest;
+    /** @var string  */
+    protected string $updateRequest = '';
 
-    /**
-     * @return string
-     */
-    public function getStoreRequest(): string
-    {
-        return $this->storeRequest;
-    }
+    /** @var string  */
+    protected string $destroyRequest = '';
 
     /**
      * @param string $storeRequest
@@ -33,14 +28,6 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
     {
         $this->storeRequest = $storeRequest;
         return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUpdateRequest(): string
-    {
-        return $this->updateRequest;
     }
 
     /**
@@ -54,39 +41,46 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
     }
 
     /**
+     * @param string $destroyRequest
+     * @return AbstractApiReadWriteCRUDController
+     */
+    public function setDestroyRequest(string $destroyRequest): AbstractApiReadWriteCRUDController
+    {
+        $this->destroyRequest = $destroyRequest;
+        return $this;
+    }
+
+    /**
+     * @param Request $request
+     * @param Model $model
+     * @return bool
+     */
+    public function handleDestroy(Request $request, Model $model): bool
+    {
+        return $this->getService()->getRepositoryService()->destroy($model->getAttribute(BaseModel::ID_COLUMN));
+    }
+
+    /**
      * @param Request $request
      * @param int $id
      * @return JsonResponse
      */
     public function destroy(Request $request, int $id): JsonResponse
     {
-        try {
-            $model = $this->getService()->getRepositoryService()->getById($id);
+        return $this->getDestroyOrDetachResponse($request, function() use ($id) {
+            return $this->getService()->getRepositoryService()->getById($id);
+        },function (Model $model) use ($request) {
+            return $this->handleDestroy($request, $model);
+        }, $this->destroyRequest);
+    }
 
-            if (!$model) {
-                return Response::json(
-                    [
-                        'success' => false,
-                        'message' => trans('model.not_found'),
-                    ], 202);
-            }
-
-            $modelDestroyed = $this->getService()->getRepositoryService()->destroy($id);
-
-            return Response::json(
-                [
-                    'success' => $modelDestroyed,
-                    'message' => $modelDestroyed ? trans('model.deleted') : trans('model.delete_failed'),
-                ], $modelDestroyed ? 200 : 202);
-        } catch (Exception $exception) {
-            Log::error('Delete '.$this->getService()->getRepositoryService()->getModelName().' Error: '.$exception->getMessage());
-            return Response::json(
-                [
-                    'success' => false,
-                    'message' => trans('model.being_used'),
-                    'error' => $exception->getMessage(),
-                ], 202);
-        }
+    /**
+     * @param Request $request
+     * @return Model
+     */
+    public function handleStore(Request $request): Model
+    {
+        return $this->getService()->getRepositoryService()->save($request->all());
     }
 
     /**
@@ -95,37 +89,20 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
      */
     public function store(Request $request): JsonResponse
     {
-        if ( !empty($this->storeRequest) ) {
-            $request->validate(app($this->storeRequest)->rules());
-        }
-        try {
-            $repositoryService = $this->getService()->getRepositoryService();
-            if ( $repositoryService instanceof ModelRepositoryServiceInterface ) {
-                $model = $repositoryService->save($request->all());
-            } else if ( $repositoryService instanceof PivotRepositoryServiceInterface ) {
-                $parentRequestKey = $repositoryService->getParentRequestKey();
-                $relationRequestKey = $repositoryService->getRelationRequestKey();
-                $model = $repositoryService->attach(
-                    $request->get($parentRequestKey),
-                    $request->get($relationRequestKey),
-                    $request->except([
-                        $parentRequestKey,
-                        $relationRequestKey
-                    ])
-                );
-            }
-            return $this->show($request, $model->getAttribute(BaseModel::ID_COLUMN));
-        } catch (Exception $exception) {
-            Log::error('New '.$this->getService()->getRepositoryService()->getModelName().' Save: '.$exception->getMessage());
-            return Response::json(
-                [
-                    'success' => false,
-                    'message' => $exception->getMessage(),
-                ], 202);
-        }
+        return $this->getStoreOrAttachResponse($request, function() use ($request) {
+            return $this->handleStore($request);
+        }, $this->storeRequest);
     }
 
-
+    /**
+     * @param Request $request
+     * @param Model $model
+     * @return bool
+     */
+    public function handleUpdate(Request $request, Model $model): bool
+    {
+        return $this->getService()->getRepositoryService()->update($model->getAttribute(BaseModel::ID_COLUMN), $request->all());
+    }
 
     /**
      * @param  Request  $request
@@ -134,36 +111,10 @@ abstract class AbstractApiReadWriteCRUDController extends AbstractApiReadOnlyCRU
      */
     public function update(Request $request, int $id): JsonResponse
     {
-        if ( !empty($this->updateRequest) ) {
-            $request->validate(app($this->updateRequest)->rules());
-        }
-        try {
-            $repositoryService = $this->getService()->getRepositoryService();
-            if ( $repositoryService instanceof ModelRepositoryServiceInterface ) {
-                $modelUpdated = $repositoryService->update($id, $request->all());
-            } else if ( $repositoryService instanceof PivotRepositoryServiceInterface ) {
-                $parentRequestKey = $repositoryService->getParentRequestKey();
-                $relationRequestKey = $repositoryService->getRelationRequestKey();
-                $modelUpdated = $repositoryService->updateData(
-                    $request->get($parentRequestKey),
-                    $request->get($relationRequestKey),
-                    $request->except([
-                        $parentRequestKey,
-                        $relationRequestKey
-                    ])
-                );
-            }
-            return Response::json(
-                [
-                    'success' => $modelUpdated,
-                ], $modelUpdated ? 200 : 202);
-        } catch (Exception $exception) {
-            Log::error('Update '.$this->getService()->getRepositoryService()->getModelName().': '.$exception->getMessage());
-            return Response::json(
-                [
-                    'success' => false,
-                    'message' => $exception->getMessage(),
-                ], 202);
-        }
+        return $this->getUpdateResponse($request, function() use ($id) {
+            return $this->getService()->getRepositoryService()->getById($id);
+        },function (Model $model) use ($request) {
+            return $this->handleUpdate($request, $model);
+        }, $this->updateRequest);
     }
 }

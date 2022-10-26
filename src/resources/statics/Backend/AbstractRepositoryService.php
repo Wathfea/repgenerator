@@ -111,16 +111,6 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
     }
 
     /**
-     * @param  int  $id
-     * @param  array  $load
-     * @return Model|null
-     */
-    public function getById(int $id, array $load = []): Model|null
-    {
-        return app($this->model)::with($load)->find($id);
-    }
-
-    /**
      * @param  Builder  $qb
      * @param  mixed  $column
      * @param  mixed  $value
@@ -170,6 +160,21 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
         int $perPage = null
     ): Collection|LengthAwarePaginator {
         $qb = $this->getFilterQB($filter, $load);
+        if ($perPage) {
+            return $qb->paginate($perPage);
+        }
+        return $qb->get();
+    }
+
+
+    /**
+     * @param  array  $load
+     * @param  int|null  $perPage
+     * @return Collection|\Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function getAll(array $load = [], int $perPage = null): Collection|LengthAwarePaginator
+    {
+        $qb = $this->getBaseBuilder($load);
         if ($perPage) {
             return $qb->paginate($perPage);
         }

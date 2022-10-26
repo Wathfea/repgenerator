@@ -34,7 +34,7 @@
                 <th :style="{ width: column.data.width ? column.data.width : 'auto' }" v-for="(column,key) in columns" :key="key" scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
 
                   <SearchColumnPopup v-if="column.isSearchOpen" :data="column.data" :set-search="searchColumns[key] ? searchColumns[key].value : ''"
-                                     :name="getColumnName(key)" @close="onCloseSearch" :column="key" @search="onSearchChanged"/>
+                                     :name="getColumnName(key)" @close="onCloseSearch" :column="key" :columns="columns" @search="onSearchChanged"/>
                   <slot
                       :name="`header(${key})`"
                       :value="column.data"
@@ -71,14 +71,14 @@
                     {{ getCellData(column, key, model) }}
                   </slot>
                 </td>
-                <td class="flex justify-end relative whitespace-nowrap py-4 px-3 text-sm font-medium sm:pr-6 lg:pr-8">
-                  <NuxtLink :to="`/${route}/${model.id}`" class="text-vagheggi-600 hover:text-vagheggi-900">
+                <td key="actions" class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                  <NuxtLink v-if="!(typeof disableDestroy === 'function' ? disableDestroy(model) : disableDestroy)" @click="deleteModel(model.id)" class="text-repgenerator-600 hover:text-repgenerator-900 ml-2 cursor-pointer mr-2 float-right">
+                    <TrashIcon class="h-6 w-6" aria-hidden="true" />
+                  </NuxtLink>
+                  <NuxtLink v-if="!(typeof disableEdit === 'function' ? disableEdit(model) : disableEdit)" :to="`/${route}/${model.id}`" class="text-repgenerator-600 hover:text-repgenerator-900 mr-2 float-right">
                     <PencilIcon class="h-6 w-6" aria-hidden="true" />
                   </NuxtLink>
-                  <a v-if="!disableDestroy" @click="deleteModel(model.id)" class="text-vagheggi-600 hover:text-vagheggi-900 ml-2 cursor-pointer">
-                    <TrashIcon class="h-6 w-6" aria-hidden="true" />
-                  </a>
-                  <slot name="actions" :value="model"/>
+                  <slot name="actions" :item="model"/>
                 </td>
               </tr>
               </tbody>
@@ -139,8 +139,8 @@ import ColumnHeader from "./ColumnHeader.vue";
 import useModel from "../../composables/model.js";
 import SearchBadge from "./SearchBadge.vue";
 import SearchColumnPopup from "./SearchColumnPopup.vue";
-import {useRoute} from "vue-router";
-
+import {useRoute} from "nuxt/app";
+import {useLocales} from "../../composables/useLocales.ts";
 const currentRoute = useRoute();
 const props = defineProps({
   modelReadableName : {
@@ -161,13 +161,11 @@ const props = defineProps({
     required: false,
     default: false
   },
-  createQuery: {
-    type: String,
-    required: false,
-    default: ''
-  },
   disableDestroy: {
-    type: Boolean,
+    required: false,
+    default: false
+  },
+  disableEdit: {
     required: false,
     default: false
   },
@@ -206,8 +204,34 @@ for ( let index in setQuery['searchColumns'] ) {
 }
 const searchColumns = ref(setSearchColumns ?? {});
 const searchParams = ref({});
-for ( let index in props.setColumns ) {
-  let data = props.setColumns[index];
+let settingColumns = props.setColumns;
+for ( let index in settingColumns ) {
+  if ( settingColumns[index].isTranslation ) {
+    const { getLocales } = useLocales();
+    const locales = await getLocales();
+    for ( let localeIndex in locales.data ) {
+      let locale = locales.data[localeIndex];
+      let newKey = 'translation_' + locale.code2;
+      let keyValues = Object.entries(settingColumns);
+      keyValues.splice(1,0, [newKey,{
+        width: '200px',
+        cellGetter: (model) => {
+          for ( let translationIndex in model.translations ) {
+            if ( model.translations[translationIndex].locale.id === locale.id ) {
+              return model.translations[translationIndex].value;
+            }
+          }
+          return model.key;
+        },
+        name : locales.data[localeIndex].name
+      }]);
+      settingColumns=  Object.fromEntries(keyValues);
+    }
+    delete settingColumns[index];
+  }
+}
+for ( let index in settingColumns ) {
+  let data = settingColumns[index];
   if ( data.valuesGetter ) {
     data.valuesLoading = ref(true);
     data.values = ref([]);
@@ -338,10 +362,17 @@ const deleteModel = async (id) => {
 }
 
 const getColumnName = (key) => {
-  if( props.setColumns[key].name ) {
-    return props.setColumns[key].name;
+  switch(key) {
+    case 'translation_en':
+      return 'Angol fordítás';
+    case 'translation_hu':
+      return 'Magyar fordítás';
+    default:
+      if( props.setColumns[key] && props.setColumns[key].name ) {
+        return props.setColumns[key].name;
+      }
+      return props.setColumns[key];
   }
-  return props.setColumns[key];
 }
 
 const onRemoveSearch = (column) => {

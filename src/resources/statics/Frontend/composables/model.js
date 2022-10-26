@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import {$larafetch} from "../utils/$larafetch.ts";
-import {useNotifications} from "./useNotifications.ts";
+import { $larafetch } from "../utils/$larafetch";
+import { useNotifications } from "./useNotifications";
 
 export default function useModel(route, setQuery = true, prefix = 'api/v1/', cacheVersion = null, localCache = false, fixedFilters = []) {
     const model = ref({})
@@ -10,7 +10,7 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
     const errors = ref('')
     const router = useRouter()
     const { addWarning, addSuccess, addInfo } = useNotifications();
-    const baseParams  = {
+    const baseParams = {
         sort_by: 'id',
         sort_dir: 'asc',
         page: 1,
@@ -18,10 +18,10 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
     };
 
     const meta = ref({
-        current_page : 0,
-        last_page : 0,
+        current_page: 0,
+        last_page: 0,
         from: 0,
-        to : 0,
+        to: 0,
         total: 0
     });
 
@@ -29,7 +29,7 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
         return JSON.parse(JSON.stringify(baseParams));
     }
 
-    const getModels = async (page = null, perPage = null, searchParams = {}, isSearching) => {
+    const getModels = async(page = null, perPage = null, searchParams = {}, isSearching) => {
         let setParams = Object.assign(getBaseParamsCopy(), {
             page: page,
             per_page: perPage,
@@ -42,31 +42,31 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
                 delete setParams[index];
             }
         }
-        if ( isSearching ) {
+        if (isSearching) {
             isSearching.value = true;
         }
-        if ( currentRoute && currentRoute.query !== setParams && setQuery ) {
-            await router.push({path: currentRoute.path, query: setParams, hash: currentRoute.hash});
+        if (currentRoute && currentRoute.query !== setParams && setQuery) {
+            await router.push({ path: currentRoute.path, query: setParams, hash: currentRoute.hash });
         }
         let requiresCache = false;
-        if ( cacheVersion !== null ) {
-            let cacheVersionKey = route+'CacheVersion';
+        if (cacheVersion !== null) {
+            let cacheVersionKey = route + 'CacheVersion';
             let currentCacheVersion = parseInt(localStorage.getItem(cacheVersionKey));
-            if ( !currentCacheVersion || currentCacheVersion !== cacheVersion ) {
+            if (!currentCacheVersion || currentCacheVersion !== cacheVersion) {
                 localStorage.setItem(cacheVersionKey, cacheVersion);
                 requiresCache = true;
             }
         }
 
-        if ( fixedFilters ) {
-            for ( let index in fixedFilters ) {
+        if (fixedFilters) {
+            for (let index in fixedFilters) {
                 let filter = fixedFilters[index];
                 setParams[filter.column] = filter.value;
             }
         }
         let paramQuery = buildParams(setParams);
-        let cacheKey = route+'Cache?' + paramQuery;
-        if ( !requiresCache && localCache && localStorage.getItem(cacheKey)  ) {
+        let cacheKey = route + 'Cache?' + paramQuery;
+        if (!requiresCache && localCache && localStorage.getItem(cacheKey)) {
             let cacheData = JSON.parse(localStorage.getItem(cacheKey));
             models.value = cacheData.data;
             models.meta = cacheData.meta;
@@ -76,12 +76,12 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
             method: 'get',
             cache: !requiresCache ? 'force-cache' : 'default'
         });
-        if ( isSearching ) {
+        if (isSearching) {
             isSearching.value = false;
         }
         models.value = response.data;
         meta.value = response.meta;
-        if ( requiresCache && localCache ) {
+        if (requiresCache && localCache) {
             localStorage.setItem(cacheKey, JSON.stringify(response));
         }
         return response;
@@ -91,7 +91,7 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
         const params = new URLSearchParams()
         Object.entries(data).forEach(([key, value]) => {
             if (Array.isArray(value)) {
-                value.forEach(value => value && params.append(key+'[]', value.toString()))
+                value.forEach(value => value && params.append(key + '[]', value.toString()))
             } else {
                 params.append(key, value.toString())
             }
@@ -99,7 +99,7 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
         return params.toString()
     }
 
-    const getModel = async (id) => {
+    const getModel = async(id) => {
         let response = await $larafetch(`${prefix}${route}/${id}`, {
             method: 'get'
         })
@@ -109,28 +109,34 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
     }
 
     const searchTimeout = ref(null);
-    const searchModel = async (params, perPage, isDelayed, isSearching) => {
-        if ( searchTimeout.value ) {
+    const searchModel = async(params, perPage, isDelayed, isSearching) => {
+        if (searchTimeout.value) {
             clearTimeout(searchTimeout.value);
         }
-        searchTimeout.value = setTimeout(async () => {
+        searchTimeout.value = setTimeout(async() => {
             await getModels(1, perPage, params, isSearching)
-        },isDelayed ? 500 : 0);
+        }, isDelayed ? 500 : 0);
     }
 
     const convertDataToFormData = (data) => {
         const formData = new FormData()
         Object.keys(data).forEach(key => {
-            if(Array.isArray(data[key])) {
-                for(let i in data[key]) {
-                    formData.append(key+'[]', data[key][i])
+            if (Array.isArray(data[key])) {
+                for (let i in data[key]) {
+                    formData.append(key + '[]', data[key][i])
+                }
+            } else if (typeof data[key] === 'object' && data[key] !== null) {
+                for (let propkey in data[key]) {
+                    if (data[key][propkey] != null) {
+                        formData.append(`${key}[${propkey}]`, data[key][propkey]);
+                    }
                 }
             } else {
                 // Temporary fix for sending booleans
-                if ( typeof data[key] === 'boolean' ) {
+                if (typeof data[key] === 'boolean') {
                     data[key] = data[key] ? 1 : 0;
                 }
-                if ( data[key] !== null ) {
+                if (data[key] !== null) {
                     formData.append(key, data[key])
                 }
             }
@@ -138,22 +144,22 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
         return formData;
     }
 
-    const storeModel = async (data) => {
+    const storeModel = async (data, getRedirectPath = null, getRedirectHash = null) => {
         errors.value = ''
         try {
             let response = await $larafetch(prefix + route, {
                 method: 'post',
                 body: convertDataToFormData(data),
             })
-            if ( response.success ) {
-                await router.push({path: '/' + route });
+            if (response.success) {
+                await router.push({ path: '/' + (getRedirectPath ? getRedirectPath(data) : route), hash: (getRedirectHash ? getRedirectHash(data) : '')});
                 addSuccess('Sikeresen mentve', response.message);
             } else {
                 addWarning('Sikertelen mentés', response.message);
             }
         } catch (e) {
-            if (e.response ) {
-                switch(e.response.status){
+            if (e.response) {
+                switch (e.response.status) {
                     case 422:
                         let data = e.response.data || e.response._data;
                         for (const key in data) {
@@ -167,18 +173,21 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
 
     }
 
-    const updateModel = async (id, data) => {
+    const updateModel = async(id, data) => {
         errors.value = ''
         try {
-            await $larafetch(prefix + route + '/' + id, {
+            let response = await $larafetch(prefix + route + '/' + id, {
                 method: 'post',
                 body: convertDataToFormData(data)
             });
-            addSuccess('Sikeresen mentve', data.message);
+            if ( response.success ) {
+                addSuccess('Sikeresen mentve', response.message);
+            } else {
+                addWarning('Hiba mentés közben', response.message);
+            }
         } catch (e) {
             if (e.response) {
-                switch(e.response.status)
-                {
+                switch (e.response.status) {
                     case 422:
                         let data = e.response.data || e.response._data;
                         for (const key in data.errors) {
@@ -191,20 +200,28 @@ export default function useModel(route, setQuery = true, prefix = 'api/v1/', cac
         }
     }
 
-    const destroyModel = async (id) => {
-        let response = await $larafetch(`${prefix}${route}/${id}`, {
-            method: 'delete'
-        })
-        switch(response.status) {
-            case 202:
-                addWarning('Nem sikerült törölni');
-                break;
-            case 200:
-                addSuccess('Sikeresen törölve');
-                break;
-            default:
-                addSuccess('Sikertelen törlés');
-                break;
+    const destroyModel = async(id) => {
+        try {
+            let response = await $larafetch(`${prefix}${route}/${id}`, {
+                method: 'delete'
+            })
+            if ( response.success ) {
+                addSuccess('Sikeresen törölve', response.message);
+            } else {
+                addWarning('Hiba törölés közben', response.message);
+            }
+        } catch (e) {
+            if (e.response) {
+                switch (e.response.status) {
+                    case 422:
+                        let data = e.response.data || e.response._data;
+                        for (const key in data.errors) {
+                            errors.value += data.errors[key][0] + ' ';
+                        }
+                        addWarning('Sikertelen törlés', data.message);
+                        break;
+                }
+            }
         }
     }
 

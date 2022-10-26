@@ -4,7 +4,6 @@ namespace App\Abstraction\Repository;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 /**
@@ -14,6 +13,16 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
 {
 
     protected array $uniqueIdentifiers = [];
+
+    /**
+     * @param  int  $id
+     * @param  array  $load
+     * @return Model|null
+     */
+    public function getById(int $id, array $load = []): Model|null
+    {
+        return app($this->model)::with($load)->find($id);
+    }
 
     /**
      * @param  int  $id
@@ -124,22 +133,6 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
             return $model->update($data) || $otherDataUpdated;
         }
         return false;
-    }
-
-
-
-    /**
-     * @param  array  $load
-     * @param  int|null  $perPage
-     * @return Collection|\Illuminate\Contracts\Pagination\LengthAwarePaginator
-     */
-    public function getAll(array $load = [], int $perPage = null): Collection|LengthAwarePaginator
-    {
-        $qb = $this->getBaseBuilder($load);
-        if ($perPage) {
-            return $qb->paginate($perPage);
-        }
-        return $qb->get();
     }
 
     /**
