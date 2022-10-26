@@ -63,6 +63,7 @@ class RepgeneratorStaticFilesService
             "composables/model.js",
             "composables/useNotifications.ts",
             "composables/useUtils.ts",
+            "composables/useLocales.ts",
             "router/router.js"
         ];
 
