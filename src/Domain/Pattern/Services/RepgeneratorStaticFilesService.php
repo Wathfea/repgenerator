@@ -113,7 +113,6 @@ class RepgeneratorStaticFilesService
             "Abstraction/Controllers/BaseTransactionController.php",
             "Abstraction/Controllers/AbstractController.php",
             "Abstraction/Controllers/ControllerInterface.php",
-            "Abstraction/Controllers/AbstractCRUDController.php",
             "Abstraction/Controllers/ReadOnlyControllerInterface.php",
             "Abstraction/Controllers/ReadWriteControllerInterface.php",
 
