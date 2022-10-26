@@ -64,6 +64,7 @@ export const dialogConfigs = () => {
               //<a class="delete" onclick="this.parentNode.remove();">&times;</a>
               //kényelemből hozzá lehetne adni, de meg kel vizsgálni hogy úgy adjuk hozzá hogy a valkue értékbe ne íródjon be csak a preview elembe
           }
+          // @ts-ignore tinymce
           tinymce.activeEditor.execCommand('mceInsertRawHTML', false, html);
           api.close();
         }
