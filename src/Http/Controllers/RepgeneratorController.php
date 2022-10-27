@@ -72,13 +72,25 @@ class RepgeneratorController extends Controller
         }
 
         //Generate migration for the main model
-        $messages[] = $this->generateMainMigrationAndDomain($table, $requestData, $columns, $indexes, $foreigns, $messages,
-            $fileUploadFieldsData, $regenerate);
+        $messages[] = $this->generateMainMigrationAndDomain(
+            table: $table,
+            requestData: $requestData,
+            columns: $columns,
+            indexes: $indexes,
+            foreigns: $foreigns,
+            messages: $messages,
+            fileUploadFieldsData: $fileUploadFieldsData,
+            regenerate: $regenerate);
         sleep(1);
 
         //If $fileUploadFieldsData is not empty we need to create the migration and the Domain for the relationship also
         if (!empty($fileUploadFieldsData)) {
-            $messages[] = $this->generateFileRelationMigrationAndDomain($table, $requestData, $fileUploadFieldsData, $regenerate);
+            $messages[] = $this->generateFileRelationMigrationAndDomain(
+                table: $table,
+                requestData: $requestData,
+                fileUploadFieldsData: $fileUploadFieldsData,
+                regenerate: $regenerate
+            );
         }
 
         $messages = collect($messages)->flatten()->toArray();
@@ -184,7 +196,22 @@ class RepgeneratorController extends Controller
                         'name' => 'crud_menu_group',
                         'relationType' => 'BelongsTo'
                     ];
-                    $columns[] = new RepgeneratorColumnAdapter($name, $type, false, false, false, null, null, null, null, false, null, null, null, null, $reference);
+                    $columns[] = new RepgeneratorColumnAdapter(
+                        name: $name,
+                        type: $type,
+                        aic:false,
+                        nullable: false,
+                        cascade: false,
+                        length: null,
+                        comment: null,
+                        precision: null,
+                        scale: null,
+                        unsigned: false,
+                        values: null,
+                        default: null,
+                        index: null,
+                        showOnTable: null,
+                        references: $reference);
                 } else {
                     $columns[] = new RepgeneratorColumnAdapter($name, $type);
                 }
@@ -206,8 +233,16 @@ class RepgeneratorController extends Controller
             ];
 
             $this->migrationGeneratorService->setDate(Carbon::now());
-            $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], [],
-                self::CRUD_MENU_TABLE_NAME, 'menu', false, false, false);
+            $migrationName = $this->migrationGeneratorService->generateMigrationFiles(
+                table: $table,
+                columns: $columns,
+                indexes: [],
+                foreigns: [],
+                modelName: self::CRUD_MENU_TABLE_NAME,
+                iconName: 'menu',
+                isGenerateFrontend: false,
+                softDelete: false,
+                timestamps: false);
 
             $data = [
                 'name' => self::CRUD_MENU_TABLE_NAME,
@@ -217,15 +252,15 @@ class RepgeneratorController extends Controller
             ];
 
             $this->repgeneratorService->generate(
-                $data,
-                $columns,
-                $foreigns,
-                function ($msg) use (&$messages) {
+                requestData: $data,
+                columns: $columns,
+                foreigns: $foreigns,
+                callback: function ($msg) use (&$messages) {
                     $messages[] = null;
                 },
-                null,
-                $migrationName,
-                true
+                fileUploadFieldsData: null,
+                migrationName: $migrationName,
+                isGenerateFrontend: true
             );
         }
 
@@ -257,8 +292,16 @@ class RepgeneratorController extends Controller
             }
 
             $this->migrationGeneratorService->setDate(Carbon::now());
-            $migrationName = $this->migrationGeneratorService->generateMigrationFiles($table, $columns, [], [],
-                self::CRUD_MENU_GROUP_TABLE_NAME, 'MenuIcon', false,false, false);
+            $migrationName = $this->migrationGeneratorService->generateMigrationFiles(
+                table: $table,
+                columns: $columns,
+                indexes: [],
+                foreigns: [],
+                modelName: self::CRUD_MENU_GROUP_TABLE_NAME,
+                iconName: 'MenuIcon',
+                isGenerateFrontend: false,
+                softDelete: false,
+                timestamps: false);
 
             $data = [
                 'name' => self::CRUD_MENU_GROUP_TABLE_NAME,
@@ -269,15 +312,15 @@ class RepgeneratorController extends Controller
 
 
             $this->repgeneratorService->generate(
-                $data,
-                $columns,
-                [],
-                function ($msg) use (&$messages) {
+                requestData: $data,
+                columns: $columns,
+                foreigns: [],
+                callback: function ($msg) use (&$messages) {
                     $messages[] = null;
                 },
-                null,
-                $migrationName,
-                true
+                fileUploadFieldsData: null,
+                migrationName: $migrationName,
+                isGenerateFrontend: true
             );
         }
 
@@ -314,19 +357,19 @@ class RepgeneratorController extends Controller
 
             $this->migrationGeneratorService->setDate(Carbon::now());
             $migrationName = $this->migrationGeneratorService->generateMigrationFiles(
-                $table,
-                $columns,
-                $indexes,
-                $foreigns,
-                $requestData['name'],
-                $requestData['icon'],
-                $requestData['generateFrontend'],
-                $requestData['softDelete'],
-                $requestData['timestamps'],
-                $requestData['menu_group_id'],
-                $requestData['new_menu_group_name'],
-                $requestData['new_menu_group_icon'],
-                $requestData['crudUrlPrefix']
+                table: $table,
+                columns: $columns,
+                indexes: $indexes,
+                foreigns: $foreigns,
+                modelName: $requestData['name'],
+                iconName: $requestData['icon'],
+                isGenerateFrontend: $requestData['generateFrontend'],
+                softDelete: $requestData['softDelete'],
+                timestamps: $requestData['timestamps'],
+                menuGroupId: $requestData['menu_group_id'],
+                newMenuGroupName: $requestData['new_menu_group_name'],
+                newMenuGroupIcon: $requestData['new_menu_group_icon'],
+                crudUrlPrefix: $requestData['crudUrlPrefix']
             );
         }
 
@@ -351,15 +394,15 @@ class RepgeneratorController extends Controller
 //        }
 
         $this->repgeneratorService->generate(
-            $requestData,
-            $columns,
-            $foreigns,
-            function ($msg) use (&$messages) {
+            requestData: $requestData,
+            columns: $columns,
+            foreigns: $foreigns,
+            callback: function ($msg) use (&$messages) {
                 $messages[] = $msg;
             },
-            $fileUploadFieldsData,
-            $migrationName,
-            $requestData['generateFrontend']
+            fileUploadFieldsData: $fileUploadFieldsData,
+            migrationName: $migrationName,
+            isGenerateFrontend: $requestData['generateFrontend']
         );
         return $messages;
     }
@@ -416,15 +459,15 @@ class RepgeneratorController extends Controller
         if(!$regenerate) {
             $this->migrationGeneratorService->setDate(Carbon::now());
             $migrationName = $this->migrationGeneratorService->generateMigrationFiles(
-                $table,
-                $columns,
-                [],
-                $foreigns,
-                $requestData['name'].'Files',
-                'photograph',
-                false,
-                false,
-                false
+                table: $table,
+                columns: $columns,
+                indexes: [],
+                foreigns: $foreigns,
+                modelName: $requestData['name'].'Files',
+                iconName: 'photograph',
+                isGenerateFrontend: false,
+                softDelete: false,
+                timestamps: false
             );
         }
 
@@ -434,16 +477,16 @@ class RepgeneratorController extends Controller
         ];
 
         $this->repgeneratorService->generate(
-            $data,
-            $columns,
-            $foreigns,
-            function ($msg) use (&$messages) {
+            requestData: $data,
+            columns: $columns,
+            foreigns: $foreigns,
+            callback: function ($msg) use (&$messages) {
                 $messages[] = $msg;
             },
-            $fileUploadFieldsData,
-            $migrationName,
-            false,
-            true
+            fileUploadFieldsData: $fileUploadFieldsData,
+            migrationName: $migrationName,
+            isGenerateFrontend: false,
+            isGeneratedFileDomain: true
         );
 
         return $messages;
@@ -535,7 +578,7 @@ class RepgeneratorController extends Controller
                 rmdir($dir);
             }
 
-            $this->generate(new GenerationRequest(), true, $domainData);
+            $this->generate(request: new GenerationRequest(), regenerate: true, regenerateData: $domainData);
         }
     }
 
@@ -545,7 +588,10 @@ class RepgeneratorController extends Controller
      */
     public function generateGradient(GradientRequest $request): JsonResponse
     {
-        $colors = $this->gradientService->generateGradients($request->get('hexFrom'), $request->get('hexTo'), 8);
+        $colors = $this->gradientService->generateGradients(
+            theColorBegin: $request->get('hexFrom'),
+            theColorEnd: $request->get('hexTo'),
+            theNumSteps: 8);
         return response()->json($colors);
     }
 

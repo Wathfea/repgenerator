@@ -123,14 +123,19 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
                 $relationBuilder->where(function (Builder $qb) use ($value) {
                     foreach ($value as $column => $v) {
                         if (!is_array($v) ) {
-                            $qb->where($column, $v);
+                            if(str_contains($v, '|')) {
+                                $whereValues = explode('|', $v);
+                                $qb->whereIn($column, $whereValues);
+                            } else {
+                                $qb->where($column, $v);
+                            }
                         } else {
                             $this->findByColumn($qb, $column, $v);
                         }
                     }
                 });
             });
-        }  else if(str_contains($value, '|')) {
+        } else if(str_contains($value, '|')) {
             $whereValues = explode('|', $value);
             return $qb->whereIn($column, $whereValues);
         } else {
