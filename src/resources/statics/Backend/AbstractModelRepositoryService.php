@@ -199,13 +199,12 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
 
     /**
      * @param BaseQueryFilter $filter
-     * @param int $perPage
      * @param array $load
      * @return mixed
      */
-    public function getFilterQB(BaseQueryFilter $filter, int $perPage, array $load = []): mixed
+    public function getFilterQB(BaseQueryFilter $filter, array $load = []): mixed
     {
-        return $this->getBaseFilterQB($filter, $perPage, $load);
+        return $this->getBaseFilterQB($filter, $load);
     }
 
     /**
@@ -217,9 +216,9 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
     public function getByFilter(
         BaseQueryFilter $filter,
         array $load = [],
-        int $perPage = null
+        int|null $perPage = null
     ): Collection|LengthAwarePaginator {
-        $qb = $this->getFilterQB($filter, $perPage, $load);
-        return $qb->get();
+        $qb = $this->getFilterQB($filter, $load);
+        return $this->getFilterResponse($qb, $perPage);
     }
 }

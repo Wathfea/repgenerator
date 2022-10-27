@@ -77,6 +77,6 @@ interface PivotRepositoryServiceInterface extends RepositoryServiceInterface
         BaseQueryFilter $filter,
         int $parentId,
         array $load = [],
-        int $perPage = null
+        int|null $perPage = null
     ): Collection|LengthAwarePaginator;
 }

@@ -135,7 +135,7 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
                     }
                 });
             });
-        } else if(str_contains($value, '|')) {
+        }  else if(str_contains($value, '|')) {
             $whereValues = explode('|', $value);
             return $qb->whereIn($column, $whereValues);
         } else {
@@ -145,17 +145,25 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
 
     /**
      * @param BaseQueryFilter $filter
-     * @param int $perPage
      * @param array $load
      * @return mixed
      */
-    public function getBaseFilterQB(BaseQueryFilter $filter, int $perPage, array $load = []): mixed
+    public function getBaseFilterQB(BaseQueryFilter $filter, array $load = []): mixed
     {
         $qb = $this->getBaseBuilder($load);
-        if ($perPage) {
-            return $qb->paginate($perPage);
-        }
         return $qb->filter($filter);
+    }
+
+    /**
+     * @param Builder $builder
+     * @param int|null $perPage
+     * @return Collection|LengthAwarePaginator
+     */
+    public function getFilterResponse(Builder $builder, int|null $perPage = null): Collection|LengthAwarePaginator {
+        if ( $perPage ) {
+            return $builder->paginate();
+        }
+        return $builder->get();
     }
 
 
@@ -164,7 +172,7 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
      * @param  int|null  $perPage
      * @return Collection|LengthAwarePaginator
      */
-    public function getAll(array $load = [], int $perPage = null): Collection|LengthAwarePaginator
+    public function getAll(array $load = [], int|null $perPage = null): Collection|LengthAwarePaginator
     {
         $qb = $this->getBaseBuilder($load);
         if ($perPage) {

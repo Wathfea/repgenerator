@@ -169,15 +169,13 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
     /**
      * @param BaseQueryFilter $filter
      * @param int $parentId
-     * @param int $perPage
      * @param array $load
      * @return mixed
      */
-    public function getFilterQB(BaseQueryFilter $filter, int $parentId, int $perPage, array $load = []): mixed
+    public function getFilterQB(BaseQueryFilter $filter, int $parentId, array $load = []): mixed
     {
-        $qb = $this->getBaseFilterQB($filter, $perPage, $load);
-        $qb->where($this->parentIdColumName, $parentId);
-        return $qb;
+        $qb = $this->getBaseFilterQB($filter, $load);
+        return $qb->where($this->parentIdColumName, $parentId);
     }
 
     /**
@@ -191,9 +189,9 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
         BaseQueryFilter $filter,
         int $parentId,
         array $load = [],
-        int $perPage = null
+        int|null $perPage = null
     ): Collection|LengthAwarePaginator {
-        $qb = $this->getFilterQB($filter, $parentId, $perPage, $load);
-        return $qb->get();
+        $qb = $this->getFilterQB($filter, $parentId, $load);
+        return $this->getFilterResponse($qb, $perPage);
     }
 }

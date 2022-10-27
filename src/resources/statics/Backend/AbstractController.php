@@ -191,7 +191,7 @@ abstract class AbstractController implements ControllerInterface, ReadOnlyContro
                 'message' => Lang::get('auth.insufficient_permissions')
             ], 403);
         }
-        return $listFunction()->toResponse();
+        return $listFunction()->toResponse($request);
     }
 
     /**

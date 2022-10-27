@@ -117,6 +117,6 @@ interface ModelRepositoryServiceInterface extends RepositoryServiceInterface
     public function getByFilter(
         BaseQueryFilter $filter,
         array $load = [],
-        int $perPage = null
+        int|null $perPage = null
     ): Collection|LengthAwarePaginator;
 }
