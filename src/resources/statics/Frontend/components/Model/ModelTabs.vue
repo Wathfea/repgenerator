@@ -10,7 +10,7 @@
       <nav class="relative z-0 rounded-lg shadow flex divide-x divide-gray-200" aria-label="Tabs">
         <a @click="onTabClicked(tab)" v-for="(tab, tabIdx) in tabs" :key="tab.name" :href="tab.href" :class="[tab.current ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700', tabIdx === 0 ? 'rounded-l-lg' : '', tabIdx === tabs.length - 1 ? 'rounded-r-lg' : '', 'group relative min-w-0 flex-1 overflow-hidden bg-white py-4 px-4 text-sm font-medium text-center hover:bg-gray-50 focus:z-10']" :aria-current="tab.current ? 'page' : undefined">
          <div class="flex justify-center">
-           <component :is="tab.icon" :class="[tab.current ? 'text-repgenerator-500' : 'text-gray-400 group-hover:text-gray-500', '-ml-0.5 mr-2 h-5 w-5']" aria-hidden="true" />
+           <div :class="['mdi','mdi-24px', 'mdi'+camelToDashCase(tab.icon),tab.current ? 'text-repgenerator-500' : 'text-gray-400 group-hover:text-gray-500', '-ml-0.5 mr-2 h-5 w-5']" aria-hidden="true" />
            <span>{{ tab.name }}</span>
            <span aria-hidden="true" :class="[tab.current ? 'bg-repgenerator-500' : 'bg-transparent', 'absolute inset-x-0 bottom-0 h-0.5']" />
          </div>
@@ -31,4 +31,5 @@ const emit = defineEmits(['tabClicked']);
 const onTabClicked = (tab) => {
   emit('tabClicked', tab);
 }
+const camelToDashCase = str => str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
 </script>

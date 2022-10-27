@@ -2,7 +2,9 @@
 
 namespace App\Abstraction\Repository;
 
+use App\Abstraction\Filter\BaseQueryFilter;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -42,10 +44,24 @@ interface RepositoryServiceInterface
      */
     public function getAllByColumn(string $column, mixed $value, array $load = []): array|Collection;
 
+
+
     /**
-     * @param  int  $id
      * @param  array  $load
-     * @return Model|null
+     * @param  int|null  $perPage
+     * @return Collection|\Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function getById(int $id, array $load = []): Model|null;
+    public function getAll(array $load = [], int $perPage = null): Collection|LengthAwarePaginator;
+
+    /**
+     * @param  BaseQueryFilter  $filter
+     * @param  array  $load
+     * @param  int|null  $perPage
+     * @return Collection|LengthAwarePaginator
+     */
+    public function getByFilter(
+        BaseQueryFilter $filter,
+        array $load = [],
+        int $perPage = null
+    ): Collection|LengthAwarePaginator;
 }

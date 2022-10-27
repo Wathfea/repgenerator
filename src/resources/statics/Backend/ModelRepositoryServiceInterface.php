@@ -45,25 +45,6 @@ interface ModelRepositoryServiceInterface extends RepositoryServiceInterface
     public function factoryMake(int $count = 1, array $attributes = []): Model|Collection;
 
     /**
-     * @param  array  $load
-     * @param  int|null  $perPage
-     * @return Collection|\Illuminate\Contracts\Pagination\LengthAwarePaginator
-     */
-    public function getAll(array $load = [], int $perPage = null): Collection|LengthAwarePaginator;
-
-    /**
-     * @param  BaseQueryFilter  $filter
-     * @param  array  $load
-     * @param  int|null  $perPage
-     * @return Collection|LengthAwarePaginator
-     */
-    public function getByFilter(
-        BaseQueryFilter $filter,
-        array $load = [],
-        int $perPage = null
-    ): Collection|LengthAwarePaginator;
-
-    /**
      * @return Model
      */
     public function getModel(): Model;
@@ -118,4 +99,11 @@ interface ModelRepositoryServiceInterface extends RepositoryServiceInterface
      * @return bool
      */
     public function beforeSaving(Model $model, array $data): bool;
+
+    /**
+     * @param  int  $id
+     * @param  array  $load
+     * @return Model|null
+     */
+    public function getById(int $id, array $load = []): Model|null;
 }

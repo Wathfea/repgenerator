@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Abstraction\Controllers;
+namespace App\Abstraction\Controllers\CRUD;
 
-use App\Abstraction\Repository\HasRepositoryService;
+use App\Abstraction\Repository\HasModelRepositoryService;
 
 interface CRUDControllerInterface
 {
-    public function getService(): HasRepositoryService;
+    public function getService(): HasModelRepositoryService;
 }

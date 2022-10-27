@@ -63,6 +63,7 @@ class RepgeneratorStaticFilesService
             "composables/model.js",
             "composables/useNotifications.ts",
             "composables/useUtils.ts",
+            "composables/useLocales.ts",
             "router/router.js"
         ];
 
@@ -99,6 +100,7 @@ class RepgeneratorStaticFilesService
         $files = [
             "Abstraction/Models/BaseModel.php",
             "Abstraction/Filter/BaseQueryFilter.php",
+
             "Abstraction/Repository/HasRepositoryService.php",
             "Abstraction/Repository/HasModelRepositoryService.php",
             "Abstraction/Repository/HasPivotRepositoryService.php",
@@ -108,13 +110,24 @@ class RepgeneratorStaticFilesService
             "Abstraction/Repository/ModelRepositoryServiceInterface.php",
             "Abstraction/Repository/PivotRepositoryServiceInterface.php",
             "Abstraction/Repository/RepositoryServiceInterface.php",
+
             "Abstraction/Controllers/BaseTransactionController.php",
-            "Abstraction/Controllers/AbstractApiReadOnlyCRUDController.php",
-            "Abstraction/Controllers/AbstractApiReadWriteCRUDController.php",
-            "Abstraction/Controllers/AbstractCRUDController.php",
-            "Abstraction/Controllers/CRUDControllerInterface.php",
-            "Abstraction/Controllers/ApiCRUDControllerReadOnlyInterface.php",
-            "Abstraction/Controllers/ApiCRUDControllerReadWriteInterface.php",
+            "Abstraction/Controllers/AbstractController.php",
+            "Abstraction/Controllers/ControllerInterface.php",
+            "Abstraction/Controllers/ReadOnlyControllerInterface.php",
+            "Abstraction/Controllers/ReadWriteControllerInterface.php",
+
+            "Abstraction/Controllers/ARUD/AbstractApiReadOnlyARUDController.php",
+            "Abstraction/Controllers/ARUD/AbstractApiReadWriteARUDController.php",
+            "Abstraction/Controllers/ARUD/ApiReadOnlyARUDControllerInterface.php",
+            "Abstraction/Controllers/ARUD/ApiReadWriteARUDControllerInterface.php",
+            "Abstraction/Controllers/ARUD/ARUDControllerInterface.php",
+            "Abstraction/Controllers/CRUD/AbstractApiReadOnlyCRUDController.php",
+            "Abstraction/Controllers/CRUD/AbstractApiReadWriteCRUDController.php",
+            "Abstraction/Controllers/CRUD/ApiReadOnlyCRUDControllerInterface.php",
+            "Abstraction/Controllers/CRUD/ApiReadWriteCRUDControllerInterface.php",
+            "Abstraction/Controllers/CRUD/CRUDControllerInterface.php",
+
             "Abstraction/Traits/UploadsFiles.php",
         ];
 
