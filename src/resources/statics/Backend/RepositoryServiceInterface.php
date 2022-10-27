@@ -52,16 +52,4 @@ interface RepositoryServiceInterface
      * @return Collection|\Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
     public function getAll(array $load = [], int $perPage = null): Collection|LengthAwarePaginator;
-
-    /**
-     * @param  BaseQueryFilter  $filter
-     * @param  array  $load
-     * @param  int|null  $perPage
-     * @return Collection|LengthAwarePaginator
-     */
-    public function getByFilter(
-        BaseQueryFilter $filter,
-        array $load = [],
-        int $perPage = null
-    ): Collection|LengthAwarePaginator;
 }

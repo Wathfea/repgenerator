@@ -106,4 +106,17 @@ interface ModelRepositoryServiceInterface extends RepositoryServiceInterface
      * @return Model|null
      */
     public function getById(int $id, array $load = []): Model|null;
+
+
+    /**
+     * @param  BaseQueryFilter  $filter
+     * @param  array  $load
+     * @param  int|null  $perPage
+     * @return Collection|LengthAwarePaginator
+     */
+    public function getByFilter(
+        BaseQueryFilter $filter,
+        array $load = [],
+        int $perPage = null
+    ): Collection|LengthAwarePaginator;
 }

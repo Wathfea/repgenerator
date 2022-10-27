@@ -10,4 +10,5 @@ use Illuminate\Http\Request;
 interface ApiReadOnlyCRUDControllerInterface extends ControllerInterface, ReadOnlyControllerInterface, CRUDControllerInterface
 {
     public function show(Request $request, int $id): JsonResponse;
+    public function index(Request $request): JsonResponse;
 }

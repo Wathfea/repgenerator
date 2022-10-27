@@ -2,9 +2,11 @@
 
 namespace App\Abstraction\Repository;
 
+use App\Abstraction\Filter\BaseQueryFilter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -162,5 +164,36 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
             return $this->getRelation($parentModelId)->updateExistingPivot($relationModelId, $data) > 0;
         }
         return true;
+    }
+
+    /**
+     * @param BaseQueryFilter $filter
+     * @param int $parentId
+     * @param int $perPage
+     * @param array $load
+     * @return mixed
+     */
+    public function getFilterQB(BaseQueryFilter $filter, int $parentId, int $perPage, array $load = []): mixed
+    {
+        $qb = $this->getBaseFilterQB($filter, $perPage, $load);
+        $qb->where($this->parentIdColumName, $parentId);
+        return $qb;
+    }
+
+    /**
+     * @param BaseQueryFilter $filter
+     * @param int $parentId
+     * @param array $load
+     * @param int|null $perPage
+     * @return Collection|LengthAwarePaginator
+     */
+    public function getByFilter(
+        BaseQueryFilter $filter,
+        int $parentId,
+        array $load = [],
+        int $perPage = null
+    ): Collection|LengthAwarePaginator {
+        $qb = $this->getFilterQB($filter, $parentId, $perPage, $load);
+        return $qb->get();
     }
 }

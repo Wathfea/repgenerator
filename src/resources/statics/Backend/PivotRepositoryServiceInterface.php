@@ -2,7 +2,9 @@
 
 namespace App\Abstraction\Repository;
 
+use App\Abstraction\Filter\BaseQueryFilter;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 /**
@@ -62,4 +64,19 @@ interface PivotRepositoryServiceInterface extends RepositoryServiceInterface
      * @return string
      */
     public function getRelationRequestKey(): string;
+
+
+    /**
+     * @param BaseQueryFilter $filter
+     * @param int $parentId
+     * @param array $load
+     * @param int|null $perPage
+     * @return Collection|LengthAwarePaginator
+     */
+    public function getByFilter(
+        BaseQueryFilter $filter,
+        int $parentId,
+        array $load = [],
+        int $perPage = null
+    ): Collection|LengthAwarePaginator;
 }

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Lang;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
+use Ramsey\Collection\Collection;
 
 abstract class AbstractController implements ControllerInterface, ReadOnlyControllerInterface, ReadWriteControllerInterface
 {
@@ -143,37 +144,17 @@ abstract class AbstractController implements ControllerInterface, ReadOnlyContro
         return app($this->getFilterClass(), $request->all());
     }
 
-    /**
-     * @param Request $request
-     * @param array $relationships
-     * @return AnonymousResourceCollection
-     */
-    public function getIndexData(Request $request, array $relationships = []): AnonymousResourceCollection
-    {
-        /** @var JsonResource $resource */
-        $resource = $this->getResourceClass();
-        $filter = $this->getFilter($request);
-        $perPage = $this->getPerPage($request);
-        if ( $request->has('load') && !empty($request->get('load')) ) {
-            $relationships = array_intersect($relationships, $request->get('load'));
-        }
-        return $resource::collection($this->getService()->getRepositoryService()->getByFilter($filter, $relationships,
-            $perPage));
-    }
 
     /**
-     * @param  Request  $request
-     * @return JsonResponse
+     * @param Request $request
+     * @return array
      */
-    public function index(Request $request): JsonResponse
-    {
-        if ( Gate::allows('index') ) {
-            return response()->json([
-                'success' => false,
-                'message' => Lang::get('auth.insufficient_permissions')
-            ], 403);
+    public function getLoad(Request $request): array {
+        $load = $this->getRelations();
+        if ( $request->has('load') && !empty($request->get('load')) ) {
+            $load = array_intersect($load, $request->get('load'));
         }
-        return $this->getIndexData($request, $this->getRelations())->toResponse($request);
+        return $load;
     }
 
     /**
@@ -198,6 +179,21 @@ abstract class AbstractController implements ControllerInterface, ReadOnlyContro
         /** @var JsonResource $resource */
         $resource = $this->getResourceClass();
         return $resource::make($model)->toResponse($request);
+    }
+
+    /**
+     * @param Request $request
+     * @param callable $listFunction
+     * @return JsonResponse|void
+     */
+    public function getListResponse(Request $request, callable $listFunction) {
+        if ( Gate::allows('index') ) {
+            return response()->json([
+                'success' => false,
+                'message' => Lang::get('auth.insufficient_permissions')
+            ], 403);
+        }
+        return $listFunction()->toResponse();
     }
 
     /**

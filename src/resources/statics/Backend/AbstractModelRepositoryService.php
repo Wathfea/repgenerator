@@ -2,8 +2,10 @@
 
 namespace App\Abstraction\Repository;
 
+use App\Abstraction\Filter\BaseQueryFilter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 /**
@@ -193,5 +195,31 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
             $modelOrModels->save();
         }
         return $modelOrModels;
+    }
+
+    /**
+     * @param BaseQueryFilter $filter
+     * @param int $perPage
+     * @param array $load
+     * @return mixed
+     */
+    public function getFilterQB(BaseQueryFilter $filter, int $perPage, array $load = []): mixed
+    {
+        return $this->getBaseFilterQB($filter, $perPage, $load);
+    }
+
+    /**
+     * @param BaseQueryFilter $filter
+     * @param array $load
+     * @param int|null $perPage
+     * @return Collection|LengthAwarePaginator
+     */
+    public function getByFilter(
+        BaseQueryFilter $filter,
+        array $load = [],
+        int $perPage = null
+    ): Collection|LengthAwarePaginator {
+        $qb = $this->getFilterQB($filter, $perPage, $load);
+        return $qb->get();
     }
 }

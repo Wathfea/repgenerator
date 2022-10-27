@@ -10,4 +10,5 @@ use Illuminate\Http\Request;
 interface ApiReadOnlyARUDControllerInterface extends ControllerInterface, ReadOnlyControllerInterface, ARUDControllerInterface
 {
     public function show(Request $request, int $parentId, int $relationId): JsonResponse;
+    public function index(Request $request, int $parentId): JsonResponse;
 }

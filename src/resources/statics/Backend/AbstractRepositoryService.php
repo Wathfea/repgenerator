@@ -140,37 +140,24 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
 
     /**
      * @param BaseQueryFilter $filter
+     * @param int $perPage
      * @param array $load
      * @return mixed
      */
-    public function getFilterQB(BaseQueryFilter $filter, array $load = []) {
+    public function getBaseFilterQB(BaseQueryFilter $filter, int $perPage, array $load = []): mixed
+    {
         $qb = $this->getBaseBuilder($load);
-        return $qb->filter($filter);
-    }
-
-    /**
-     * @param BaseQueryFilter $filter
-     * @param  array  $load
-     * @param  int|null  $perPage
-     * @return Collection|LengthAwarePaginator
-     */
-    public function getByFilter(
-        BaseQueryFilter $filter,
-        array $load = [],
-        int $perPage = null
-    ): Collection|LengthAwarePaginator {
-        $qb = $this->getFilterQB($filter, $load);
         if ($perPage) {
             return $qb->paginate($perPage);
         }
-        return $qb->get();
+        return $qb->filter($filter);
     }
 
 
     /**
      * @param  array  $load
      * @param  int|null  $perPage
-     * @return Collection|\Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @return Collection|LengthAwarePaginator
      */
     public function getAll(array $load = [], int $perPage = null): Collection|LengthAwarePaginator
     {

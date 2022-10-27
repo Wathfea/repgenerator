@@ -9,5 +9,4 @@ use Illuminate\Http\Request;
 interface ReadOnlyControllerInterface extends ControllerInterface
 {
     public function getShowResponse(Request $request, Model $model): JsonResponse;
-    public function index(Request $request): JsonResponse;
 }
