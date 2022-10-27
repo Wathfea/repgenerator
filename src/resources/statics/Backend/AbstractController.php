@@ -6,14 +6,12 @@ use App\Abstraction\Filter\BaseQueryFilter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Lang;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
-use Ramsey\Collection\Collection;
 
 abstract class AbstractController implements ControllerInterface, ReadOnlyControllerInterface, ReadWriteControllerInterface
 {
