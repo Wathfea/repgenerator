@@ -1,6 +1,6 @@
 <template>
     <form method="POST" @submit="onSubmit">
-        <div v-for="(column, key) in columns">
+        <div v-for="(column, key) in columns" v-show="isColumnShown(column.data)">
             <div class="sm:col-span-4 mt-2">
                 <label for="username" class="block text-sm font-medium text-gray-700"> {{  getColumnName(key) }} </label>
                 <div v-if="column.data.wildcards">
@@ -312,6 +312,12 @@ const getColumnName = (key) => {
     return columns.value[key].data
 }
 const isColumnShown = (data) => {
+    if(data && data.show_if) {
+        if(columns.value[data.show_if.column].model === data.show_if.value) {
+            return true;
+        }
+    }
+
     if ( !data.show_if ) {
         return true;
     }
