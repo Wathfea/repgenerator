@@ -36,11 +36,11 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
         parent::__construct($pivotModel);
     }
 
-    public function getParentRequestKey(): string {
+    public function getParentColumnName(): string {
         return $this->getParentModelName() . '_' . $this->parentIdColumName;
     }
 
-    public function getRelationRequestKey(): string {
+    public function getRelationColumnName(): string {
         return Str::singular($this->relatedTableName) . '_' . $this->relationIdColumnName;
     }
 
@@ -92,7 +92,7 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
     {
         $this->getRelation($parentModelId)->attach($relationshipModelId, $this->filterData($data));
 
-        return app($this->pivotModel)->find(DB::getPdo()->lastInsertId());
+        return $this->getSpecific($parentModelId, $relationshipModelId);
     }
 
     /**
@@ -134,8 +134,9 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
      */
     public function getSpecific(int $parentModelId, int $relationModelId): Pivot|null
     {
-        return app($this->pivotModel)->newQuery()->where($this->parentIdColumName, $parentModelId)
-            ->where($this->relationIdColumnName, $relationModelId)
+        return app($this->pivotModel)->newQuery()
+            ->where($this->getParentColumnName(), $parentModelId)
+            ->where($this->getRelationColumnName(), $relationModelId)
             ->first();
     }
 
@@ -150,6 +151,21 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
 
         return true;
     }
+
+
+    /**
+     * @param int $parentModelId
+     * @param array $relations
+     * @param array $data
+     * @return bool
+     */
+    public function syncWithData(int $parentModelId, array $relations, array $data): bool
+    {
+        $this->getRelation($parentModelId)->syncWithPivotValues($relations, $data);
+
+        return true;
+    }
+
 
     /**
      * @param  int  $parentModelId
@@ -175,7 +191,7 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
     public function getFilterQB(BaseQueryFilter $filter, int $parentId, array $load = []): mixed
     {
         $qb = $this->getBaseFilterQB($filter, $load);
-        return $qb->where($this->parentIdColumName, $parentId);
+        return $qb->where($this->getParentColumnName(), $parentId);
     }
 
     /**

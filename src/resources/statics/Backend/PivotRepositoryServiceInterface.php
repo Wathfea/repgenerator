@@ -48,6 +48,14 @@ interface PivotRepositoryServiceInterface extends RepositoryServiceInterface
     public function sync(int $parentModelId, array $relations): bool;
 
     /**
+     * @param int $parentModelId
+     * @param array $relations
+     * @param array $data
+     * @return bool
+     */
+    public function syncWithData(int $parentModelId, array $relations, array $data): bool;
+
+    /**
      * @param  int  $parentModelId
      * @param  int  $relationModelId
      * @param  array  $data
@@ -58,12 +66,12 @@ interface PivotRepositoryServiceInterface extends RepositoryServiceInterface
     /**
      * @return string
      */
-    public function getParentRequestKey(): string;
+    public function getParentColumnName(): string;
 
     /**
      * @return string
      */
-    public function getRelationRequestKey(): string;
+    public function getRelationColumnName(): string;
 
 
     /**
