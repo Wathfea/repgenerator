@@ -82,17 +82,31 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
         }, ARRAY_FILTER_USE_BOTH);
     }
 
+
+    /**
+     * @param int $parentModelId
+     * @param int $relationModelId
+     * @param array $data
+     * @return bool
+     */
+    public function beforeSaving(int $parentModelId, int $relationModelId, array $data = []): bool
+    {
+        return false;
+    }
+
+
     /**
      * @param  int  $parentModelId
-     * @param  int  $relationshipModelId
+     * @param  int  $relationModelId
      * @param  array  $data
      * @return Pivot
      */
-    public function attach(int $parentModelId, int $relationshipModelId, array $data = []): Pivot
+    public function attach(int $parentModelId, int $relationModelId, array $data = []): Pivot
     {
-        $this->getRelation($parentModelId)->attach($relationshipModelId, $this->filterData($data));
+        $this->beforeSaving($parentModelId, $relationModelId,  $data);
+        $this->getRelation($parentModelId)->attach($relationModelId, $this->filterData($data));
 
-        return $this->getSpecific($parentModelId, $relationshipModelId);
+        return $this->getSpecific($parentModelId, $relationModelId);
     }
 
     /**
@@ -110,12 +124,12 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
 
     /**
      * @param  int  $parentModelId
-     * @param  int  $relationshipModelId
+     * @param  int  $relationModelId
      * @return bool
      */
-    public function detach(int $parentModelId, int $relationshipModelId): bool
+    public function detach(int $parentModelId, int $relationModelId): bool
     {
-        return $this->getRelation($parentModelId)->detach($relationshipModelId) > 0;
+        return $this->getRelation($parentModelId)->detach($relationModelId) > 0;
     }
 
     /**
@@ -128,15 +142,17 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
     }
 
     /**
-     * @param  int  $parentModelId
-     * @param  int  $relationModelId
+     * @param int $parentModelId
+     * @param int $relationModelId
+     * @param array $load
      * @return Pivot|null
      */
-    public function getSpecific(int $parentModelId, int $relationModelId): Pivot|null
+    public function getSpecific(int $parentModelId, int $relationModelId, array $load = []): Pivot|null
     {
         return app($this->pivotModel)->newQuery()
             ->where($this->getParentColumnName(), $parentModelId)
             ->where($this->getRelationColumnName(), $relationModelId)
+            ->with($load)
             ->first();
     }
 
@@ -177,6 +193,7 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
     {
         $data = $this->filterData($data);
         if ( !empty($data) ) {
+            $this->beforeSaving($parentModelId, $relationModelId,  $data);
             return $this->getRelation($parentModelId)->updateExistingPivot($relationModelId, $data) > 0;
         }
         return true;

@@ -14,18 +14,18 @@ interface PivotRepositoryServiceInterface extends RepositoryServiceInterface
 {
     /**
      * @param  int  $parentModelId
-     * @param  int  $relationshipModelId
+     * @param  int  $relationModelId
      * @param  array  $data
      * @return Pivot
      */
-    public function attach(int $parentModelId, int $relationshipModelId, array $data = []): Pivot;
+    public function attach(int $parentModelId, int $relationModelId, array $data = []): Pivot;
 
     /**
      * @param  int  $parentModelId
-     * @param  int  $relationshipModelId
+     * @param  int  $relationModelId
      * @return bool
      */
-    public function detach(int $parentModelId, int $relationshipModelId): bool;
+    public function detach(int $parentModelId, int $relationModelId): bool;
 
     /**
      * @param  int  $parentModelId

@@ -21,7 +21,7 @@ abstract class AbstractApiReadOnlyARUDController extends AbstractController impl
     public function show(Request $request, int $parentId, int $relationId, array $relationships = []): JsonResponse
     {
         $this->addToRelations($relationships);
-        $pivot = $this->getService()->getRepositoryService()->getSpecific($parentId, $relationId);
+        $pivot = $this->getService()->getRepositoryService()->getSpecific($parentId, $relationId, $this->getLoad($request));
         return $this->getShowResponse($request, $pivot);
     }
 
