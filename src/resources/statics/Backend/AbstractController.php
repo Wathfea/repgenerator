@@ -176,10 +176,11 @@ abstract class AbstractController implements ControllerInterface, ReadOnlyContro
         }
         /** @var JsonResource $resource */
         $resource = $this->getResourceClass();
+        $resource = $resource::make($model);
         $resource->additional([
             'success' => true
         ]);
-        return $resource::make($model)->toResponse($request);
+        return $resource->toResponse($request);
     }
 
     /**
