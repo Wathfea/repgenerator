@@ -8,14 +8,14 @@ use App\Abstraction\Controllers\CRUD\CRUDControllerInterface;
 use App\Abstraction\Controllers\CRUD\ApiReadOnlyCRUDControllerInterface;
 
 use App\Domain\{{modelName}}\Services\{{modelName}}Service;
-use App\Abstraction\Repository\HasRepositoryService;
+use App\Abstraction\Repository\HasModelRepositoryService;
 
 /**
  * Class {{modelName}}ApiController.
  */
 class {{modelName}}ApiController extends AbstractApiReadWriteCRUDController implements CRUDControllerInterface, ApiReadWriteCRUDControllerInterface, ApiReadOnlyCRUDControllerInterface
 {
-    public function getService(): HasRepositoryService
+    public function getService(): HasModelRepositoryService
     {
         return $this->service;
     }
