@@ -2,17 +2,18 @@
 
 namespace App\Domain\{{modelName}}\Controllers\Api\v1;
 
-use App\Abstraction\Controllers\AbstractApiReadWriteCRUDController;
-use App\Abstraction\Controllers\CRUDControllerInterface;
-use App\Abstraction\Controllers\ApiCRUDControllerReadWriteInterface;
-use App\Abstraction\Controllers\ApiReadOnlyCRUDControllerInterface;
+use App\Abstraction\Controllers\CRUD\AbstractApiReadWriteCRUDController;
+use App\Abstraction\Controllers\CRUD\ApiReadWriteCRUDControllerInterface;
+use App\Abstraction\Controllers\CRUD\CRUDControllerInterface;
+use App\Abstraction\Controllers\CRUD\ApiReadOnlyCRUDControllerInterface;
+
 use App\Domain\{{modelName}}\Services\{{modelName}}Service;
 use App\Abstraction\Repository\HasRepositoryService;
 
 /**
  * Class {{modelName}}ApiController.
  */
-class {{modelName}}ApiController extends AbstractApiReadWriteCRUDController implements CRUDControllerInterface, ApiCRUDControllerReadWriteInterface, ApiReadOnlyCRUDControllerInterface
+class {{modelName}}ApiController extends AbstractApiReadWriteCRUDController implements CRUDControllerInterface, ApiReadWriteCRUDControllerInterface, ApiReadOnlyCRUDControllerInterface
 {
     public function getService(): HasRepositoryService
     {

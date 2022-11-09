@@ -5,10 +5,10 @@ export const use{{ modelNamePluralUcfirst }}  = () => {
     const getRoute = () => {
         return '{{ modelNamePluralLowerCaseHyphenated }}'
     }
-    const getEditableColumns = () => {
+    const getEditableColumns = (forDataTable = false) => {
         return {{ columns }}
     }
-    const getDataTableColumns = () => {
+    const getDataTableColumns = (fixedFilters) => {
         const { getFilteredObject } = useUtils();
         return  {
             'id': {
@@ -17,7 +17,7 @@ export const use{{ modelNamePluralUcfirst }}  = () => {
                 align: 'right',
                 isSorting: true,
             },
-            ...getFilteredObject(getEditableColumns(), []),
+            ...getFilteredObject(getEditableColumns(true), []),
             'created_at': {
                 name: 'Created at',
                 isDate: true
@@ -27,7 +27,7 @@ export const use{{ modelNamePluralUcfirst }}  = () => {
     const getColumns = () => {
         return getEditableColumns();
     }
-    const { getModels: get{{ modelNamePluralUcfirst }}, getModel: get{{ modelNameSingularUcfirst }}, storeModel: store{{ modelNameSingularUcfirst }}, updateModel: update{{ modelNameSingularUcfirst }} } = useModel('{{ modelNamePluralLowerCaseHyphenated }}', false);
+    const { getModels: get{{ modelNamePluralUcfirst }}, getModel: get{{ modelNameSingularUcfirst }}, storeModel: store{{ modelNameSingularUcfirst }}, updateModel: update{{ modelNameSingularUcfirst }} } = useModel(getRoute(), false);
     return {
         getRoute,
         getColumns,

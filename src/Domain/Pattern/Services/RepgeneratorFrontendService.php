@@ -185,12 +185,14 @@ class RepgeneratorFrontendService
                 '{{ modelNamePluralLowerCaseHyphenated }}',
                 '{{ modelNameSingularLowercase }}',
                 '{{ modelNamePluralLowercase }}',
+                '{{ modelNamePluralUcfirst }}',
                 '{{ columns }}'
             ],
             [
                 $this->nameTransformerService->getModelNamePluralLowerCaseHyphenated(),
                 $this->nameTransformerService->getModelNameSingularLowerCase(),
                 $this->nameTransformerService->getModelNamePluralLowerCase(),
+                $this->nameTransformerService->getModelNamePluralUcfirst(),
                 $this->implodeLines($columnsTemplate, 2)
             ],
             $this->repgeneratorStubService->getStub('Frontend/Vue/components/index')
