@@ -1,7 +1,7 @@
 <template>
   <div>
     <ModelTabs :tabs="tabs" class="mb-6" @tabClicked="onTabClicked"/>
-    <ModelForm v-if="currentTab === '#adatok'" :id="id" :setColumns="columns" :data-function="dataFunction"
+    <ModelForm v-if="currentTab === '#details'" :id="id" :setColumns="columns" :data-function="dataFunction"
                :disable-update="!updateMethod" @submit="onSubmit" :is-submitting="isSubmitting"/>
     <slot/>
   </div>
@@ -41,7 +41,7 @@ const props = defineProps({
   setCurrentTab: {
     required: false,
     type: String,
-    default: '#adatok'
+    default: '#details'
   },
   updateMethod: {
     type: Function,
@@ -50,7 +50,7 @@ const props = defineProps({
 })
 const currentTab = ref(currentRoute.hash.length ? currentRoute.hash : props.setCurrentTab);
 const tabs = ref([
-  {name: 'Adatok', href: '#adatok', icon: 'Database', current: currentTab.value === '#adatok'}
+  {name: 'Adatok', href: '#details', icon: 'Database', current: currentTab.value === '#details'}
 ]);
 for (let index in props.addTabs) {
   let addTab = props.addTabs[index];

@@ -37,7 +37,7 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
     }
 
     public function getParentColumnName(): string {
-        return $this->getParentModelName() . '_' . $this->parentIdColumName;
+        return Str::lower(Str::snake($this->getParentModelName())) . '_' . $this->parentIdColumName;
     }
 
     public function getRelationColumnName(): string {
@@ -50,7 +50,7 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
      */
     private function getNameFromClass(string $modelName): string {
         $modelClass = explode('\\', $modelName);
-        return strtolower($modelClass[count($modelClass) - 1]);
+        return $modelClass[count($modelClass) - 1];
     }
 
     /**
