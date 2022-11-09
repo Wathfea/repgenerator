@@ -131,8 +131,9 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         $model = $this->getById($id);
         if ($model) {
             $this->beforeSaving($model, $data);
+            $updated = $model->update($data);
             $otherDataUpdated = $this->saveOtherData($model, $data);
-            return $model->update($data) || $otherDataUpdated;
+            return $updated || $otherDataUpdated;
         }
         return false;
     }

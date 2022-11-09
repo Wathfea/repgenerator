@@ -75,6 +75,15 @@ interface PivotRepositoryServiceInterface extends RepositoryServiceInterface
 
 
     /**
+     * @param int $parentModelId
+     * @param int $relationModelId
+     * @param array $data
+     * @return bool
+     */
+    public function beforeSaving(int $parentModelId, int $relationModelId, array $data = []): bool;
+
+
+    /**
      * @param BaseQueryFilter $filter
      * @param int $parentId
      * @param array $load
