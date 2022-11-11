@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Lang;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -168,12 +167,6 @@ abstract class AbstractController implements ControllerInterface, ReadOnlyContro
                 'message' => Lang::get('model.not_found')
             ], 202);
         }
-        if ( Gate::allows('show', $model) ) {
-            return response()->json([
-                'success' => false,
-                'message' => Lang::get('auth.insufficient_permissions')
-            ], 403);
-        }
         /** @var JsonResource $resource */
         $resource = $this->getResourceClass();
         $resource = $resource::make($model);
@@ -189,12 +182,6 @@ abstract class AbstractController implements ControllerInterface, ReadOnlyContro
      * @return JsonResponse|void
      */
     public function getListResponse(Request $request, callable $listFunction) {
-        if ( Gate::allows('index') ) {
-            return response()->json([
-                'success' => false,
-                'message' => Lang::get('auth.insufficient_permissions')
-            ], 403);
-        }
         return $listFunction()->toResponse($request);
     }
 
@@ -207,12 +194,6 @@ abstract class AbstractController implements ControllerInterface, ReadOnlyContro
     public function getStoreOrAttachResponse(Request $request, callable $storeOrAttachFunction, string $validator = null): JsonResponse {
         if ( !empty($validator) ) {
             $request->validate(app($validator)->rules());
-        }
-        if ( Gate::allows('store') ) {
-            return response()->json([
-                'success' => false,
-                'message' => Lang::get('auth.insufficient_permissions')
-            ], 403);
         }
         try {
             $model = $storeOrAttachFunction();
@@ -244,12 +225,6 @@ abstract class AbstractController implements ControllerInterface, ReadOnlyContro
                 'success' => false,
                 'message' => Lang::get('model.not_found')
             ], 202);
-        }
-        if ( Gate::allows('update', $model) ) {
-            return response()->json([
-                'success' => false,
-                'message' => Lang::get('auth.insufficient_permissions')
-            ], 403);
         }
         try {
             $modelUpdated = $updateFunction($model);
@@ -285,12 +260,6 @@ abstract class AbstractController implements ControllerInterface, ReadOnlyContro
                     'success' => false,
                     'message' => trans('model.not_found'),
                 ], 202);
-        }
-        if ( Gate::allows('destroy', $model) ) {
-            return response()->json([
-                'success' => false,
-                'message' => Lang::get('auth.insufficient_permissions')
-            ], 403);
         }
         try {
             $modelDestroyed = $destroyOrDetachFunction($model);
