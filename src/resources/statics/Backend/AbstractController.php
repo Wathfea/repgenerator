@@ -157,9 +157,10 @@ abstract class AbstractController implements ControllerInterface, ReadOnlyContro
     /**
      * @param Request $request
      * @param Model|null $model
+     * @param array|null $additional
      * @return JsonResponse
      */
-    public function getShowResponse(Request $request, Model|null $model): JsonResponse
+    public function getShowResponse(Request $request, Model|null $model, ?array $additional = []): JsonResponse
     {
         if ( !$model ) {
             return response()->json([
@@ -170,9 +171,9 @@ abstract class AbstractController implements ControllerInterface, ReadOnlyContro
         /** @var JsonResource $resource */
         $resource = $this->getResourceClass();
         $resource = $resource::make($model);
-        $resource->additional([
+        $resource->additional(array_merge($additional,[
             'success' => true
-        ]);
+        ]));
         return $resource->toResponse($request);
     }
 
