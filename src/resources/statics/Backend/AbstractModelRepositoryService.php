@@ -3,6 +3,7 @@
 namespace App\Abstraction\Repository;
 
 use App\Abstraction\Filter\BaseQueryFilter;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -16,6 +17,17 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
 
     protected array $uniqueIdentifiers = [];
 
+
+    /**
+     * @param int $id
+     * @param array $load
+     * @return Builder
+     */
+    public function getByIdQB(int $id, array $load = []): Builder
+    {
+        return app($this->model)::with($load)->where('id', $id);
+    }
+
     /**
      * @param  int  $id
      * @param  array  $load
@@ -23,7 +35,7 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
      */
     public function getById(int $id, array $load = []): Model|null
     {
-        return app($this->model)::with($load)->find($id);
+        return $this->getByIdQB($id, $load)->first();
     }
 
     /**
