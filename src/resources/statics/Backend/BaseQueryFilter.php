@@ -19,8 +19,10 @@ class BaseQueryFilter extends QueryFilter
 {
     CONST PER_PAGE = 'per_page';
     CONST SEARCH_DATE = 'date';
+    CONST SEARCH_ID = 'id';
     CONST SEARCH_TYPES = [
-        self::SEARCH_DATE
+        self::SEARCH_DATE,
+        self::SEARCH_ID,
     ];
 
     /**
@@ -154,6 +156,9 @@ class BaseQueryFilter extends QueryFilter
                     $builder->whereDate($columnName,$dates[0]);
                 }
                 break;
+            case 'id':
+                $builder->where($builder->from . '.' . $columnName, $acceptedValue);
+                break;
             default:
                 $values = explode(',', $acceptedValue);
                 if ( count($values) > 1 ) {
@@ -177,7 +182,7 @@ class BaseQueryFilter extends QueryFilter
         if ( is_array($typeOrSearch) ) {
             $relationSearch = explode('.', $columnOrRelation);
             $relationName = $relationSearch[0];
-            if ( count($relationSearch) > 0 ) {
+            if ( count($relationSearch) > 1 ) {
                 $columnName = $relationSearch[1];
             } else {
                 $columnName = $relationName;
@@ -208,7 +213,7 @@ class BaseQueryFilter extends QueryFilter
             $columnData = explode(':', $search);
             $columnName = explode('.', $columnData[0])[0];
             $acceptedValue = $columnData[1];
-            if ( str_contains($columnName, 'translation_') ) {
+            if ( !str_contains($columnName,'_id') && str_contains($columnName, 'translation_') ) {
                 $localeCode = explode('_', $columnName)[1];
                 /** @var LocaleService $localeService */
                 $localeService = app(LocaleService::class);
@@ -295,7 +300,7 @@ class BaseQueryFilter extends QueryFilter
         // 5. We loop through each column (or just the one)
         // e.x our user is sorting by user.first_name
         foreach ($orderColumns as $index => $orderColumn) {
-            if ( str_contains($orderColumn, 'translation_') ) {
+            if ( !str_contains($orderColumn, '_id') && str_contains($orderColumn, 'translation_') ) {
                 $localeCode = explode('_', $orderColumn)[1];
                 /** @var LocaleService $localeService */
                 $localeService = app(LocaleService::class);
