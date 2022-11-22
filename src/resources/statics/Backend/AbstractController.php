@@ -232,6 +232,7 @@ abstract class AbstractController implements ControllerInterface, ReadOnlyContro
             return Response::json(
                 [
                     'success' => $modelUpdated,
+                    'message' => Lang::get('model.' . $modelUpdated ? 'updated' : 'update_failed')
                 ], $modelUpdated ? 200 : 202);
         } catch (Exception $exception) {
             Log::error('Update ' . $this->getService()->getRepositoryService()->getModelName() . ': ' . $exception->getMessage());
