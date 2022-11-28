@@ -134,11 +134,11 @@ abstract class AbstractController implements ControllerInterface, ReadOnlyContro
     }
 
     /**
-     * @param Request $request
+     * @param array $paremeters
      * @return BaseQueryFilter
      */
-    public function getFilter(Request $request): BaseQueryFilter {
-        return app($this->getFilterClass(), $request->all());
+    public function getFilter(array $parameters): BaseQueryFilter {
+        return app($this->getFilterClass(), $parameters);
     }
 
 
