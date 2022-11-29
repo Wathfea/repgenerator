@@ -1,5 +1,5 @@
 <template>
-   <Table :route="getRoute()" :set-columns="getDataTableColumns()" model-readable-name="{{ modelNameSingularLowercase }}" :fixed-filters="getFixedFilters()">
+   <Table :route="getRoute()" :set-columns="getDataTableColumns(getFixedFilters())" model-readable-name="{{ modelNameSingularLowercase }}" :fixed-filters="getFixedFilters()">
 
    </Table>
 </template>
