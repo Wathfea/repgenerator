@@ -49,7 +49,7 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractController impl
     {
         /** @var JsonResource $resource */
         $resource = $this->getResourceClass();
-        $filter = $this->getFilter($request);
+        $filter = $this->getFilter($request->all());
         $perPage = $this->getPerPage($request);
         $data = $this->getService()->getRepositoryService()->getByFilter($filter, $this->getLoad($request), $perPage);
         return $resource::collection($data);

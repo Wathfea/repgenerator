@@ -111,6 +111,20 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
 
     /**
      * @param  int  $parentModelId
+     * @param  int  $relationModelId
+     * @param  array  $data
+     * @return Pivot|bool
+     */
+    public function attachOrUpdate(int $parentModelId, int $relationModelId, array $data = []): Pivot|bool
+    {
+        if ( !$this->getSpecific($parentModelId, $relationModelId) ) {
+            return $this->attach($parentModelId, $relationModelId, $data);
+        }
+        return $this->updateData($parentModelId, $relationModelId, $data);
+    }
+
+    /**
+     * @param  int  $parentModelId
      * @return BelongsToMany
      */
     private function getRelation(int $parentModelId): BelongsToMany

@@ -23,6 +23,14 @@ interface PivotRepositoryServiceInterface extends RepositoryServiceInterface
     /**
      * @param  int  $parentModelId
      * @param  int  $relationModelId
+     * @param  array  $data
+     * @return Pivot|bool
+     */
+    public function attachOrUpdate(int $parentModelId, int $relationModelId, array $data = []): Pivot|bool;
+
+    /**
+     * @param  int  $parentModelId
+     * @param  int  $relationModelId
      * @return bool
      */
     public function detach(int $parentModelId, int $relationModelId): bool;

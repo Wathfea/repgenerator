@@ -141,7 +141,6 @@ abstract class AbstractController implements ControllerInterface, ReadOnlyContro
         return app($this->getFilterClass(), $parameters);
     }
 
-
     /**
      * @param Request $request
      * @return array
