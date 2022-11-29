@@ -20,7 +20,7 @@ class {{modelName}}ApiController extends AbstractApiReadWriteCRUDController impl
         return $this->service;
     }
 
-    public function __construct(private {{modelName}}Service $service)
+    public function __construct(private readonly {{modelName}}Service $service)
     {
     }
 }

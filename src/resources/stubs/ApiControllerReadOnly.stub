@@ -21,7 +21,7 @@ class {{modelName}}ApiController extends AbstractApiReadOnlyCRUDController imple
         return $this->service;
     }
 
-    public function __construct(private {{modelName}}Service $service)
+    public function __construct(private readonly {{modelName}}Service $service)
     {
     }
 }
