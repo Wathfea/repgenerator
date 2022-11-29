@@ -5,17 +5,11 @@ import {useRoute} from "nuxt/app";
 const currentRoute = useRoute();
 definePageMeta({ middleware: ["auth"] });
 </script>
-
 <template>
-  <NuxtLayout name="app-layout">
-    <Head>
-      <Title>CMS</Title>
-    </Head>
-    <CMSDashboard page="{{modelNamePluralLowerCaseHyphenated}}" title="" :pages="[
+    <CMSDashboard page="{{modelNamePluralLowerCaseHyphenated}}" title="{{modelNameSingularUcfirst}}" :pages="[
         {href: '/{{modelNamePluralLowerCaseHyphenated}}', name: '{{modelNamePluralUcfirst}}', current: false, icon: '{{modelIcon}}'},
         {href: '/{{modelNamePluralLowerCaseHyphenated}}/' + currentRoute.params.id, name: '{{modelNameSingularUcfirst}} edit', current: true, icon: '{{modelIcon}}'},
       ]">
       <{{modelNameSingularUcfirst}}Edit/>
     </CMSDashboard>
-  </NuxtLayout>
 </template>
