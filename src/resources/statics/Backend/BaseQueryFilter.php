@@ -20,9 +20,11 @@ class BaseQueryFilter extends QueryFilter
     CONST PER_PAGE = 'per_page';
     CONST SEARCH_DATE = 'date';
     CONST SEARCH_ID = 'id';
+    CONST SEARCH_BOOLEAN = 'boolean';
     CONST SEARCH_TYPES = [
         self::SEARCH_DATE,
         self::SEARCH_ID,
+        self::SEARCH_BOOLEAN
     ];
 
     /**
@@ -146,7 +148,7 @@ class BaseQueryFilter extends QueryFilter
     private function searchType(Builder $builder, $type, $columnName, $acceptedValue): void
     {
         switch($type) {
-            case 'date':
+            case self::SEARCH_DATE:
                 $dates = array_filter(array_map(function($dateString) {
                     return strlen($dateString) > 0 ? date($dateString) : null;
                 }, explode(',', $acceptedValue)));
@@ -156,7 +158,8 @@ class BaseQueryFilter extends QueryFilter
                     $builder->whereDate($columnName,$dates[0]);
                 }
                 break;
-            case 'id':
+            case self::SEARCH_ID:
+            case self::SEARCH_BOOLEAN:
                 $builder->where($builder->from . '.' . $columnName, $acceptedValue);
                 break;
             default:
@@ -212,6 +215,9 @@ class BaseQueryFilter extends QueryFilter
         foreach ( $columns as $search ) {
             $columnData = explode(':', $search);
             $columnName = explode('.', $columnData[0])[0];
+            if ( empty($columnData) ) {
+                continue;
+            }
             $acceptedValue = $columnData[1];
             if ( !str_contains($columnName,'_id') && str_contains($columnName, 'translation_') ) {
                 $localeCode = explode('_', $columnName)[1];
