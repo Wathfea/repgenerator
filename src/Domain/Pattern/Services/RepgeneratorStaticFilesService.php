@@ -129,6 +129,8 @@ class RepgeneratorStaticFilesService
             "Abstraction/Controllers/CRUD/CRUDControllerInterface.php",
 
             "Abstraction/Traits/UploadsFiles.php",
+            "Abstraction/Cache/CacheGroup.php",
+            "Abstraction/Cache/CacheGroupService.php",
         ];
 
         $generatedFiles = [];

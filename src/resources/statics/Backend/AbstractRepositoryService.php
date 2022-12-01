@@ -2,17 +2,40 @@
 
 namespace App\Abstraction\Repository;
 
+use App\Abstraction\Cache\CacheGroupService;
 use App\Abstraction\Filter\BaseQueryFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Class AbstractRepository.
  */
 abstract class AbstractRepositoryService implements RepositoryServiceInterface
 {
+    private bool $cacheFilteredRequests = false;
+
+    /**
+     * @return bool
+     */
+    public function isCacheFilteredRequests(): bool
+    {
+        return $this->cacheFilteredRequests;
+    }
+
+    /**
+     * @param bool $cacheFilteredRequests
+     * @return AbstractRepositoryService
+     */
+    public function setCacheFilteredRequests(bool $cacheFilteredRequests): AbstractRepositoryService
+    {
+        $this->cacheFilteredRequests = $cacheFilteredRequests;
+        return $this;
+    }
+
+
     /**
      * AbstractRepository constructor.
      * @param  string  $model
@@ -159,11 +182,32 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
      * @param int|null $perPage
      * @return Collection|LengthAwarePaginator
      */
-    public function getFilterResponse(Builder $builder, int|null $perPage = null): Collection|LengthAwarePaginator {
+    private function calculateFilterResponse(Builder $builder, int|null $perPage = null): Collection|LengthAwarePaginator {
         if ( $perPage ) {
-            return $builder->paginate();
+            return $builder->paginate($perPage);
         }
         return $builder->get();
+    }
+
+    /**
+     * @param Builder $builder
+     * @param int|null $perPage
+     * @param array $load
+     * @return Collection|LengthAwarePaginator
+     */
+    public function getFilterResponse(Builder $builder, int|null $perPage = null, array $load = []): Collection|LengthAwarePaginator {
+        if ( $this->isCacheFilteredRequests() ) {
+            $cacheKey = $builder->getQuery()->toSql() . serialize($load) . $perPage;
+            if ( Cache::has($cacheKey) ) {
+                return unserialize(Cache::get($cacheKey));
+            }
+            $result = $this->calculateFilterResponse($builder, $perPage);
+            if ( Cache::put($cacheKey, serialize($result)) ) {
+                CacheGroupService::addCache($this->model, $cacheKey);
+            }
+            return $result;
+        }
+        return $this->calculateFilterResponse($builder, $perPage);
     }
 
 

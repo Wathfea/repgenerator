@@ -239,6 +239,6 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
         int|null $perPage = null
     ): Collection|LengthAwarePaginator {
         $qb = $this->getFilterQB($filter, $parentId, $load);
-        return $this->getFilterResponse($qb, $perPage);
+        return $this->getFilterResponse($qb, $perPage, $load);
     }
 }

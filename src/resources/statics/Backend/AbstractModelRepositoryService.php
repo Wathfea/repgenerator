@@ -2,6 +2,7 @@
 
 namespace App\Abstraction\Repository;
 
+use App\Abstraction\Cache\CacheGroupService;
 use App\Abstraction\Filter\BaseQueryFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -47,7 +48,12 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         $model = $this->getById($id);
         if ($model) {
             $this->destroyOtherData($model);
-            return $model->delete();
+            if ( $model->delete() ) {
+                if ( $this->isCacheFilteredRequests() ) {
+                    CacheGroupService::invalidateGroup($this->model);
+                }
+                return true;
+            }
         }
         return false;
     }
@@ -127,6 +133,9 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         $model->save();
         if ($model->exists) {
             $this->saveOtherData($model, $data);
+            if ( $this->isCacheFilteredRequests() ) {
+                CacheGroupService::invalidateGroup($this->model);
+            }
             return $model;
         }
         return false;
@@ -145,7 +154,11 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
             $this->beforeSaving($model, $data);
             $updated = $model->update($data);
             $otherDataUpdated = $this->saveOtherData($model, $data);
-            return $updated || $otherDataUpdated;
+            $somethingUpdated = $updated || $otherDataUpdated;
+            if ( $somethingUpdated && $this->isCacheFilteredRequests() ) {
+                CacheGroupService::invalidateGroup($this->model);
+            }
+            return $somethingUpdated;
         }
         return false;
     }
@@ -207,6 +220,9 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         } else {
             $modelOrModels->save();
         }
+        if ( $this->isCacheFilteredRequests() ) {
+            CacheGroupService::invalidateGroup($this->model);
+        }
         return $modelOrModels;
     }
 
@@ -232,6 +248,6 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         int|null $perPage = null
     ): Collection|LengthAwarePaginator {
         $qb = $this->getFilterQB($filter, $load);
-        return $this->getFilterResponse($qb, $perPage);
+        return $this->getFilterResponse($qb, $perPage, $load);
     }
 }
