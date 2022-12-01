@@ -66,15 +66,6 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractController impl
         return $this->getShowResponse($request, $model);
     }
 
-    /**
-     * @param Request $request
-     * @return Collection|LengthAwarePaginator
-     */
-    private function calculateIndexData(Request $request): Collection|LengthAwarePaginator {
-        $filter = $this->getFilter($request->all());
-        $perPage = $this->getPerPage($request);
-        return $this->getService()->getRepositoryService()->getByFilter($filter, $this->getLoad($request), $perPage);
-    }
 
     /**
      * @param Request $request
@@ -84,23 +75,20 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractController impl
     {
         /** @var JsonResource $resource */
         $resource = $this->getResourceClass();
-        if ( $this->isCacheFilteredRequests() ) {
-            $cacheKey = md5(serialize([
-                'filters' => $request->all(),
-                'load' => $this->getLoad($request)
-            ]));
-            if ( Cache::has($cacheKey) ) {
-                return unserialize(Cache::get($cacheKey));
-            } else {
-                $data = $this->calculateIndexData($request);
-                $resourceCollection = $resource::collection($data);
-                if ( Cache::put($cacheKey, serialize($resourceCollection)) ) {
-                    CacheGroupService::addCache($this->getService()->getRepositoryService()->getModelName(), $data);
-                }
-                return $resourceCollection;
-            }
-        }
-        return $resource::collection($this->calculateIndexData($request));
+        $filter = $this->getFilter($request->all());
+        $perPage = $this->getPerPage($request);
+        $data = $this->getService()->getRepositoryService()->getByFilter($filter, $this->getLoad($request), $perPage);
+        return $resource::collection($data);
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse|void
+     */
+    private function calculateListResponse(Request $request) {
+        return $this->getListResponse($request, function() use ($request) {
+            return $this->getIndexData($request);
+        });
     }
 
     /**
@@ -109,8 +97,21 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractController impl
      */
     public function index(Request $request): JsonResponse
     {
-        return $this->getListResponse($request, function() use ($request) {
-           return $this->getIndexData($request);
-        });
+        if ( $this->isCacheFilteredRequests() ) {
+            $cacheKey = md5(serialize([
+                'filters' => $request->all(),
+                'load' => $this->getLoad($request)
+            ]));
+            if ( Cache::has($cacheKey) ) {
+                return unserialize(Cache::get($cacheKey));
+            } else {
+                $data = $this->calculateListResponse($request);
+                if ( Cache::put($cacheKey, serialize($data)) ) {
+                    CacheGroupService::addCache($this->getService()->getRepositoryService()->getModelName(), $data);
+                }
+                return $data;
+            }
+        }
+        return $this->calculateListResponse($request);
     }
 }
