@@ -26,7 +26,10 @@ final class CacheGroupService
         /** @var CacheGroup[] $caches */
         $caches = CacheGroup::where(CacheGroup::NAME_COLUMN, $groupName)->get();
         foreach ( $caches as $cache ) {
-            Cache::forget($cache->getAttribute(CacheGroup::KEY_COLUMN));
+            $cacheKey = $cache->getAttribute(CacheGroup::KEY_COLUMN);
+            if ( Cache::forget($cacheKey) ) {
+                $cache->delete();
+            }
         }
         return true;
     }

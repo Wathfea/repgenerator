@@ -18,6 +18,21 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
 
     protected array $uniqueIdentifiers = [];
 
+    /**
+     * @return bool
+     */
+    public function invalidateCacheGroup(): bool
+    {
+        if ( $this->isHasCachedFilteredRequests() ) {
+            CacheGroupService::invalidateGroup($this->model);
+        }
+        /** @var RepositoryServiceInterface $cacheGroup */
+        foreach ( $this->getInvalidateCacheGroupsWhenModified() as $cacheGroup ) {
+            $cacheGroup->invalidateCacheGroup();
+        }
+        return true;
+    }
+
 
     /**
      * @param int $id
@@ -49,9 +64,7 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         if ($model) {
             $this->destroyOtherData($model);
             if ( $model->delete() ) {
-                if ( $this->isCacheFilteredRequests() ) {
-                    CacheGroupService::invalidateGroup($this->model);
-                }
+                $this->invalidateCacheGroup();
                 return true;
             }
         }
@@ -133,9 +146,7 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         $model->save();
         if ($model->exists) {
             $this->saveOtherData($model, $data);
-            if ( $this->isCacheFilteredRequests() ) {
-                CacheGroupService::invalidateGroup($this->model);
-            }
+            $this->invalidateCacheGroup();
             return $model;
         }
         return false;
@@ -155,8 +166,8 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
             $updated = $model->update($data);
             $otherDataUpdated = $this->saveOtherData($model, $data);
             $somethingUpdated = $updated || $otherDataUpdated;
-            if ( $somethingUpdated && $this->isCacheFilteredRequests() ) {
-                CacheGroupService::invalidateGroup($this->model);
+            if ( $somethingUpdated ) {
+                $this->invalidateCacheGroup();
             }
             return $somethingUpdated;
         }
@@ -220,9 +231,7 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
         } else {
             $modelOrModels->save();
         }
-        if ( $this->isCacheFilteredRequests() ) {
-            CacheGroupService::invalidateGroup($this->model);
-        }
+        $this->invalidateCacheGroup();
         return $modelOrModels;
     }
 

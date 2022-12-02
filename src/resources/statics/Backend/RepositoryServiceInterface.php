@@ -2,7 +2,6 @@
 
 namespace App\Abstraction\Repository;
 
-use App\Abstraction\Filter\BaseQueryFilter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -13,6 +12,13 @@ use Illuminate\Database\Eloquent\Builder;
  */
 interface RepositoryServiceInterface
 {
+
+    public function invalidateCacheGroup(): bool;
+    public function isCacheFilteredRequests(): bool;
+    public function setCacheFilteredRequests(bool $cacheFilteredRequests): mixed;
+    public function isHasCachedFilteredRequests(): bool;
+    public function setHasCachedFilteredRequests(bool $hasCachedFilteredRequests): mixed;
+
 
     /**
      * @param  array  $columns

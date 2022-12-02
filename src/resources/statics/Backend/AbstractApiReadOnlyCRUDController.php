@@ -22,6 +22,7 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractController impl
     /** @var bool  */
     private bool $cacheFilteredRequests = false;
 
+
     /**
      * @return bool
      */
@@ -37,6 +38,7 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractController impl
     public function setCacheFilteredRequests(bool $cacheFilteredRequests): AbstractApiReadOnlyCRUDController
     {
         $this->cacheFilteredRequests = $cacheFilteredRequests;
+        $this->getService()->getRepositoryService()->setCacheFilteredRequests($cacheFilteredRequests);
         return $this;
     }
 
@@ -102,12 +104,18 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractController impl
                 'filters' => $request->all(),
                 'load' => $this->getLoad($request)
             ]));
+            $requiresSerialization = config('cache.default') != 'redis';
             if ( Cache::has($cacheKey) ) {
-                return unserialize(Cache::get($cacheKey));
+                $data = Cache::get($cacheKey);
+                if ( $requiresSerialization ) {
+                    $data = unserialize($data);
+                }
+                return $data;
             } else {
                 $data = $this->calculateListResponse($request);
-                if ( Cache::put($cacheKey, serialize($data)) ) {
-                    CacheGroupService::addCache($this->getService()->getRepositoryService()->getModelName(), $data);
+                $storeResult = $requiresSerialization ? serialize($data) : $data;
+                if ( Cache::put($cacheKey, $storeResult) ) {
+                    CacheGroupService::addCache(get_class($this->getService()->getRepositoryService()->getModel()), $cacheKey);
                 }
                 return $data;
             }
