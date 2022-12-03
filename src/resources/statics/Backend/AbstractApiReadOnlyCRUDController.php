@@ -39,6 +39,11 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractController impl
     {
         $this->cacheFilteredRequests = $cacheFilteredRequests;
         $this->getService()->getRepositoryService()->setCacheFilteredRequests($cacheFilteredRequests);
+        // A model might not cache in certain environments but
+        // might still have caches that it needs invalidating
+        if ( $cacheFilteredRequests ) {
+            $this->getService()->getRepositoryService()->setHasCachedFilteredRequests(true);
+        }
         return $this;
     }
 
