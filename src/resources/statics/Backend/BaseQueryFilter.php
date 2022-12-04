@@ -215,7 +215,7 @@ class BaseQueryFilter extends QueryFilter
         foreach ( $columns as $search ) {
             $columnData = explode(':', $search);
             $columnName = explode('.', $columnData[0])[0];
-            if ( empty($columnData) ) {
+            if ( count($columnData ) < 2 ) {
                 continue;
             }
             $acceptedValue = $columnData[1];
