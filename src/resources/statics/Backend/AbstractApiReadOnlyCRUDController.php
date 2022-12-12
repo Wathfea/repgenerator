@@ -22,6 +22,29 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractController impl
     /** @var bool  */
     private bool $cacheFilteredRequests = false;
 
+    /**
+     * @var array
+     */
+    private array $clientSpecificCacheDependency = [];
+
+    /**
+     * @param Request $request
+     * @return array
+     */
+    public function getClientSpecificCacheDependency(Request $request): array
+    {
+        return $this->clientSpecificCacheDependency;
+    }
+
+    /**
+     * @param array $clientSpecificCacheDependency
+     * @return AbstractApiReadOnlyCRUDController
+     */
+    public function setClientSpecificCacheDependency(array $clientSpecificCacheDependency): AbstractApiReadOnlyCRUDController
+    {
+        $this->clientSpecificCacheDependency = $clientSpecificCacheDependency;
+        return $this;
+    }
 
     /**
      * @return bool
@@ -100,10 +123,11 @@ abstract class AbstractApiReadOnlyCRUDController extends AbstractController impl
     public function index(Request $request): JsonResponse
     {
         if ( $this->isCacheFilteredRequests() ) {
-            $cacheKey = md5(serialize([
+            $cacheKeyArray = array_merge([
                 'filters' => $request->all(),
                 'load' => $this->getLoad($request)
-            ]));
+            ], $this->getClientSpecificCacheDependency($request));
+            $cacheKey = md5(serialize($cacheKeyArray));
             $requiresSerialization = config('cache.default') != 'redis';
             if ( Cache::has($cacheKey) ) {
                 $data = Cache::get($cacheKey);
