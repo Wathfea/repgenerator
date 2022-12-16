@@ -21,10 +21,12 @@ class BaseQueryFilter extends QueryFilter
     CONST SEARCH_DATE = 'date';
     CONST SEARCH_ID = 'id';
     CONST SEARCH_BOOLEAN = 'boolean';
+    CONST SEARCH_FILTER_OVERRIDE = 'filter_override';
     CONST SEARCH_TYPES = [
         self::SEARCH_DATE,
         self::SEARCH_ID,
-        self::SEARCH_BOOLEAN
+        self::SEARCH_BOOLEAN,
+        self::SEARCH_FILTER_OVERRIDE
     ];
 
     /**
@@ -123,6 +125,11 @@ class BaseQueryFilter extends QueryFilter
             });
         } else if ( !in_array($value, static::SEARCH_TYPES) ) {
             $this->globalSearchColumn($builder, $value, $search);
+        } else if ( $value == static::SEARCH_FILTER_OVERRIDE ) {
+            $methodName = lcfirst(str_replace('_', '', ucwords($index, '_')));
+            if ( method_exists($this, $methodName) ) {
+                $this->$methodName($search, true);
+            }
         }
     }
 
@@ -152,7 +159,7 @@ class BaseQueryFilter extends QueryFilter
                 $dates = array_filter(array_map(function($dateString) {
                     return strlen($dateString) > 0 ? date($dateString) : null;
                 }, explode(',', $acceptedValue)));
-                if ( count($dates) > 1 ) {
+                if ( count($dates) > 1 && count(array_unique($dates)) > 1 ) {
                     $builder->whereBetween($columnName,$dates);
                 } else {
                     $builder->whereDate($columnName,$dates[0]);
