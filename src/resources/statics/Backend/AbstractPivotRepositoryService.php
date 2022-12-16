@@ -105,6 +105,7 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
     {
         $this->beforeSaving($parentModelId, $relationModelId,  $data);
         $this->getRelation($parentModelId)->attach($relationModelId, $this->filterData($data));
+        $this->invalidateCacheGroup();
 
         return $this->getSpecific($parentModelId, $relationModelId);
     }
@@ -143,7 +144,12 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
      */
     public function detach(int $parentModelId, int $relationModelId): bool
     {
-        return $this->getRelation($parentModelId)->detach($relationModelId) > 0;
+        $detached = $this->getRelation($parentModelId)->detach($relationModelId) > 0;
+        if ( $detached ) {
+            $this->invalidateCacheGroup();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -178,6 +184,7 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
     public function sync(int $parentModelId, array $relations): bool
     {
         $this->getRelation($parentModelId)->sync($relations);
+        $this->invalidateCacheGroup();
 
         return true;
     }
@@ -192,6 +199,7 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
     public function syncWithData(int $parentModelId, array $relations, array $data): bool
     {
         $this->getRelation($parentModelId)->syncWithPivotValues($relations, $data);
+        $this->invalidateCacheGroup();
 
         return true;
     }
@@ -208,7 +216,12 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
         $data = $this->filterData($data);
         if ( !empty($data) ) {
             $this->beforeSaving($parentModelId, $relationModelId,  $data);
-            return $this->getRelation($parentModelId)->updateExistingPivot($relationModelId, $data) > 0;
+            $updated = $this->getRelation($parentModelId)->updateExistingPivot($relationModelId, $data) > 0;
+            if ( $updated ) {
+                $this->invalidateCacheGroup();
+                return true;
+            }
+            return false;
         }
         return true;
     }

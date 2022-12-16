@@ -2,6 +2,7 @@
 
 namespace App\Abstraction\Repository;
 
+use App\Abstraction\Cache\CacheGroupService;
 use App\Abstraction\Filter\BaseQueryFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -33,6 +34,23 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
     {
         $this->invalidateCacheGroupsWhenModified = $invalidateCacheGroupsWhenModified;
         return $this;
+    }
+
+
+
+    /**
+     * @return bool
+     */
+    public function invalidateCacheGroup(): bool
+    {
+        if ( $this->isHasCachedFilteredRequests() ) {
+            CacheGroupService::invalidateGroup($this->model);
+        }
+        /** @var RepositoryServiceInterface $cacheGroup */
+        foreach ( $this->getInvalidateCacheGroupsWhenModified() as $cacheGroup ) {
+            $cacheGroup->invalidateCacheGroup();
+        }
+        return true;
     }
 
     /**
@@ -78,11 +96,6 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
      */
     public function __construct(protected string $model)
     {
-    }
-
-    public function invalidateCacheGroup(): bool
-    {
-        return true;
     }
 
 

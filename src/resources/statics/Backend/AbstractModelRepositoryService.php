@@ -18,21 +18,6 @@ abstract class AbstractModelRepositoryService extends AbstractRepositoryService 
 
     protected array $uniqueIdentifiers = [];
 
-    /**
-     * @return bool
-     */
-    public function invalidateCacheGroup(): bool
-    {
-        if ( $this->isHasCachedFilteredRequests() ) {
-            CacheGroupService::invalidateGroup($this->model);
-        }
-        /** @var RepositoryServiceInterface $cacheGroup */
-        foreach ( $this->getInvalidateCacheGroupsWhenModified() as $cacheGroup ) {
-            $cacheGroup->invalidateCacheGroup();
-        }
-        return true;
-    }
-
 
     /**
      * @param int $id
