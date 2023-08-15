@@ -130,11 +130,12 @@ abstract class AbstractPivotRepositoryService extends AbstractRepositoryService 
     /**
      * @param  int  $parentModelId
      * @param  int  $relationModelId
+     * @param  array  $load
      * @return Pivot|null
      */
-    public function getSpecific(int $parentModelId, int $relationModelId): Pivot|null
+    public function getSpecific(int $parentModelId, int $relationModelId, array $load = []): Pivot|null
     {
-        return app($this->pivotModel)->newQuery()->where($this->parentIdColumName, $parentModelId)
+        return app($this->pivotModel)->newQuery()->with($load)->where($this->parentIdColumName, $parentModelId)
             ->where($this->relationIdColumnName, $relationModelId)
             ->first();
     }

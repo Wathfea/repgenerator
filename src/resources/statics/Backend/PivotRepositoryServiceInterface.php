@@ -36,9 +36,10 @@ interface PivotRepositoryServiceInterface extends RepositoryServiceInterface
     /**
      * @param  int  $parentModelId
      * @param  int  $relationModelId
+     * @param  array  $load
      * @return Pivot|null
      */
-    public function getSpecific(int $parentModelId, int $relationModelId): Pivot|null;
+    public function getSpecific(int $parentModelId, int $relationModelId, array $load = []): Pivot|null;
 
     /**
      * @param  int  $parentModelId
