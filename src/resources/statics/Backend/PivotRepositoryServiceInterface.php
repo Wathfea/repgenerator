@@ -14,18 +14,26 @@ interface PivotRepositoryServiceInterface extends RepositoryServiceInterface
 {
     /**
      * @param  int  $parentModelId
-     * @param  int  $relationshipModelId
+     * @param  int  $relationModelId
      * @param  array  $data
      * @return Pivot
      */
-    public function attach(int $parentModelId, int $relationshipModelId, array $data = []): Pivot;
+    public function attach(int $parentModelId, int $relationModelId, array $data = []): Pivot;
 
     /**
      * @param  int  $parentModelId
-     * @param  int  $relationshipModelId
+     * @param  int  $relationModelId
+     * @param  array  $data
+     * @return Pivot|bool
+     */
+    public function attachOrUpdate(int $parentModelId, int $relationModelId, array $data = []): Pivot|bool;
+
+    /**
+     * @param  int  $parentModelId
+     * @param  int  $relationModelId
      * @return bool
      */
-    public function detach(int $parentModelId, int $relationshipModelId): bool;
+    public function detach(int $parentModelId, int $relationModelId): bool;
 
     /**
      * @param  int  $parentModelId
@@ -49,6 +57,14 @@ interface PivotRepositoryServiceInterface extends RepositoryServiceInterface
     public function sync(int $parentModelId, array $relations): bool;
 
     /**
+     * @param int $parentModelId
+     * @param array $relations
+     * @param array $data
+     * @return bool
+     */
+    public function syncWithData(int $parentModelId, array $relations, array $data): bool;
+
+    /**
      * @param  int  $parentModelId
      * @param  int  $relationModelId
      * @param  array  $data
@@ -59,12 +75,21 @@ interface PivotRepositoryServiceInterface extends RepositoryServiceInterface
     /**
      * @return string
      */
-    public function getParentRequestKey(): string;
+    public function getParentColumnName(): string;
 
     /**
      * @return string
      */
-    public function getRelationRequestKey(): string;
+    public function getRelationColumnName(): string;
+
+
+    /**
+     * @param int $parentModelId
+     * @param int $relationModelId
+     * @param array $data
+     * @return bool
+     */
+    public function beforeSaving(int $parentModelId, int $relationModelId, array $data = []): bool;
 
 
     /**

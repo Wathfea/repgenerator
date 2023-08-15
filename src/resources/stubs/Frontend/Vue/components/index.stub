@@ -1,17 +1,16 @@
 <template>
-   <Table route="{{ modelNamePluralLowerCaseHyphenated }}" :set-columns="setColumns" model-readable-name="{{ modelNameSingularLowercase }}" :fixed-filters="getFixedFilters()">
+   <Table :route="getRoute()" :set-columns="getDataTableColumns(getFixedFilters())" model-readable-name="{{ modelNameSingularLowercase }}" :fixed-filters="getFixedFilters()">
 
    </Table>
 </template>
 
 <script setup>
 import Table from "../../../Abstraction/components/DataTable/Table.vue";
+import {use{{ modelNamePluralUcfirst }}} from "../composables/use{{ modelNamePluralUcfirst }}.ts";
 const props = defineProps({});
 const getFixedFilters = () => {
   let fixedFilters = [];
   return fixedFilters;
 }
-const setColumns = {
-  {{ columns }}
-}
+const { getRoute, getDataTableColumns } = use{{ modelNamePluralUcfirst }}();
 </script>

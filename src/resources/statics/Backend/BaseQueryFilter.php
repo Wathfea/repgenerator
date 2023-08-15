@@ -19,8 +19,14 @@ class BaseQueryFilter extends QueryFilter
 {
     CONST PER_PAGE = 'per_page';
     CONST SEARCH_DATE = 'date';
+    CONST SEARCH_ID = 'id';
+    CONST SEARCH_BOOLEAN = 'boolean';
+    CONST SEARCH_FILTER_OVERRIDE = 'filter_override';
     CONST SEARCH_TYPES = [
-        self::SEARCH_DATE
+        self::SEARCH_DATE,
+        self::SEARCH_ID,
+        self::SEARCH_BOOLEAN,
+        self::SEARCH_FILTER_OVERRIDE
     ];
 
     /**
@@ -119,6 +125,11 @@ class BaseQueryFilter extends QueryFilter
             });
         } else if ( !in_array($value, static::SEARCH_TYPES) ) {
             $this->globalSearchColumn($builder, $value, $search);
+        } else if ( $value == static::SEARCH_FILTER_OVERRIDE ) {
+            $methodName = lcfirst(str_replace('_', '', ucwords($index, '_')));
+            if ( method_exists($this, $methodName) ) {
+                $this->$methodName($search, true);
+            }
         }
     }
 
@@ -144,15 +155,19 @@ class BaseQueryFilter extends QueryFilter
     private function searchType(Builder $builder, $type, $columnName, $acceptedValue): void
     {
         switch($type) {
-            case 'date':
+            case self::SEARCH_DATE:
                 $dates = array_filter(array_map(function($dateString) {
                     return strlen($dateString) > 0 ? date($dateString) : null;
                 }, explode(',', $acceptedValue)));
-                if ( count($dates) > 1 ) {
+                if ( count($dates) > 1 && count(array_unique($dates)) > 1 ) {
                     $builder->whereBetween($columnName,$dates);
                 } else {
                     $builder->whereDate($columnName,$dates[0]);
                 }
+                break;
+            case self::SEARCH_ID:
+            case self::SEARCH_BOOLEAN:
+                $builder->where($builder->from . '.' . $columnName, $acceptedValue);
                 break;
             default:
                 $values = explode(',', $acceptedValue);
@@ -177,7 +192,7 @@ class BaseQueryFilter extends QueryFilter
         if ( is_array($typeOrSearch) ) {
             $relationSearch = explode('.', $columnOrRelation);
             $relationName = $relationSearch[0];
-            if ( count($relationSearch) > 0 ) {
+            if ( count($relationSearch) > 1 ) {
                 $columnName = $relationSearch[1];
             } else {
                 $columnName = $relationName;
@@ -207,8 +222,11 @@ class BaseQueryFilter extends QueryFilter
         foreach ( $columns as $search ) {
             $columnData = explode(':', $search);
             $columnName = explode('.', $columnData[0])[0];
+            if ( count($columnData ) < 2 ) {
+                continue;
+            }
             $acceptedValue = $columnData[1];
-            if ( str_contains($columnName, 'translation_') ) {
+            if ( !str_contains($columnName,'_id') && str_contains($columnName, 'translation_') ) {
                 $localeCode = explode('_', $columnName)[1];
                 /** @var LocaleService $localeService */
                 $localeService = app(LocaleService::class);
@@ -295,7 +313,7 @@ class BaseQueryFilter extends QueryFilter
         // 5. We loop through each column (or just the one)
         // e.x our user is sorting by user.first_name
         foreach ($orderColumns as $index => $orderColumn) {
-            if ( str_contains($orderColumn, 'translation_') ) {
+            if ( !str_contains($orderColumn, '_id') && str_contains($orderColumn, 'translation_') ) {
                 $localeCode = explode('_', $orderColumn)[1];
                 /** @var LocaleService $localeService */
                 $localeService = app(LocaleService::class);

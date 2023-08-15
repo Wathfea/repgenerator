@@ -347,3 +347,8 @@ const onSubmit = (e) => {
     emit('submit', columns);
 }
 </script>
+<style>
+    input:disabled {
+        background:rgb(243 244 246) !Important;
+    }
+</style>

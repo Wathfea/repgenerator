@@ -1,1 +1,1 @@
-'{{route}}' => route('api.{{routeName}}.{{route}}', $this->getAttribute({{modelName}}::ID_COLUMN)),
+'{{route}}' => route('api.{{routeName}}.{{route}}', $this->offsetGet({{modelName}}::ID_COLUMN)),

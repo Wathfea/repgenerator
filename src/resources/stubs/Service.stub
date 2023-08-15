@@ -12,12 +12,15 @@ use App\Domain\{{modelName}}\Repositories\{{modelName}}RepositoryService;
  */
 class {{modelName}}Service implements Has{{modelType}}RepositoryService
 {
+    /**
+     * @return {{modelName}}RepositoryService
+     */
     public function getRepositoryService(): {{modelType}}RepositoryServiceInterface
     {
         return $this->repositoryService;
     }
 
-    public function __construct(private {{modelName}}RepositoryService $repositoryService) {
+    public function __construct(private readonly {{modelName}}RepositoryService $repositoryService) {
 
     }
 

@@ -1,1 +1,1 @@
-'{{field}}' => {{bool}} $this->getAttribute({{modelName}}::{{constans}}),
+'{{field}}' => {{bool}} $this->offsetGet({{modelName}}::{{constans}}),

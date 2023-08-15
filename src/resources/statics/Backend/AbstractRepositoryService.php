@@ -2,6 +2,7 @@
 
 namespace App\Abstraction\Repository;
 
+use App\Abstraction\Cache\CacheGroupService;
 use App\Abstraction\Filter\BaseQueryFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,82 @@ use Illuminate\Support\Collection;
  */
 abstract class AbstractRepositoryService implements RepositoryServiceInterface
 {
+    private bool $cacheFilteredRequests = false;
+    private bool $hasCachedFilteredRequests = false;
+    private array $invalidateCacheGroupsWhenModified = [];
+
+    /**
+     * @return array
+     */
+    public function getInvalidateCacheGroupsWhenModified(): array
+    {
+        return $this->invalidateCacheGroupsWhenModified;
+    }
+
+    /**
+     * @param RepositoryServiceInterface[] $invalidateCacheGroupsWhenModified
+     * @return AbstractRepositoryService
+     */
+    public function setInvalidateCacheGroupsWhenModified(array $invalidateCacheGroupsWhenModified): AbstractRepositoryService
+    {
+        $this->invalidateCacheGroupsWhenModified = $invalidateCacheGroupsWhenModified;
+        return $this;
+    }
+
+
+
+    /**
+     * @return bool
+     */
+    public function invalidateCacheGroup(): bool
+    {
+        if ( $this->isHasCachedFilteredRequests() ) {
+            CacheGroupService::invalidateGroup($this->model);
+        }
+        /** @var RepositoryServiceInterface $cacheGroup */
+        foreach ( $this->getInvalidateCacheGroupsWhenModified() as $cacheGroup ) {
+            $cacheGroup->invalidateCacheGroup();
+        }
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCacheFilteredRequests(): bool
+    {
+        return $this->cacheFilteredRequests;
+    }
+
+    /**
+     * @param bool $cacheFilteredRequests
+     * @return AbstractRepositoryService
+     */
+    public function setCacheFilteredRequests(bool $cacheFilteredRequests): AbstractRepositoryService
+    {
+        $this->cacheFilteredRequests = $cacheFilteredRequests;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHasCachedFilteredRequests(): bool
+    {
+        return $this->hasCachedFilteredRequests;
+    }
+
+    /**
+     * @param bool $hasCachedFilteredRequests
+     * @return AbstractRepositoryService
+     */
+    public function setHasCachedFilteredRequests(bool $hasCachedFilteredRequests): AbstractRepositoryService
+    {
+        $this->hasCachedFilteredRequests = $hasCachedFilteredRequests;
+        return $this;
+    }
+
+
     /**
      * AbstractRepository constructor.
      * @param  string  $model
@@ -20,6 +97,7 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
     public function __construct(protected string $model)
     {
     }
+
 
     /**
      * @return Model
@@ -159,11 +237,22 @@ abstract class AbstractRepositoryService implements RepositoryServiceInterface
      * @param int|null $perPage
      * @return Collection|LengthAwarePaginator
      */
-    public function getFilterResponse(Builder $builder, int|null $perPage = null): Collection|LengthAwarePaginator {
+    private function calculateFilterResponse(Builder $builder, int|null $perPage = null): Collection|LengthAwarePaginator {
         if ( $perPage ) {
-            return $builder->paginate();
+            return $builder->paginate($perPage);
         }
         return $builder->get();
+    }
+
+    /**
+     * @param Builder $builder
+     * @param int|null $perPage
+     * @param array $load
+     * @return Collection|LengthAwarePaginator
+     */
+    public function getFilterResponse(Builder $builder, int|null $perPage = null, array $load = []): Collection|LengthAwarePaginator {
+        // TODO: Consider adding caching layer here if as well
+        return $this->calculateFilterResponse($builder, $perPage);
     }
 
 
